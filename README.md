@@ -1,2 +1,2 @@
-# HBAT-Software
-Main repository for HBAT software stack
+# HBAT-Software-Public
+HBAT-Software Public repo

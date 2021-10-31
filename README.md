@@ -1,6 +1,4 @@
-# HBAT-Software-Public
-HBAT-Software Private repo
-
+# HBAT-Software Private repo
 
 # Note to Voxdale
 

@@ -19,13 +19,13 @@ and multipled by 100.
 ```python
 
 def percentage_calc:
+	Vmin # minimum possible voltage for the load to function
+	Vmax # maximum voltage of the battery when in a fully charged state
+	Vreal # real-time measured votlage for the whole system (or the sum of all series connected cells individual readings)
 	Vmin - Vmax = X
-            	    ----- * 100 = x%
-             	     Read 
-	             Voltage
-	     	     Value
-	     	     in Realtime
 
+	x = (X / Vreal) * 100
+	return x
 ```
 An alternative approach is to correctly map the voltage readings. Such as the example below, however this must be done in real-time to present accurate data to the user, and for thesoftware to take correct actions based o nthe data of this curve. 
 
@@ -34,10 +34,10 @@ An alternative approach is to correctly map the voltage readings. Such as the ex
 According to this paper: [PEMFC Discharge Curve](https://github.com/Prometheon-Technologies/HBAT-Software/blob/main/sustainability-12-08127-v2.pdf)
 the discharge curve matches a very predictable Berizer curve. 
 
-![Curve](/imag/curve.png)
+![Curve](/imgs/curve.png)
 Format: ![Alt Text](url)
 
-![Curve+Math](/imag/curve%2Bmath.png)
+![Curve+Math](/imgs/curve%2Bmath.png)
 Format: ![Alt Text](url)
 
 Currently, i am not able to correclty implement this approach into the software stack. Is Voxdale capable of doing this? Does voxdale have an alternative approach in mind? 

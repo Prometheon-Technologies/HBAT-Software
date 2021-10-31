@@ -32,7 +32,7 @@ An alternative approach is to correctly map the voltage readings. Such as the ex
 **Mapping Bezier curve to voltage readings**
 
 According to this paper: [PEMFC Discharge Curve](https://github.com/Prometheon-Technologies/HBAT-Software/blob/main/sustainability-12-08127-v2.pdf)
-the discharge curve matches a very predictable Berizer curve. 
+the discharge curve matches a very predictable Bezier curve. 
 
 ![Curve](/imgs/curve.png)
 

@@ -3,14 +3,15 @@
 #include <HMS.h>
 #include <Humidity.h>
 #include <Battery.h>
-
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 #define DEBUG 0
 
 #if DEBUG == 1
-#define debug(x) Serial.print(x)
-#define debugln(x) Serial.println(x)
-#define debugf(x) Serial.printf(x)
+#define debug(x) debug(x)
+#define debugln(x) debugln(x)
+#define debugf(x) debugf(x)
 #define debugCalibrateAmps() HMSmain.calibrateAmps()
 
 #else
@@ -20,6 +21,25 @@
 #define debugCalibrateAmps()
 #endif
 
+// Data wire is plugged into port 2 on the Arduino
+#define ONE_WIRE_BUS 2
+
+// Setup a oneWire instance to communicate with any OneWire devices
+OneWire oneWire(ONE_WIRE_BUS);
+
+// Pass our oneWire reference to Dallas Temperature.
+DallasTemperature sensors(&oneWire);
+
+// variable to hold device addresses
+DeviceAddress Thermometer;
+
+// Addresses of 3 DS18B20s CHANGE THESE WITH DEVICE ADDRESSES PRINTED TO CONSOLE
+uint8_t sensor1[8] = {0x28, 0xEE, 0xD5, 0x64, 0x1A, 0x16, 0x02, 0xEC};
+uint8_t sensor2[8] = {0x28, 0x61, 0x64, 0x12, 0x3C, 0x7C, 0x2F, 0x27};
+uint8_t sensor3[8] = {0x28, 0x61, 0x64, 0x12, 0x3F, 0xFD, 0x80, 0xC6};
+
+int deviceCount = 0;
+
 #define LED1 12
 #define LED2 9
 
@@ -28,8 +48,8 @@
 
 /* RTC_DATA_ATTR int bootCount = 0; */
 
-//Method to print the reason by which ESP32
-//has been awaken from sleep
+// Method to print the reason by which ESP32
+// has been awaken from sleep
 
 /* void print_wakeup_reason()
 {
@@ -41,29 +61,28 @@
   switch (wakeup_reason)
   {
   case ESP_SLEEP_WAKEUP_EXT0:
-    Serial.printf("Wakeup caused by external signal using RTC_IO");
+    debugf("Wakeup caused by external signal using RTC_IO");
     break;
   case ESP_SLEEP_WAKEUP_EXT1:
-    Serial.printf("Wakeup caused by external signal using RTC_CNTL");
+    debugf("Wakeup caused by external signal using RTC_CNTL");
     break;
   case ESP_SLEEP_WAKEUP_TIMER:
-    Serial.printf("Wakeup caused by timer");
+    debugf("Wakeup caused by timer");
     break;
   case ESP_SLEEP_WAKEUP_TOUCHPAD:
-    Serial.printf("Wakeup caused by touchpad");
+    debugf("Wakeup caused by touchpad");
     break;
   case ESP_SLEEP_WAKEUP_ULP:
-    Serial.printf("Wakeup caused by ULP program");
+    debugf("Wakeup caused by ULP program");
     break;
   default:
-    Serial.println("Wakeup was not caused by deep sleep: %d\n" + wakeup_reason);
+    debugln("Wakeup was not caused by deep sleep: %d\n" + wakeup_reason);
     break;
   }
 } */
 
 HMS HMSmain = HMS();
 Humidity Hum = Humidity();
-/* BluetoothSerial SerialBT; */
 
 int received;
 Battery battery(1000, 3300, A0);
@@ -119,9 +138,32 @@ Battery battery(1000, 3300, A0);
       SerialBT.print(data); //write on BT app
       Serial.write(SerialBT.read());
     }
-    Serial.print(data);
+    debug(data);
   }
 } */
+
+void printAddress(DeviceAddress deviceAddress)
+{ 
+  for (uint8_t i = 0; i < 8; i++)
+  {
+    Serial.print("0x");
+    if (deviceAddress[i] < 0x10) Serial.print("0");
+    Serial.print(deviceAddress[i], HEX);
+    if (i < 7) Serial.print(", ");
+  }
+  Serial.println("");
+}
+
+void printTemperature(DeviceAddress deviceAddress)
+{
+  float tempC = sensors.getTempC(deviceAddress);
+  Serial.print(tempC);
+  Serial.print((char)176);
+  Serial.print("C  |  ");
+  Serial.print(DallasTemperature::toFahrenheit(tempC));
+  Serial.print((char)176);
+  Serial.println("F");
+}
 
 void floattostring()
 {
@@ -138,18 +180,33 @@ void floattostring()
     sprintf(temp, "%s, %3f", voltageaverage, readvoltage[i]);
     voltageaverage = temp;
   }
-  /* SerialandBT(voltageaverage); */
 }
 
 void setup()
 {
-
   debugln("\n===================================");
-  pinMode(LED1, OUTPUT);
-  pinMode(LED2, OUTPUT);
   Serial.begin(115200);
   while (!Serial)
-    delay(10); // will pause Zero, Leonardo, etc until serial console opens
+      delay(10); // will pause Zero, Leonardo, etc until serial console opens
+  // Start up the library
+  sensors.begin();
+
+  // locate devices on the bus
+  debugln("Locating devices...");
+  debug("Found ");
+  deviceCount = sensors.getDeviceCount();
+  Serial.print(deviceCount, DEC);
+  debugln(" devices.");
+  debugln("");
+  debugln("Printing addresses...");
+  for (int i = 0; i < deviceCount; i++)
+  {
+    debug("Sensor ");
+    debug(i + 1);
+    debug(" : ");
+    sensors.getAddress(Thermometer, i);
+    printAddress(Thermometer);
+  }
   Hum.setupSensor();
   HMSmain.setupSensor();
   battery.begin(3300, 1.0, &sigmoidal);
@@ -171,7 +228,7 @@ void setup()
   debugf("HMS booting - please wait");
   /* SerialBT.begin("ESP32_HMS"); */
   debugf("Device now Discoverable");
-  //debugf(__FILE__);
+  // debugf(__FILE__);
   debugf("Setup Complete");
   delay(100);
   /*
@@ -183,30 +240,49 @@ void setup()
   Left the line commented as an example of how to configure peripherals.
   The line below turns off all RTC peripherals in deep sleep.
   //esp_deep_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);
-  //Serial.println("Configured all RTC Peripherals to be powered down in sleep");
+  //debugln("Configured all RTC Peripherals to be powered down in sleep");
   Now that we have setup a wake cause and if needed setup the
   peripherals state in deep sleep, we can now start going to
   deep sleep.
   In the case that no wake up sources were provided but deep
   sleep was started, it will sleep forever unless hardware
   reset occurs*/
-  //Serial.flush();
+  // Serial.flush();
   /* if (!runningState)
   {
     esp_deep_sleep_start();
   } */
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+}
+
+void read_temp_sensor_data()
+{
+  sensors.requestTemperatures();
+  
+  Serial.print("Sensor 1: ");
+  printTemperature(sensor1);
+  
+  Serial.print("Sensor 2: ");
+  printTemperature(sensor2);
+  
+  Serial.print("Sensor 3: ");
+  printTemperature(sensor3);
+  
+  Serial.println();
+  delay(1000);
 }
 
 void loop()
 {
+  read_temp_sensor_data();
   Hum.ReadSensor();
   HMSmain.readAmps();
-  //ledtestOnOff(500); //comment out when not testing - Blink led from Unity Terminal over BTSerial
-  /* SerialandBT("Connection Successful"); */
+  // ledtestOnOff(500); //comment out when not testing - Blink led from Unity Terminal over BTSerial
   delay(100);
   floattostring();
   delay(100);
   debugCalibrateAmps(); // only needed for manual calibration of HalEffect Sensorsensor
-  //debugf("Going to sleep now");
+  // debugf("Going to sleep now");
   delay(100);
 }

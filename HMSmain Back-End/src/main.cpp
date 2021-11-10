@@ -2,9 +2,9 @@
 #include <BluetoothSerial.h>
 #include <HMS.h>
 #include <Humidity.h>
-#include <Battery.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+//#include <MemoryFree.h>
 
 #define DEBUG 0
 
@@ -21,8 +21,11 @@
 #define debugCalibrateAmps()
 #endif
 
-// Data wire is plugged into port 2 on the Arduino
-#define ONE_WIRE_BUS 2
+#define LED1 37
+#define LED2 47
+
+// Data wire is plugged into port 42 on the ESP32
+#define ONE_WIRE_BUS 42
 
 // Setup a oneWire instance to communicate with any OneWire devices
 OneWire oneWire(ONE_WIRE_BUS);
@@ -33,16 +36,24 @@ DallasTemperature sensors(&oneWire);
 // variable to hold device addresses
 DeviceAddress Thermometer;
 
-// Addresses of 3 DS18B20s CHANGE THESE WITH DEVICE ADDRESSES PRINTED TO CONSOLE
+//Placeholder Addresses of 3 DS18B20s - CHANGE THESE WITH DEVICE ADDRESSES PRINTED TO CONSOLE from printAddress()
 uint8_t sensor1[8] = {0x28, 0xEE, 0xD5, 0x64, 0x1A, 0x16, 0x02, 0xEC};
 uint8_t sensor2[8] = {0x28, 0x61, 0x64, 0x12, 0x3C, 0x7C, 0x2F, 0x27};
 uint8_t sensor3[8] = {0x28, 0x61, 0x64, 0x12, 0x3F, 0xFD, 0x80, 0xC6};
+uint8_t sensor4[8] = {0x28, 0xEE, 0xD5, 0x64, 0x1A, 0x16, 0x02, 0xEC};
+uint8_t sensor5[8] = {0x28, 0x61, 0x64, 0x12, 0x3C, 0x7C, 0x2F, 0x27};
+uint8_t sensor6[8] = {0x28, 0x61, 0x64, 0x12, 0x3F, 0xFD, 0x80, 0xC6};
+uint8_t sensor7[8] = {0x28, 0x61, 0x64, 0x12, 0x3F, 0xFD, 0x80, 0xC6};
+uint8_t sensor8[8] = {0x28, 0xEE, 0xD5, 0x64, 0x1A, 0x16, 0x02, 0xEC};
+uint8_t sensor9[8] = {0x28, 0x61, 0x64, 0x12, 0x3C, 0x7C, 0x2F, 0x27};
+uint8_t sensor10[8] = {0x28, 0x61, 0x64, 0x12, 0x3F, 0xFD, 0x80, 0xC6};
 
 int deviceCount = 0;
 
-#define LED1 12
-#define LED2 9
-
+// Setup an array of relays to control peripherals. Numbers represent pin numbers.
+const int relays[10] = {
+  45, 38, 36, 35, 48
+};
 /* #define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
 /* #define TIME_TO_SLEEP 30    */ /* Time ESP32 will go to sleep (in seconds) */
 
@@ -85,7 +96,6 @@ HMS HMSmain = HMS();
 Humidity Hum = Humidity();
 
 int received;
-Battery battery(1000, 3300, A0);
 
 /* void led2OnOff(int time)
 {
@@ -146,31 +156,30 @@ void printAddress(DeviceAddress deviceAddress)
 { 
   for (uint8_t i = 0; i < 8; i++)
   {
-    Serial.print("0x");
-    if (deviceAddress[i] < 0x10) Serial.print("0");
+    debug("0x");
+    if (deviceAddress[i] < 0x10) debug("0");
     Serial.print(deviceAddress[i], HEX);
-    if (i < 7) Serial.print(", ");
+    if (i < 7) debug(", ");
   }
-  Serial.println("");
+  debugln("");
 }
 
 void printTemperature(DeviceAddress deviceAddress)
 {
   float tempC = sensors.getTempC(deviceAddress);
-  Serial.print(tempC);
-  Serial.print((char)176);
-  Serial.print("C  |  ");
-  Serial.print(DallasTemperature::toFahrenheit(tempC));
-  Serial.print((char)176);
-  Serial.println("F");
+  debug(tempC);
+  debug((char)176);
+  debug("C  |  ");
+  debug(DallasTemperature::toFahrenheit(tempC));
+  debug((char)176);
+  debugln("F");
 }
 
-void floattostring()
+void stack_climate()
 {
   float *climatedata = Hum.ReadSensor();
   char climateData[100];
   sprintf(climateData, "%3d, %3d", climatedata[0], climatedata[1]);
-  /* SerialandBT(climateData); */
 
   String voltageaverage = "";
   float *readvoltage = HMSmain.readSensAndCondition();
@@ -182,13 +191,45 @@ void floattostring()
   }
 }
 
+int freeRam () {
+  extern int __heap_start, *__brkval;
+  int v;
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+}
+
+void read_temp_sensor_data()
+{
+  sensors.requestTemperatures();
+  
+  debug("Sensor 1: ");
+  printTemperature(sensor1);
+  
+  debug("Sensor 2: ");
+  printTemperature(sensor2);
+  
+  debug("Sensor 3: ");
+  printTemperature(sensor3);
+  
+  debugln();
+  debugln(freeRam());
+  delay(1000);
+}
+
+
 void setup()
 {
-  debugln("\n===================================");
   Serial.begin(115200);
   while (!Serial)
-      delay(10); // will pause Zero, Leonardo, etc until serial console opens
-  // Start up the library
+      delay(10); // will pause until serial console opens
+
+  //debug("freeMemory()="+freeMemory());
+  debug("Free Memory: "+freeRam());
+  debugln();
+  delay(1000);
+
+  debugln("\n===================================");
+  
+  // Start up the ds18b20 library
   sensors.begin();
 
   // locate devices on the bus
@@ -209,7 +250,6 @@ void setup()
   }
   Hum.setupSensor();
   HMSmain.setupSensor();
-  battery.begin(3300, 1.0, &sigmoidal);
   /* +bootCount;
   char bootChar[100];
   sprintf(bootChar, "Boot number: %s", String(bootCount));
@@ -226,7 +266,6 @@ void setup()
   sprintf(sleeptime, "Setup ESP32 to sleep for every ", String(TIME_TO_SLEEP) + " Seconds");
   debugf(sleeptime); */
   debugf("HMS booting - please wait");
-  /* SerialBT.begin("ESP32_HMS"); */
   debugf("Device now Discoverable");
   // debugf(__FILE__);
   debugf("Setup Complete");
@@ -252,25 +291,8 @@ void setup()
   {
     esp_deep_sleep_start();
   } */
-  pinMode(LED1, OUTPUT);
-  pinMode(LED2, OUTPUT);
-}
-
-void read_temp_sensor_data()
-{
-  sensors.requestTemperatures();
-  
-  Serial.print("Sensor 1: ");
-  printTemperature(sensor1);
-  
-  Serial.print("Sensor 2: ");
-  printTemperature(sensor2);
-  
-  Serial.print("Sensor 3: ");
-  printTemperature(sensor3);
-  
-  Serial.println();
-  delay(1000);
+  // pinMode(LED1, OUTPUT);
+  // pinMode(LED2, OUTPUT);
 }
 
 void loop()
@@ -280,9 +302,10 @@ void loop()
   HMSmain.readAmps();
   // ledtestOnOff(500); //comment out when not testing - Blink led from Unity Terminal over BTSerial
   delay(100);
-  floattostring();
+  stack_climate();
   delay(100);
   debugCalibrateAmps(); // only needed for manual calibration of HalEffect Sensorsensor
   // debugf("Going to sleep now");
   delay(100);
-}
+  //debugln(freeRam());
+}  

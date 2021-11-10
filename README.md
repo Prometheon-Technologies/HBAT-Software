@@ -1,5 +1,15 @@
 # HBAT-Software Private repo
 
+Main Software Stack files are located in lib and src. 
+
+**LIB**
+
+[HMSmain Library](HMS Back-End/lib/HMSmain)
+
+**SRC**
+
+[HMSmain](HMS Back-End/src)
+
 # Note to Voxdale
 
 For this project, we need to map the discharge curve of the system, in order to present the user with an accurate representation of charge and discharge states. 

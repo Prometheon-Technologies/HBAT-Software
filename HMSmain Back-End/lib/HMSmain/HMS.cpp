@@ -9,7 +9,7 @@
 uint8_t _amppin = 18;
 ACS712 ACS(_amppin, 5.0, 4095, 100);
 
-// ESP 32 example (requires resistors to step down the logic voltage)
+// ESP 32 (requires resistors to step down the logic voltage)
 //ACS712  ACS(25, 5.0, 4095, 185);
 
 int voltageValues[10];

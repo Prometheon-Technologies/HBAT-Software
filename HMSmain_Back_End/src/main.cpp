@@ -9,9 +9,9 @@
 #define DEBUG 1
 
 #if DEBUG == 1
-#define debug(x) debug(x)
-#define debugln(x) debugln(x)
-#define debugf(x) debugf(x)
+#define debug(x) Serial.print(x)
+#define debugln(x) Serial.println(x)
+#define debugf(x) Serial.printf(x)
 #define debugCalibrateAmps() HMSmain.calibrateAmps()
 
 #else

@@ -23,6 +23,11 @@
 #define LED1 37
 #define LED2 47
 
+HMS HMSmain = HMS();
+Humidity Hum = Humidity();
+CELLTEMP Cell = CELLTEMP();
+
+int received;
 
 // Setup an array of relays to control peripherals. Numbers represent pin numbers.
 const int relays[10] = {
@@ -65,12 +70,6 @@ const int relays[10] = {
     break;
   }
 } */
-
-HMS HMSmain = HMS();
-Humidity Hum = Humidity();
-CELLTEMP Cell = CELLTEMP();
-
-int received;
 
 /* void led2OnOff(int time)
 {

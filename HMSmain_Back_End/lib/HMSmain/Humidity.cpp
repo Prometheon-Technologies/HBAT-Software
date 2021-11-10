@@ -105,11 +105,26 @@ float *Humidity::ReadSensor()
   {
     enableHeater = !enableHeater;
     sht31.heater(enableHeater);
+    sht31_2.heater(enableHeater);
     Serial.print("Heater Enabled State: ");
-    if (sht31.isHeaterEnabled())
-      Serial.printf("ENABLED");
-    else
-      Serial.printf("DISABLED");
+
+    switch (sht31.isHeaterEnabled()) {
+      case 0:
+        Serial.printf("Sensor 1 Heater Disabled");
+        break;
+      case 1:
+        Serial.printf("Sensor 1 Heater ENABLED");
+        break;
+    }
+
+    switch (sht31_2.isHeaterEnabled()) {
+      case 0:
+        Serial.printf("Sensor 1 Heater Disabled");
+        break;
+      case 1:
+        Serial.printf("Sensor 1 Heater ENABLED");
+        break;
+    }
 
     loopCnt = 0;
   }

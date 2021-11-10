@@ -4,11 +4,11 @@ Main Software Stack files are located in lib and src.
 
 **LIB**
 
-[HMSmain Library](HMS Back-End/lib/HMSmain)
+[HMSmain Library](HMSmain_Back_End/lib/HMSmain)
 
 **SRC**
 
-[HMSmain](HMS Back-End/src)
+[HMSmain](HMSmain_Back_End/src)
 
 # Note to Voxdale
 

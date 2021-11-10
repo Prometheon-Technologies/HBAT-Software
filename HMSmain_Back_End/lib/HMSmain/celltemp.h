@@ -1,5 +1,5 @@
 /*
- HMS.h - HBAT library
+ celltemp.h - HBAT library
  Copyright (c) 2021 Zacariah Austin Heim.
  */
 

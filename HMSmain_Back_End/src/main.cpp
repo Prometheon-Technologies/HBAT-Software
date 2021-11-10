@@ -25,7 +25,7 @@
 
 HMS HMSmain = HMS();
 Humidity Hum = Humidity();
-CELLTEMP Cell = CELLTEMP();
+CELLTEMP CellTemp = CELLTEMP();
 
 int received;
 
@@ -33,6 +33,7 @@ int received;
 const int relays[10] = {
   45, 38, 36, 35, 48
 };
+
 /* #define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
 /* #define TIME_TO_SLEEP 30    */ /* Time ESP32 will go to sleep (in seconds) */
 
@@ -142,7 +143,6 @@ void stack_climate()
   }
 }
 
-
 void setup()
 {
   Serial.begin(115200);
@@ -154,7 +154,7 @@ void setup()
   delay(1000);
 
   debugln("\n===================================");
-
+  CellTemp.setup_sensors();
   Hum.setupSensor();
   HMSmain.setupSensor();
   /* +bootCount;
@@ -204,7 +204,7 @@ void setup()
 
 void loop()
 {
-  Cell.read_temp_sensor_data();
+  CellTemp.read_temp_sensor_data();
   Hum.ReadSensor();
   HMSmain.readAmps();
   // ledtestOnOff(500); //comment out when not testing - Blink led from Unity Terminal over BTSerial

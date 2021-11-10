@@ -21,6 +21,7 @@
 CELLTEMP::CELLTEMP()
 {
 }
+
 // Setup a oneWire instance to communicate with any OneWire devices
 OneWire oneWire(ONE_WIRE_BUS);
 

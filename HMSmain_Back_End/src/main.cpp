@@ -4,6 +4,20 @@
 #include <Humidity.h>
 #include <celltemp.h>
 //#include <MemoryFree.h>
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WebServer.h>
+#include <WiFiAP.h>
+#include <index.html.h>
+#include <data.json.h>
+
+#define LED_BUILTIN 2 // Set the GPIO pin where you connected your test LED or comment this line out if your dev board has a built-in LED
+
+// Set these to your desired credentials.
+const char *ssid = "yourAP";
+const char *password = "yourPassword";
+
+WebServer server(80);
 
 #define DEBUG 1
 
@@ -31,8 +45,7 @@ int received;
 
 // Setup an array of relays to control peripherals. Numbers represent pin numbers.
 const int relays[10] = {
-  45, 38, 36, 35, 48
-};
+    45, 38, 36, 35, 48};
 
 /* #define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
 /* #define TIME_TO_SLEEP 30    */ /* Time ESP32 will go to sleep (in seconds) */
@@ -147,9 +160,40 @@ void setup()
 {
   Serial.begin(115200);
   while (!Serial)
-      delay(10); // will pause until serial console opens
+    delay(10); // will pause until serial console opens
 
-  //debug("freeMemory()="+freeMemory());
+  Serial.println();
+  Serial.println("Configuring access point...");
+
+  // You can remove the password parameter if you want the AP to be open.
+  WiFi.softAP(ssid, password);
+  IPAddress myIP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(myIP);
+
+  Serial.println("Server started");
+
+  server.on(F("/"), []()
+            { server.send(200, "text/html", indexHtml); });
+
+  server.on(F("/data.json"), []()
+            { server.send(200, "application/json", jsonString); });
+
+  //  server.on(UriBraces("/users/{}"), []() {
+  //    String user = server.pathArg(0);
+  //    server.send(200, "text/plain", "User: '" + user + "'");
+  //  });
+  //
+  //  server.on(UriRegex("^\\/users\\/([0-9]+)\\/devices\\/([0-9]+)$"), []() {
+  //    String user = server.pathArg(0);
+  //    String device = server.pathArg(1);
+  //    server.send(200, "text/plain", "User: '" + user + "' and Device: '" + device + "'");
+  //  });
+
+  server.begin();
+  Serial.println("HTTP server started");
+
+  // debug("freeMemory()="+freeMemory());
   debugln();
   delay(1000);
 
@@ -204,6 +248,8 @@ void setup()
 
 void loop()
 {
+  server.handleClient();
+  delay(0);
   CellTemp.read_temp_sensor_data();
   Hum.ReadSensor();
   HMSmain.readAmps();
@@ -214,5 +260,5 @@ void loop()
   debugCalibrateAmps(); // only needed for manual calibration of HalEffect Sensorsensor
   // debugf("Going to sleep now");
   delay(100);
-  //debugln(freeRam());
-}  
+  // debugln(freeRam());
+}

@@ -209,9 +209,30 @@ void read_temp_sensor_data()
   
   debug("Sensor 3: ");
   printTemperature(sensor3);
+
+  debug("Sensor 4: ");
+  printTemperature(sensor4);
+  
+  debug("Sensor 5: ");
+  printTemperature(sensor5);
+  
+  debug("Sensor 6: ");
+  printTemperature(sensor6);
+
+  debug("Sensor 7: ");
+  printTemperature(sensor7);
+  
+  debug("Sensor 8: ");
+  printTemperature(sensor8);
+  
+  debug("Sensor 9: ");
+  printTemperature(sensor9);
+
+  debug("Sensor 10: ");
+  printTemperature(sensor10);
   
   debugln();
-  debugln(freeRam());
+  debug("Free Memory: "+freeRam());
   delay(1000);
 }
 

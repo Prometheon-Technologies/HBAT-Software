@@ -1,6 +1,8 @@
 # HBAT-Software Private repo
 
-Main Software Stack files are located in lib and src. 
+Custom Software Stack files are located in lib and src. 
+
+main.cpp runs the stricpt, HMSmain library does the heavy lifting. 
 
 **LIB**
 

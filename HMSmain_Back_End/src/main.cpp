@@ -10,14 +10,7 @@
 #include <WiFiAP.h>
 #include <index.html.h>
 #include <data.json.h>
-
 #define LED_BUILTIN 2 // Set the GPIO pin where you connected your test LED or comment this line out if your dev board has a built-in LED
-
-// Set these to your desired credentials.
-const char *ssid = "yourAP";
-const char *password = "yourPassword";
-
-WebServer server(80);
 
 #define DEBUG 1
 
@@ -37,15 +30,18 @@ WebServer server(80);
 #define LED1 37
 #define LED2 47
 
+// Variables
+int received;
+
 HMS HMSmain = HMS();
 Humidity Hum = Humidity();
 CELLTEMP CellTemp = CELLTEMP();
 
-int received;
+// Set these to your desired credentials.
+const char *ssid = "yourAP";
+const char *password = "yourPassword";
 
-// Setup an array of relays to control peripherals. Numbers represent pin numbers.
-const int relays[10] = {
-    45, 38, 36, 35, 48};
+WebServer server(80);
 
 /* #define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
 /* #define TIME_TO_SLEEP 30    */ /* Time ESP32 will go to sleep (in seconds) */
@@ -120,31 +116,12 @@ const int relays[10] = {
   }
 } */
 
-/* void SerialandBT(String data)
-{
-  bool BTwritestate = false;
-  if (BTwritestate = true)
-  {
-    ledFade(LED2);
-  }
-  while (true)
-  {
-    BTwritestate = true;
-
-    if (SerialBT.available())
-    {
-      SerialBT.print(data); //write on BT app
-      Serial.write(SerialBT.read());
-    }
-    debug(data);
-  }
-} */
-
 void stack_climate()
 {
   float *climatedata = Hum.ReadSensor();
   char climateData[100];
-  sprintf(climateData, "%3d, %3d", climatedata[0], climatedata[1]);
+  sprintf(climateData, "%3d, %3d", "%3d, %3d", climatedata[0], climatedata[1], climatedata[2], climatedata[3]);
+  debugln(climateData);
 
   String voltageaverage = "";
   float *readvoltage = HMSmain.readSensAndCondition();
@@ -193,7 +170,9 @@ void setup()
   server.begin();
   Serial.println("HTTP server started");
 
+  // Serial.println("Configuring RTC...");
   // debug("freeMemory()="+freeMemory());
+
   debugln();
   delay(1000);
 
@@ -250,6 +229,7 @@ void loop()
 {
   server.handleClient();
   delay(0);
+
   CellTemp.read_temp_sensor_data();
   Hum.ReadSensor();
   HMSmain.readAmps();

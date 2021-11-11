@@ -2,7 +2,7 @@
 
 Custom Software Stack files are located in lib and src. 
 
-main.cpp runs the stricpt, HMSmain library does the heavy lifting. 
+main.cpp runs the control script, HMSmain library does the heavy lifting. 
 
 **LIB**
 

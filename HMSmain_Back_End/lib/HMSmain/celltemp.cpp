@@ -28,9 +28,6 @@ OneWire oneWire(ONE_WIRE_BUS);
 // Pass our oneWire reference to Dallas Temperature.
 DallasTemperature sensors(&oneWire);
 // variable to hold device addresses
-DeviceAddress Thermometer;
-
-// Placeholder Addresses of 3 DS18B20s - CHANGE THESE WITH DEVICE ADDRESSES PRINTED TO CONSOLE from printAddress()
 DeviceAddress sensorslist[10];
 
 int deviceCount = 0;

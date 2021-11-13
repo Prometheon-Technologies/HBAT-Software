@@ -173,23 +173,6 @@ void setup()
   while (!Serial)
     delay(10); // will pause until serial console opens
 
-  Serial.println();
-  Serial.println("Configuring access point...");
-
-  // You can remove the password parameter if you want the AP to be open.
-  WiFi.softAP(ssid, password);
-  IPAddress myIP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(myIP);
-
-  Serial.println("Server started");
-
-  server.on(F("/"), []()
-            { server.send(200, "text/html", indexHtml); });
-
-  server.on(F("/data.json"), []()
-            { server.send(200, "application/json", jsonString); });
-
   //  server.on(UriBraces("/users/{}"), []() {
   //    String user = server.pathArg(0);
   //    server.send(200, "text/plain", "User: '" + user + "'");
@@ -261,9 +244,6 @@ void setup()
 
 void loop()
 {
-  server.handleClient();
-  delay(0);
-
   /* CellTemp.read_temp_sensor_data();
   Hum.ReadSensor();
   HMSmain.readAmps();

@@ -179,7 +179,7 @@ int Humidity::hum_relay_On_Off(int time)
   char climateData[100];
   sprintf(climateData, "%3d, %3d", climate_data[1], climate_data[3]);
   debugln(climateData);
-  Input = climateData[1];
+  Input = climateData[0];
   myPID.Compute();
 
   // turn the output pin on/off based on pid output

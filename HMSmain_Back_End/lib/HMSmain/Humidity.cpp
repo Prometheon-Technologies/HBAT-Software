@@ -99,6 +99,18 @@ void Humidity::setupSensor()
   }
 }
 
+float Stacktemp()
+{
+  float temp[4] = ReadSensor(); 
+  return (temp.climatedata[0] + temp.climatedata[2]) / 2;
+}
+
+float Stackhumidity()
+{
+  float humidity[4] = ReadSensor(); 
+  return (humidity.climatedata[1] + humidity.climatedata[3]) / 2;
+}
+
 float *ReadSensor()
 {
   float t = sht31.readTemperature();
@@ -175,11 +187,8 @@ float *ReadSensor()
 
 int Humidity::hum_relay_On_Off(int time)
 {
-  float *climate_data = ReadSensor();
-  char climateData[100];
-  sprintf(climateData, "%3d, %3d", climate_data[1], climate_data[3]);
-  debugln(climateData);
-  Input = climateData[0];
+  float climate_data = Stackhumidity();
+  Input = climate_data;
   myPID.Compute();
 
   // turn the output pin on/off based on pid output

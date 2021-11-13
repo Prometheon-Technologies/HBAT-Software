@@ -43,6 +43,17 @@ const char *password = "yourPassword";
 
 WebServer server(80);
 
+
+Struct data_arrays
+{
+  float stack_humidity;
+  float stack_temp;
+  float stack_voltage;
+  float cell_temp[10];
+  float cell_voltage[10];
+  //float humidity_temp[2]
+}
+
 /* #define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
 /* #define TIME_TO_SLEEP 30    */ /* Time ESP32 will go to sleep (in seconds) */
 
@@ -116,7 +127,7 @@ WebServer server(80);
   }
 } */
 
-void stack_climate()
+/* void stack_climate()
 {
   float *climatedata = Hum.ReadSensor();
   char climateData[100];
@@ -130,6 +141,29 @@ void stack_climate()
     char temp[100];
     sprintf(temp, "%s, %3f", voltageaverage, readvoltage[i]);
     voltageaverage = temp;
+  }
+} */
+
+data_arrays accumulate_data()
+{
+  float stack_humidity = Hum.Stackhumidity();
+  float stack_temp = Hum.Stacktemp();
+  float cell_voltage[10] = HMSmain.readSensAndCondition();
+  float cell_temp[10] = CellTemp.cell_temp_sensor_results();
+  float stack_voltage = 0;
+
+  for (int i = 0; i < 10; i++)
+  {
+    stack_voltage += cell_voltage[i]; 
+  }
+   stack_voltage = stack_voltage / 10;
+  return 
+  {
+    stack_humidity;
+    stack_temp;
+    stack_voltage;
+    cell_temp[10];
+    cell_voltage[10];
   }
 }
 
@@ -230,7 +264,7 @@ void loop()
   server.handleClient();
   delay(0);
 
-  CellTemp.read_temp_sensor_data();
+  /* CellTemp.read_temp_sensor_data();
   Hum.ReadSensor();
   HMSmain.readAmps();
   // ledtestOnOff(500); //comment out when not testing - Blink led from Unity Terminal over BTSerial
@@ -240,5 +274,5 @@ void loop()
   debugCalibrateAmps(); // only needed for manual calibration of HalEffect Sensorsensor
   // debugf("Going to sleep now");
   delay(100);
-  // debugln(freeRam());
+  // debugln(freeRam()); */
 }

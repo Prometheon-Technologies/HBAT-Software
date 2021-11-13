@@ -1,4 +1,3 @@
-#include <BluetoothSerial.h>
 #include <Wire.h>
 #include <ACS712.h>
 #include <Adafruit_SHT31.h>

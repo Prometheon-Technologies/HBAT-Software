@@ -39,6 +39,11 @@ void setup() {
     server.send(200, "application/json", jsonString);
   });
 
+   server.on(F("/data.json"), []() {
+    data_arrays = accumulate_data();
+    server.send(200, "application/json", jsonText);
+  });
+
 //  server.on(UriBraces("/users/{}"), []() {
 //    String user = server.pathArg(0);
 //    server.send(200, "text/plain", "User: '" + user + "'");
@@ -54,6 +59,10 @@ void setup() {
   Serial.println("HTTP server started");
 }
 
+
+String json_return_data(){
+
+}
 void loop() {
   server.handleClient();
   delay(0);

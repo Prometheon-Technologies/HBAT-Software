@@ -99,19 +99,28 @@ void Humidity::setupSensor()
   }
 }
 
-float Stacktemp()
+float Humidity::Stacktemp()
 {
-  float temp[4] = ReadSensor(); 
-  return (temp.climatedata[0] + temp.climatedata[2]) / 2;
+  int temp[4]; // 
+  for (int i = 0; i < 4; ++i)
+  {
+    temp[i] = ReadSensor();
+  }
+  return ((temp[0] + temp[2]) / 2); // Read the temperature from the sensor
 }
 
-float Stackhumidity()
+float Humidity::Stackhumidity()
 {
-  float humidity[4] = ReadSensor(); 
-  return (humidity.climatedata[1] + humidity.climatedata[3]) / 2;
+  float humidity[4]; // 
+  for (int i = 0; i < 4; ++i)
+  {
+    humidity_data = ReadSensor();
+    humidity[i] = humidity_data;
+  }
+  return ((humidity[1] + humidity[3]) / 2); // Read the humidity from the sensor
 }
 
-float *ReadSensor()
+float *Humidity::ReadSensor()
 {
   float t = sht31.readTemperature();
   float h = sht31.readHumidity();

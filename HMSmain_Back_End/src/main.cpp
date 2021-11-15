@@ -10,7 +10,6 @@
 #include <WiFiAP.h>
 #include <index.html.h>
 #include <data.json.h>
-#define LED_BUILTIN 2 // Set the GPIO pin where you connected your test LED or comment this line out if your dev board has a built-in LED
 
 #define DEBUG 1
 
@@ -30,29 +29,27 @@
 #define LED1 37
 #define LED2 47
 
-// Variables
-int received;
-
-HMS HMSmain = HMS();
-Humidity Hum = Humidity();
-CELLTEMP CellTemp = CELLTEMP();
-
 // Set these to your desired credentials.
 const char *ssid = "yourAP";
 const char *password = "yourPassword";
 
 WebServer server(80);
 
-
-Struct data_arrays
+struct data_arrays
 {
   float stack_humidity;
   float stack_temp;
   float stack_voltage;
   float cell_temp[10];
   float cell_voltage[10];
-  //float humidity_temp[2]
 }
+
+// Variables
+int received;
+
+HMS HMSmain = HMS();
+Humidity Hum = Humidity();
+CELLTEMP CellTemp = CELLTEMP();
 
 /* #define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
 /* #define TIME_TO_SLEEP 30    */ /* Time ESP32 will go to sleep (in seconds) */
@@ -154,10 +151,10 @@ data_arrays accumulate_data()
 
   for (int i = 0; i < 10; i++)
   {
-    stack_voltage += cell_voltage[i]; 
+    stack_voltage += cell_voltage[i];
   }
-   stack_voltage = stack_voltage / 10;
-  return 
+  stack_voltage = stack_voltage / 10;
+  return
   {
     stack_humidity;
     stack_temp;

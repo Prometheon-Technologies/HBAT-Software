@@ -28,9 +28,8 @@ OneWire oneWire(ONE_WIRE_BUS);
 // Pass our oneWire reference to Dallas Temperature.
 DallasTemperature sensors(&oneWire);
 // variable to hold device addresses
-DeviceAddress sensorslist[10];
-
-int deviceCount = 0;
+int sensors_count;
+DeviceAddress temp_sensor_addresses;
 
 int CELLTEMP::freeRam()
 {
@@ -39,46 +38,69 @@ int CELLTEMP::freeRam()
     return (int)&v - (__brkval == 0 ? (int)&__heap_start : (int)__brkval);
 }
 
-void CELLTEMP::readAddresses(DeviceAddress deviceAddress)
-{
-    for (uint8_t i = 0; i < 8; i++)
-    {
-        sensorslist[i] = deviceAddress[i];
-    }
-}
-
-float CELLTEMP::read_temp_sensor_data()
-{
-    float cell_temp_sensor_results[10];
-    for (uint8_t i = 0; i < 10; i++)
-    {
-        cell_temp_sensor_results[i] = sensors.getTempC(sensorslist[i]);
-    }
-    return cell_temp_sensor_results;
-}
-
 void CELLTEMP::setup_sensors()
 {
-    Serial.begin(115200);
-    while (!Serial)
-        delay(10); // will pause until serial console opens
-
     // Start up the ds18b20 library
     sensors.begin();
+
+    // Grab a count of devices on the wire
+    sensors_count = sensors.getDeviceCount();
+
     // locate devices on the bus
-    debugln("Locating devices...");
-    debug("Found ");
-    deviceCount = sensors.getDeviceCount();
-    Serial.print(deviceCount, DEC);
-    debugln(" devices.");
-    debugln("");
-    debugln("Printing addresses...");
-    for (int i = 0; i < deviceCount; i++)
+    Serial.print("Locating devices...");
+    Serial.print("Found ");
+    Serial.print(sensors_count, DEC);
+    Serial.println(" devices.");
+
+    // Loop through each device, print out address
+    for (int i = 0; i < sensors_count; i++)
     {
-        debug("Sensor ");
-        debug(i + 1);
-        debug(" : ");
-        sensors.getAddress(Thermometer, i);
-        printAddress(Thermometer);
+        // Search the wire for address
+        if (sensors.getAddress(temp_sensor_addresses, i))
+        {
+            Serial.print("Found device ");
+            Serial.print(i, DEC);
+            Serial.print(" with address: ");
+            printAddress(temp_sensor_addresses);
+            Serial.println();
+        }
+        else
+        {
+            Serial.print("Found ghost device at ");
+            Serial.print(i, DEC);
+            Serial.print(" but could not detect address. Check power and cabling");
+        }
+    }
+}
+
+// function to print a device address
+void CELLTEMP::printAddress(DeviceAddress deviceAddress)
+{
+    for (uint8_t i = 0; i < sensors_count; i++)
+    {
+        if (deviceAddress[i] < 16)
+            Serial.print("0");
+        Serial.print(deviceAddress[i], HEX);
+    }
+}
+
+int CELLTEMP::read_temp_sensor_data()
+{
+    int cell_temp_sensor_results[10];
+    for (int i = 0; i < sensors_count; i++)
+    {
+        // Search the wire for address
+        if (sensors.getAddress(temp_sensor_addresses, i))
+        {
+            cell_temp_sensor_results[i] = sensors.getTempC(temp_sensor_addresses);
+            printAddress(temp_sensor_addresses);
+            Serial.println();
+        }
+        else
+        {
+            Serial.print("Found ghost device at ");
+            Serial.print(i, DEC);
+            Serial.print(" but could not detect address. Check power and cabling");
+        }
     }
 }

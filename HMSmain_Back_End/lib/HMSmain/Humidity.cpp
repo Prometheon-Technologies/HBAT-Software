@@ -102,7 +102,7 @@ void Humidity::setupSensor()
 float Humidity::Stacktemp()
 {
   int temp[4]; // 
-  for (int i = 0; i < 4; ++i)
+  for (int i = 0; i < 4; i++)
   {
     temp[i] = ReadSensor();
   }
@@ -112,27 +112,26 @@ float Humidity::Stacktemp()
 float Humidity::Stackhumidity()
 {
   float humidity[4]; // 
-  for (int i = 0; i < 4; ++i)
+  for (int i = 0; i < 4; i++)
   {
-    humidity_data = ReadSensor();
-    humidity[i] = humidity_data;
+    humidity[i] = ReadSensor();
   }
   return ((humidity[1] + humidity[3]) / 2); // Read the humidity from the sensor
 }
 
-float *Humidity::ReadSensor()
+float Humidity::ReadSensor()
 {
   float t = sht31.readTemperature();
   float h = sht31.readHumidity();
   float t_2 = sht31_2.readTemperature();
   float h_2 = sht31_2.readHumidity();
 
-  float climatedata[4] = {t, h, t_2, h_2};
+  //float climatedata[4] = {t, h, t_2, h_2};
 
   if (!isnan(t and t_2))
   { // check if 'is not a number'
-    climatedata[0] = t;
-    climatedata[2] = t;
+    /* climatedata[0] = t;
+    climatedata[2] = t; */
     Serial.printf("Sensor 1 Temp *C = ");
     Serial.print(t);
     Serial.printf("Sensor 2 Temp *C = ");
@@ -145,8 +144,8 @@ float *Humidity::ReadSensor()
 
   if (!isnan(h and h_2))
   { // check if 'is not a number'
-    climatedata[1] = h;
-    climatedata[3] = h_2;
+    /* climatedata[1] = h;
+    climatedata[3] = h_2; */
     Serial.printf("Sensor 1 Humidity % = ");
     Serial.print(h);
     Serial.printf("Sensor 2 Humidity % = ");
@@ -191,7 +190,7 @@ float *Humidity::ReadSensor()
 
     loopCnt = 0;
   }
-  return climatedata;
+  return t, h, t_2, h_2;
 }
 
 int Humidity::hum_relay_On_Off(int time)

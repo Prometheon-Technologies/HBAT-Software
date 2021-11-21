@@ -29,11 +29,13 @@
 #define LED1 37
 #define LED2 47
 
-// Set these to your desired credentials.
-const char *ssid = "yourAP";
-const char *password = "yourPassword";
+// Variables
 
-WebServer server(80);
+int received;
+
+HMS HMSmain = HMS();
+Humidity Hum = Humidity();
+CELLTEMP CellTemp = CELLTEMP();
 
 struct data_arrays
 {
@@ -42,52 +44,7 @@ struct data_arrays
   float stack_voltage;
   float cell_temp[10];
   float cell_voltage[10];
-}
-
-// Variables
-int received;
-
-HMS HMSmain = HMS();
-Humidity Hum = Humidity();
-CELLTEMP CellTemp = CELLTEMP();
-
-/* #define uS_TO_S_FACTOR 1000000 /* Conversion factor for micro seconds to seconds */
-/* #define TIME_TO_SLEEP 30    */ /* Time ESP32 will go to sleep (in seconds) */
-
-/* RTC_DATA_ATTR int bootCount = 0; */
-
-// Method to print the reason by which ESP32
-// has been awaken from sleep
-
-/* void print_wakeup_reason()
-{
-  runningState = true;
-  esp_sleep_wakeup_cause_t wakeup_reason;
-
-  wakeup_reason = esp_sleep_get_wakeup_cause();
-
-  switch (wakeup_reason)
-  {
-  case ESP_SLEEP_WAKEUP_EXT0:
-    debugf("Wakeup caused by external signal using RTC_IO");
-    break;
-  case ESP_SLEEP_WAKEUP_EXT1:
-    debugf("Wakeup caused by external signal using RTC_CNTL");
-    break;
-  case ESP_SLEEP_WAKEUP_TIMER:
-    debugf("Wakeup caused by timer");
-    break;
-  case ESP_SLEEP_WAKEUP_TOUCHPAD:
-    debugf("Wakeup caused by touchpad");
-    break;
-  case ESP_SLEEP_WAKEUP_ULP:
-    debugf("Wakeup caused by ULP program");
-    break;
-  default:
-    debugln("Wakeup was not caused by deep sleep: %d\n" + wakeup_reason);
-    break;
-  }
-} */
+};
 
 /* void led2OnOff(int time)
 {
@@ -141,47 +98,12 @@ CELLTEMP CellTemp = CELLTEMP();
   }
 } */
 
-data_arrays accumulate_data()
-{
-  float stack_humidity = Hum.Stackhumidity();
-  float stack_temp = Hum.Stacktemp();
-  float cell_voltage[10] = HMSmain.readSensAndCondition();
-  float cell_temp[10] = CellTemp.cell_temp_sensor_results();
-  float stack_voltage = 0;
-
-  for (int i = 0; i < 10; i++)
-  {
-    stack_voltage += cell_voltage[i];
-  }
-  stack_voltage = stack_voltage / 10;
-  return
-  {
-    stack_humidity;
-    stack_temp;
-    stack_voltage;
-    cell_temp[10];
-    cell_voltage[10];
-  }
-}
-
 void setup()
 {
   Serial.begin(115200);
   while (!Serial)
     delay(10); // will pause until serial console opens
 
-  //  server.on(UriBraces("/users/{}"), []() {
-  //    String user = server.pathArg(0);
-  //    server.send(200, "text/plain", "User: '" + user + "'");
-  //  });
-  //
-  //  server.on(UriRegex("^\\/users\\/([0-9]+)\\/devices\\/([0-9]+)$"), []() {
-  //    String user = server.pathArg(0);
-  //    String device = server.pathArg(1);
-  //    server.send(200, "text/plain", "User: '" + user + "' and Device: '" + device + "'");
-  //  });
-
-  server.begin();
   Serial.println("HTTP server started");
 
   // Serial.println("Configuring RTC...");
@@ -194,49 +116,34 @@ void setup()
   CellTemp.setup_sensors();
   Hum.setupSensor();
   HMSmain.setupSensor();
-  /* +bootCount;
-  char bootChar[100];
-  sprintf(bootChar, "Boot number: %s", String(bootCount));
-  debugf(bootChar);
-
-  //Print the wakeup reason for ESP32
-  print_wakeup_reason();
-
-  //First we configure the wake up source
-  //We set our ESP32 to wake up every 5 seconds
-
-  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-  char sleeptime[1];
-  sprintf(sleeptime, "Setup ESP32 to sleep for every ", String(TIME_TO_SLEEP) + " Seconds");
-  debugf(sleeptime); */
   debugf("HMS booting - please wait");
   debugf("Device now Discoverable");
   // debugf(__FILE__);
   debugf("Setup Complete");
   delay(100);
-  /*
-  Next we decide what all peripherals to shut down/keep on
-  By default, ESP32 will automatically power down the peripherals
-  not needed by the wakeup source, but if you want to be a poweruser
-  this is for you. Read in detail at the API docs
-  http://esp-idf.readthedocs.io/en/latest/api-reference/system/deep_sleep.html
-  Left the line commented as an example of how to configure peripherals.
-  The line below turns off all RTC peripherals in deep sleep.
-  //esp_deep_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);
-  //debugln("Configured all RTC Peripherals to be powered down in sleep");
-  Now that we have setup a wake cause and if needed setup the
-  peripherals state in deep sleep, we can now start going to
-  deep sleep.
-  In the case that no wake up sources were provided but deep
-  sleep was started, it will sleep forever unless hardware
-  reset occurs*/
-  // Serial.flush();
-  /* if (!runningState)
+}
+
+data_arrays accumulate_data()
+{
+  float stack_humidity = Hum.Stackhumidity();
+  float *cell_voltage[10] = {HMSmain.readSensAndCondition()};
+  float stack_temp = Hum.Stacktemp();
+  float cell_temp[10] = {CellTemp.read_temp_sensor_data()};
+  float stack_voltage = {0};
+
+  for (int i = 0; i < 10; i++)
   {
-    esp_deep_sleep_start();
-  } */
-  // pinMode(LED1, OUTPUT);
-  // pinMode(LED2, OUTPUT);
+    stack_voltage += *cell_voltage[i];
+  }
+  stack_voltage = stack_voltage / 10;
+  return;
+  {
+    stack_humidity;
+    stack_temp;
+    stack_voltage;
+    cell_temp[10];
+    cell_voltage[10];
+  }
 }
 
 void loop()

@@ -14,7 +14,7 @@ class Humidity
     void setupSensor();
     float Stackhumidity();
     float Stacktemp();
-    float *ReadSensor();
+    float ReadSensor();
     int hum_relay_On_Off(int time);
   /* private:
     int _pin;

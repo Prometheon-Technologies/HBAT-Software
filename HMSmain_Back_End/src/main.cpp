@@ -4,7 +4,6 @@
 #include <celltemp.h>
 //#include <MemoryFree.h>
 
-
 #define DEBUG 1
 
 #if DEBUG == 1
@@ -107,7 +106,6 @@ void setup()
   delay(1000);
 
   debugln("\n===================================");
-  CellTemp.setup_sensors();
   Hum.setupSensor();
   HMSmain.setupSensor();
   debugf("HMS booting - please wait");
@@ -130,7 +128,7 @@ data_arrays accumulate_data()
     stack_voltage += cell_voltage[i];
   }
   stack_voltage = stack_voltage / 10;
-  return {stack_humidity, stack_temp, stack_voltage, cell_voltage, cell_temp};
+  return {stack_humidity, stack_temp, stack_voltage, cell_voltage[10], cell_temp[10]};
 }
 
 void loop()

@@ -17,7 +17,6 @@ public:
     void readAddresses(DeviceAddress deviceAddress);
     void printAddress(DeviceAddress deviceAddress);
     int read_temp_sensor_data();
-    void setup_sensors();
     /* private: */
 };
 #endif

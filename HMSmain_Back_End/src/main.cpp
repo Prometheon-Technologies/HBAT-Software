@@ -1,15 +1,9 @@
 #include <Arduino.h>
-#include <BluetoothSerial.h>
 #include <HMS.h>
 #include <Humidity.h>
 #include <celltemp.h>
 //#include <MemoryFree.h>
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <WebServer.h>
-#include <WiFiAP.h>
-#include <index.html.h>
-#include <data.json.h>
+
 
 #define DEBUG 1
 
@@ -126,24 +120,17 @@ void setup()
 data_arrays accumulate_data()
 {
   float stack_humidity = Hum.Stackhumidity();
-  float *cell_voltage[10] = {HMSmain.readSensAndCondition()};
+  float cell_voltage[10] = {HMSmain.readSensAndCondition()};
   float stack_temp = Hum.Stacktemp();
   float cell_temp[10] = {CellTemp.read_temp_sensor_data()};
   float stack_voltage = {0};
 
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i <= sizeof(cell_voltage); i++)
   {
-    stack_voltage += *cell_voltage[i];
+    stack_voltage += cell_voltage[i];
   }
   stack_voltage = stack_voltage / 10;
-  return;
-  {
-    stack_humidity;
-    stack_temp;
-    stack_voltage;
-    cell_temp[10];
-    cell_voltage[10];
-  }
+  return {stack_humidity, stack_temp, stack_voltage, cell_voltage, cell_temp};
 }
 
 void loop()

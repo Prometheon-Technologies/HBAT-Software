@@ -11,9 +11,9 @@ class HMS
 {
   public:
     HMS();
-    float* readSensAndCondition();
+    float readSensAndCondition();
     void calibrateAmps();
-    float *readAmps();
+    float readAmps();
     float readVoltage(int pinnumber);
     uint8_t _amppin = 18;
     void setupSensor();

@@ -3,7 +3,7 @@ asyncserver.cpp - HBAT asyncserver library
  Copyright (c) 2021 Zacariah Austin Heim.
 
  File is inherently in Debug Mode. Change #define DEBUG to 0 to disable 
- */
+ 
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 
@@ -11,7 +11,7 @@ asyncserver.cpp - HBAT asyncserver library
 
 #if DEBUG == 1
 #define debug(x) Serial.print(x)
-#define debugln(x) debugln(x)
+#define debugln(x) Serial.println(x)
 #define debugf(x) Serial.printf(x)
 
 #else
@@ -57,4 +57,4 @@ void setup(){
   server.begin();
 }
 
-void loop(){}
+void loop(){} */

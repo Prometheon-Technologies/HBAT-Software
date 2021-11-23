@@ -115,7 +115,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=HMS
+CMAKE_PROJECT_NAME:STATIC=HMSmain
 
 //Value Computed by CMake
 CMAKE_PROJECT_VERSION:STATIC=0.1.0
@@ -251,6 +251,15 @@ HMS_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
 HMS_SOURCE_DIR:STATIC=C:/Users/zacar/Documents/GitHub/HBAT-Software/HMSmain_Back_End
+
+//Value Computed by CMake
+HMSmain_BINARY_DIR:STATIC=C:/Users/zacar/Documents/GitHub/HBAT-Software/HMSmain_Back_End/build
+
+//Value Computed by CMake
+HMSmain_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+HMSmain_SOURCE_DIR:STATIC=C:/Users/zacar/Documents/GitHub/HBAT-Software/HMSmain_Back_End
 
 //Command to build the project
 MAKECOMMAND:STRING="C:\Program Files\CMake\bin\cmake.exe" --build . --config "${CTEST_CONFIGURATION_TYPE}"

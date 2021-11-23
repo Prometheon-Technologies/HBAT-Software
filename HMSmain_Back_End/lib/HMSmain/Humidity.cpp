@@ -101,7 +101,7 @@ void Humidity::setupSensor()
 
 float Humidity::Stacktemp()
 {
-  int temp[4]; // 
+  int temp[4]; //
   for (int i = 0; i < 4; i++)
   {
     temp[i] = ReadSensor();
@@ -111,7 +111,7 @@ float Humidity::Stacktemp()
 
 float Humidity::Stackhumidity()
 {
-  float humidity[4]; // 
+  float humidity[4]; //
   for (int i = 0; i < 4; i++)
   {
     humidity[i] = ReadSensor();
@@ -126,7 +126,7 @@ float Humidity::ReadSensor()
   float t_2 = sht31_2.readTemperature();
   float h_2 = sht31_2.readHumidity();
 
-  //float climatedata[4] = {t, h, t_2, h_2};
+  // float climatedata[4] = {t, h, t_2, h_2};
 
   if (!isnan(t and t_2))
   { // check if 'is not a number'

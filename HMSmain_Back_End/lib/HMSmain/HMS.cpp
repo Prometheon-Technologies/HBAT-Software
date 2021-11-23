@@ -22,7 +22,7 @@ float HMS::readVoltage(int pinnumber)
     return (float)((analogRead(pinnumber) * 5.0) / 1024.0);
 }
 
-float *HMS::readSensAndCondition()
+float HMS::readSensAndCondition()
 {
     float sval[10] = {0};
 
@@ -47,7 +47,10 @@ float *HMS::readSensAndCondition()
         sval[i] = sval[i] / 5;
     }
 
-    return sval;
+    return
+    {
+        sval[10]
+    };
 }
 
 //if (input_voltage < 0.50 && input_voltage >= 0.00 )
@@ -102,12 +105,12 @@ void HMS::setupSensor()
     ACS.autoMidPoint();
 }
 
-float HMS::*readAmps()
+float HMS::readAmps()
 {
     int mA = ACS.mA_DC();
     String Amps = String(mA);
-    //SerialandBT(Amps);
     Serial.println("," + Amps);
+    return Amps.toFloat();
 }
 
 void HMS::calibrateAmps()

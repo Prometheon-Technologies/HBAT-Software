@@ -97,8 +97,6 @@ void setup()
   while (!Serial)
     delay(10); // will pause until serial console opens
 
-  Serial.println("HTTP server started");
-
   // Serial.println("Configuring RTC...");
   // debug("freeMemory()="+freeMemory());
 
@@ -109,8 +107,6 @@ void setup()
   Hum.setupSensor();
   HMSmain.setupSensor();
   debugf("HMS booting - please wait");
-  debugf("Device now Discoverable");
-  // debugf(__FILE__);
   debugf("Setup Complete");
   delay(100);
 }
@@ -138,7 +134,6 @@ void loop()
   HMSmain.readAmps();
   // ledtestOnOff(500); //comment out when not testing - Blink led from Unity Terminal over BTSerial
   delay(100);
-  stack_climate();
   delay(100);
   debugCalibrateAmps(); // only needed for manual calibration of HalEffect Sensorsensor
   // debugf("Going to sleep now");

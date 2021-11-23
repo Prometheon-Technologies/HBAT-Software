@@ -15,7 +15,7 @@ class Humidity
     float Stackhumidity();
     float Stacktemp();
     float ReadSensor();
-    int hum_relay_On_Off(int time);
+    void hum_relay_On_Off(int time);
   /* private:
     int _pin;
     const int ADC1 = analogRead(_pin); */

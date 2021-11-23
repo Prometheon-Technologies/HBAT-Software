@@ -20,7 +20,20 @@
 
 CELLTEMP::CELLTEMP()
 {
-    // Start up the ds18b20 library
+}
+
+// Setup a oneWire instance to communicate with any OneWire devices
+OneWire oneWire(ONE_WIRE_BUS);
+
+// Pass our oneWire reference to Dallas Temperature.
+DallasTemperature sensors(&oneWire);
+// variable to hold device addresses
+int sensors_count;
+DeviceAddress temp_sensor_addresses;
+
+void CELLTEMP::setup_sensors()
+{
+  // Start up the ds18b20 library
     sensors.begin();
 
     // Grab a count of devices on the wire
@@ -52,15 +65,6 @@ CELLTEMP::CELLTEMP()
         }
     }
 }
-
-// Setup a oneWire instance to communicate with any OneWire devices
-OneWire oneWire(ONE_WIRE_BUS);
-
-// Pass our oneWire reference to Dallas Temperature.
-DallasTemperature sensors(&oneWire);
-// variable to hold device addresses
-int sensors_count;
-DeviceAddress temp_sensor_addresses;
 
 int CELLTEMP::freeRam()
 {

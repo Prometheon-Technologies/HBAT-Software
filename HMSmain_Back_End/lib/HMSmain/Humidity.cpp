@@ -18,7 +18,7 @@
 #endif
 
 // Setup an array of relays to control peripherals. Numbers represent pin numbers.
-const int relays[9] = {45, 38, 36, 35, 48};
+const int relays[10] = {45, 38, 36, 35, 48};
 
 // Define Variables we'll be connecting to
 double Setpoint, Input, Output;
@@ -66,9 +66,10 @@ void Humidity::setupSensor()
   // turn the PID on
   myPID.SetMode(AUTOMATIC);
   Serial.printf("SHT31 Sensors Setup Beginning");
+  // Set to 0x45 for alternate i2c address
   if (!sht31.begin(0x44) and !sht31_2.begin(0x45))
 
-  { // Set to 0x45 for alternate i2c addr
+  {
     Serial.printf("Couldn't find SHT31");
     while (1)
       delay(1);
@@ -80,20 +81,20 @@ void Humidity::setupSensor()
 
   switch (sht31.isHeaterEnabled())
   {
-  case 0:
+  case false:
     Serial.printf("Sensor 1 Heater Disabled");
     break;
-  case 1:
+  case true:
     Serial.printf("Sensor 2 Heater ENABLED");
     break;
   }
 
   switch (sht31_2.isHeaterEnabled())
   {
-  case 0:
+  case false:
     Serial.printf("Sensor 1 Heater Disabled");
     break;
-  case 1:
+  case true:
     Serial.printf("Sensor 2 Heater ENABLED");
     break;
   }
@@ -170,20 +171,20 @@ float Humidity::ReadSensor()
 
     switch (sht31.isHeaterEnabled())
     {
-    case 0:
+    case false:
       Serial.printf("Sensor 1 Heater Disabled");
       break;
-    case 1:
+    case true:
       Serial.printf("Sensor 1 Heater ENABLED");
       break;
     }
 
     switch (sht31_2.isHeaterEnabled())
     {
-    case 0:
+    case false:
       Serial.printf("Sensor 1 Heater Disabled");
       break;
-    case 1:
+    case true:
       Serial.printf("Sensor 1 Heater ENABLED");
       break;
     }
@@ -193,7 +194,7 @@ float Humidity::ReadSensor()
   return t, h, t_2, h_2;
 }
 
-int Humidity::hum_relay_On_Off(int time)
+void Humidity::hum_relay_On_Off(int time)
 {
   float climate_data = Stackhumidity();
   Input = climate_data;

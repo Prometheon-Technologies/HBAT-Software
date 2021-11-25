@@ -28,7 +28,7 @@ int received;
 
 HMS HMSmain = HMS();
 Humidity Hum = Humidity();
-CELLTEMP CellTemp = CELLTEMP();
+CellTemp Cell_Temp = CellTemp();
 
 struct data_arrays
 {
@@ -103,18 +103,42 @@ void setup()
   delay(1000);
 
   debugln("\n===================================");
-  Hum.setupSensor();
+  Hum.setup_Sensor();
   HMSmain.setupSensor();
   debugf("HMS booting - please wait");
   debugf("Setup Complete");
   delay(100);
 }
 
-data_arrays accumulate_data()
+data_arrays accumulate_data(float *stack_humidity, float *stack_temp, float *stack_voltage, float *cell_temp, float *cell_voltage)
 {
-  float stack_humidity = Hum.Stackhumidity();
-  float cell_voltage[10] = {HMSmain.readSensAndCondition()};
-  float stack_temp = Hum.Stacktemp();
+  data_arrays data;
+  data.stack_humidity = *stack_humidity;
+
+  data.stack_temp = *stack_temp;
+  data.stack_voltage = *stack_voltage;
+
+  Cell_Temp.read_temp_sensor_data(cell_temp);
+
+  for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
+  {
+    data.cell_temp[i] = cell_temp[i];
+    debugln(data.cell_temp[i]);
+  }
+
+  HMSmain.readSensAndCondition(cell_voltage);
+
+  for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
+  {
+    data.cell_voltage[i] = cell_voltage[i];
+  }
+  return data;
+}
+
+/* {
+  float stack_humidity = Hum.Stack_humidity();
+  float cell_voltage[] = {HMSmain.readSensAndCondition()};
+  float stack_temp = Hum.average_Stack_temp();
   float *cell_temp[10];
   CellTemp.read_temp_sensor_data(*cell_temp);
 
@@ -124,8 +148,8 @@ data_arrays accumulate_data()
     stack_voltage += cell_voltage[i];
   }
   stack_voltage = stack_voltage / 10;
-  return {stack_humidity, stack_temp, stack_voltage, cell_voltage[9], *cell_temp[9]};
-}
+  return {stack_humidity, stack_temp, stack_voltage, cell_voltage, *cell_temp};
+} */
 
 void loop()
 {

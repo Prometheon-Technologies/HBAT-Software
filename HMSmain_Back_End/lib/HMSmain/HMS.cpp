@@ -4,9 +4,11 @@
 #include <HMS.h>
 #include <Arduino.h>
 #include <Humidity.h>
+#include <CellTemp.h>
 
 uint8_t _amppin = 18;
 ACS712 ACS(_amppin, 5.0, 4095, 100);
+CellTemp Cell_Temp = CellTemp();
 
 // ESP 32 (requires resistors to step down the logic voltage)
 //ACS712  ACS(25, 5.0, 4095, 185);
@@ -22,35 +24,29 @@ float HMS::readVoltage(int pinnumber)
     return (float)((analogRead(pinnumber) * 5.0) / 1024.0);
 }
 
-float HMS::readSensAndCondition()
+float *HMS::readSensAndCondition(float *cell_voltage)
 {
-    float sval[10] = {0};
-
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
     {
-        sval[0] += readVoltage(39); // sensor on analog pin
-        sval[1] += readVoltage(34);
-        sval[2] += readVoltage(35);
-        sval[3] += readVoltage(32);
-        sval[4] += readVoltage(33);
-        sval[5] += readVoltage(25);
-        sval[6] += readVoltage(26);
-        sval[7] += readVoltage(27);
-        sval[8] += readVoltage(14);
-        sval[9] += readVoltage(12);
+        cell_voltage[0] += readVoltage(39); // sensor on analog pin
+        cell_voltage[1] += readVoltage(34);
+        cell_voltage[2] += readVoltage(35);
+        cell_voltage[3] += readVoltage(32);
+        cell_voltage[4] += readVoltage(33);
+        cell_voltage[5] += readVoltage(25);
+        cell_voltage[6] += readVoltage(26);
+        cell_voltage[7] += readVoltage(27);
+        cell_voltage[8] += readVoltage(14);
+        cell_voltage[9] += readVoltage(12);
 
         delay(100);
     }
 
-    for (int i = 0; i < sizeof(sval); i++)
+    for (int i = 0; i < sizeof(cell_voltage); i++)
     {
-        sval[i] = sval[i] / 5;
+        cell_voltage[i] = cell_voltage[i] / 5;
     }
-
-    return
-    {
-        sval[10]
-    };
+    return cell_voltage;
 }
 
 //if (input_voltage < 0.50 && input_voltage >= 0.00 )

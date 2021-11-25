@@ -11,7 +11,7 @@ class HMS
 {
   public:
     HMS();
-    float readSensAndCondition();
+    float *readSensAndCondition(float *cell_voltage);
     void calibrateAmps();
     float readAmps();
     float readVoltage(int pinnumber);

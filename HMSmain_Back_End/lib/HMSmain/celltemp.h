@@ -9,16 +9,18 @@
 #include "OneWire.h"
 #include "DallasTemperature.h"
 
-class CELLTEMP
+class CellTemp
 {
 public:
-    CELLTEMP();
+    CellTemp();
     int freeRam();
     void setup_sensors();
     void readAddresses(DeviceAddress deviceAddress);
     void printAddress(DeviceAddress deviceAddress);
-    void *read_temp_sensor_data(float *cell_temp_sensor_results);
+    float *read_temp_sensor_data(float *cell_temp_sensor_results);
+    int GetSensorCount();
+    void SetSensorCount();
+private:
     int sensors_count;
-    /* private: */
 };
 #endif

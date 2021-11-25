@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <celltemp.h>
+#include <CellTemp.h>
 
 // Data wire is plugged into port 42 on the ESP32
 #define ONE_WIRE_BUS 42
@@ -18,7 +18,7 @@
 #define debugf(x)
 #endif
 
-CELLTEMP::CELLTEMP()
+CellTemp::CellTemp()
 {
 }
 
@@ -31,13 +31,13 @@ DallasTemperature sensors(&oneWire);
 
 DeviceAddress temp_sensor_addresses;
 
-void CELLTEMP::setup_sensors()
+void CellTemp::setup_sensors()
 {
     // Start up the ds18b20 library
     sensors.begin();
 
     // Grab a count of devices on the wire
-    sensors_count = sensors.getDeviceCount();
+    SetSensorCount();
 
     // locate devices on the bus
     Serial.print("Locating devices...");
@@ -66,7 +66,7 @@ void CELLTEMP::setup_sensors()
     }
 }
 
-int CELLTEMP::freeRam()
+int CellTemp::freeRam()
 {
     extern int __heap_start, *__brkval;
     int v;
@@ -74,7 +74,7 @@ int CELLTEMP::freeRam()
 }
 
 // function to print a device address
-void CELLTEMP::printAddress(DeviceAddress deviceAddress)
+void CellTemp::printAddress(DeviceAddress deviceAddress)
 {
     for (uint8_t i = 0; i < sensors_count; i++)
     {
@@ -84,7 +84,7 @@ void CELLTEMP::printAddress(DeviceAddress deviceAddress)
     }
 }
 
-void *CELLTEMP::read_temp_sensor_data(float *cell_temp_sensor_results)
+float *CellTemp::read_temp_sensor_data(float *cell_temp_sensor_results)
 {
     for (int i = 0; i < sensors_count; i++)
     {
@@ -104,4 +104,14 @@ void *CELLTEMP::read_temp_sensor_data(float *cell_temp_sensor_results)
         }
     }
     return cell_temp_sensor_results;
+}
+
+void CellTemp::SetSensorCount()
+{
+    sensors_count = sensors.getDeviceCount();
+}
+
+int CellTemp::GetSensorCount()
+{
+    return sensor_count;
 }

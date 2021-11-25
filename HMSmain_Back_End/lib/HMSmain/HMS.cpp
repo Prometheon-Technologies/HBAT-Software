@@ -24,8 +24,9 @@ float HMS::readVoltage(int pinnumber)
     return (float)((analogRead(pinnumber) * 5.0) / 1024.0);
 }
 
-float *HMS::readSensAndCondition(float *cell_voltage)
+float *HMS::readSensAndCondition()
 {
+    float *cell_voltage = new float[5];
     for (int i = 0; i < 5; i++)
     {
         cell_voltage[0] += readVoltage(39); // sensor on analog pin

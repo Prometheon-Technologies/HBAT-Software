@@ -17,7 +17,7 @@ public:
     void setup_sensors();
     void readAddresses(DeviceAddress deviceAddress);
     void printAddress(DeviceAddress deviceAddress);
-    float *read_temp_sensor_data(float *cell_temp_sensor_results);
+    float *read_temp_sensor_data();
     int GetSensorCount();
     void SetSensorCount();
 private:

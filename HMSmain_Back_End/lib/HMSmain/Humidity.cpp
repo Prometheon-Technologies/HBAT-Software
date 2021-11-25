@@ -33,6 +33,12 @@ Adafruit_SHT31 sht31 = Adafruit_SHT31();
 
 Adafruit_SHT31 sht31_2 = Adafruit_SHT31();
 
+struct humidity_array
+{
+  float stack_humidity;
+  float stack_temp;
+};
+
 byte degree[8] =
     {
         0b00011,
@@ -50,15 +56,15 @@ Humidity::Humidity()
 
 void Humidity::setup_relays()
 {
-  //initialize the Relay pins and set them to off state
+  // initialize the Relay pins and set them to off state
   for (int i = 0; i < 5; i++)
   {
     pinMode(relays[i], OUTPUT);
     digitalWrite(relays[i], LOW);
-  }  
+  }
 }
 
-void Humidity::setup_Sensor()
+void Humidity::SetupSensor()
 {
   // Initialize the relay pins
   setup_relays();
@@ -75,10 +81,9 @@ void Humidity::setup_Sensor()
   myPID.SetMode(AUTOMATIC);
   Serial.printf("SHT31 Sensors Setup Beginning");
   // Set to 0x45 for alternate i2c address
-  if (!sht31.begin(0x44) and !sht31_2.begin(0x45))
-
+  if (!sht31.begin(0x44) ^ !sht31_2.begin(0x45))
   {
-    Serial.printf("Couldn't find SHT31");
+    Serial.printf("Couldn't find SHT31 sensors");
     while (1)
       delay(1);
   }
@@ -108,27 +113,28 @@ void Humidity::setup_Sensor()
   }
 }
 
-float Humidity::average_Stack_temp()
+float Humidity::AverageStackTemp()
 {
-  int temp[4]; //
+  float stack_temp[4];
   for (int i = 0; i < 4; i++)
   {
-    temp[i] = Read_Sensor();
+    stack_temp[i] = ReadSensor();
   }
-  return ((temp[0] + temp[2]) / 2); // Read the temperature from the sensor and averge the two sensors. 
+  return (stack_temp[0] + stack_temp[2]) / 2; // Read the temperature from the sensor and averge the two sensors.
 }
 
-float Humidity::Stack_humidity()
+float Humidity::StackHumidity()
 {
-  float humidity[4]; //
+  float stack_humidity[4];
+
   for (int i = 0; i < 4; i++)
   {
-    humidity[i] = Read_Sensor();
+    stack_humidity[i] = ReadSensor();
   }
-  return ((humidity[1] + humidity[3]) / 2); // Read the humidity from the sensor
+  return (stack_humidity[1] + stack_humidity[3]) / 2; 
 }
 
-float Humidity::Read_Sensor()
+float Humidity::ReadSensor()
 {
   float t = sht31.readTemperature();
   float h = sht31.readHumidity();
@@ -202,12 +208,12 @@ float Humidity::Read_Sensor()
   return t, h, t_2, h_2;
 }
 
-//SFM3003 Mass Air Flow Sensor code to be integrated
-//Below PID Relay code is an example of how to use the PID controller
-// This code should only be used durign the Charging phase. Integrate State Machine to use this code
-void Humidity::hum_relay_On_Off(int time)
+// SFM3003 Mass Air Flow Sensor code to be integrated
+// Below PID Relay code is an example of how to use the PID controller
+//  This code should only be used durign the Charging phase. Integrate State Machine to use this code
+void Humidity::HumRelayOnOff(int time, float *stack_humidity)
 {
-  float climate_data = Stack_humidity();
+  float climate_data = StackHumidity();
   Input = climate_data;
   myPID.Compute();
 

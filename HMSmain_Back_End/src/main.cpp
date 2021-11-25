@@ -103,22 +103,23 @@ void setup()
   delay(1000);
 
   debugln("\n===================================");
-  Hum.setup_Sensor();
+  Hum.SetupSensor();
   HMSmain.setupSensor();
   debugf("HMS booting - please wait");
   debugf("Setup Complete");
   delay(100);
 }
 
-data_arrays accumulate_data(float *stack_humidity, float *stack_temp, float *stack_voltage, float *cell_temp, float *cell_voltage)
+void accumulate_data(data_arrays &data)
 {
-  data_arrays data;
-  data.stack_humidity = *stack_humidity;
 
-  data.stack_temp = *stack_temp;
-  data.stack_voltage = *stack_voltage;
+  //Stack level data
+  data.stack_humidity = Hum.StackHumidity();
 
-  Cell_Temp.read_temp_sensor_data(cell_temp);
+  data.stack_temp = Hum.AverageStackTemp();
+
+  //Cell level data
+  float * cell_temp = Cell_Temp.read_temp_sensor_data();
 
   for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
   {
@@ -126,13 +127,19 @@ data_arrays accumulate_data(float *stack_humidity, float *stack_temp, float *sta
     debugln(data.cell_temp[i]);
   }
 
-  HMSmain.readSensAndCondition(cell_voltage);
+  float *cell_voltage = HMSmain.readSensAndCondition();
 
   for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
   {
     data.cell_voltage[i] = cell_voltage[i];
+    debugln(data.cell_voltage[i]);
   }
-  return data;
+
+  data.stack_voltage = 0;
+  for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
+  {
+    data.stack_voltage += cell_voltage[i];
+  }
 }
 
 /* {

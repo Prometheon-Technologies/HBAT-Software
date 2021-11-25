@@ -113,13 +113,13 @@ void setup()
 void accumulate_data(data_arrays &data)
 {
 
-  //Stack level data
+  // Stack level data
   data.stack_humidity = Hum.StackHumidity();
 
   data.stack_temp = Hum.AverageStackTemp();
 
-  //Cell level data
-  float * cell_temp = Cell_Temp.read_temp_sensor_data();
+  // Cell level data
+  float *cell_temp = Cell_Temp.read_temp_sensor_data();
 
   for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
   {
@@ -140,6 +140,7 @@ void accumulate_data(data_arrays &data)
   {
     data.stack_voltage += cell_voltage[i];
   }
+  delete[] cell_temp, cell_voltage;
 }
 
 /* {

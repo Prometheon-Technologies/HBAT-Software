@@ -97,7 +97,6 @@ void setup()
   while (!Serial)
     delay(10); // will pause until serial console opens
 
-  // Serial.println("Configuring RTC...");
   // debug("freeMemory()="+freeMemory());
 
   debugln();
@@ -116,15 +115,16 @@ data_arrays accumulate_data()
   float stack_humidity = Hum.Stackhumidity();
   float cell_voltage[10] = {HMSmain.readSensAndCondition()};
   float stack_temp = Hum.Stacktemp();
-  float cell_temp[10] = {CellTemp.read_temp_sensor_data()};
-  float stack_voltage = {0};
+  float *cell_temp[10];
+  CellTemp.read_temp_sensor_data(*cell_temp);
 
-  for (int i = 0; i <= sizeof(cell_voltage); i++)
+  float stack_voltage = {0};
+  for (int i = 0; i < sizeof(cell_voltage); i++)
   {
     stack_voltage += cell_voltage[i];
   }
   stack_voltage = stack_voltage / 10;
-  return {stack_humidity, stack_temp, stack_voltage, cell_voltage[10], cell_temp[10]};
+  return {stack_humidity, stack_temp, stack_voltage, cell_voltage[9], *cell_temp[9]};
 }
 
 void loop()

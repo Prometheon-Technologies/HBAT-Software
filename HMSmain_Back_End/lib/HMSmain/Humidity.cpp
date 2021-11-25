@@ -17,9 +17,6 @@
 #define debugf(x)
 #endif
 
-// Setup an array of relays to control peripherals. Numbers represent pin numbers.
-const int relays[10] = {45, 38, 36, 35, 48};
-
 // Define Variables we'll be connecting to
 double Setpoint, Input, Output;
 
@@ -51,9 +48,20 @@ Humidity::Humidity()
 {
 }
 
-void Humidity::setupSensor()
+void Humidity::setup_relays()
 {
-  pinMode(relays[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], OUTPUT);
+  //initialize the Relay pins and set them to off state
+  for (int i = 0; i < 5; i++)
+  {
+    pinMode(relays[i], OUTPUT);
+    digitalWrite(relays[i], LOW);
+  }  
+}
+
+void Humidity::setup_Sensor()
+{
+  // Initialize the relay pins
+  setup_relays();
 
   windowStartTime = millis();
 
@@ -100,27 +108,27 @@ void Humidity::setupSensor()
   }
 }
 
-float Humidity::Stacktemp()
+float Humidity::average_Stack_temp()
 {
   int temp[4]; //
   for (int i = 0; i < 4; i++)
   {
-    temp[i] = ReadSensor();
+    temp[i] = Read_Sensor();
   }
-  return ((temp[0] + temp[2]) / 2); // Read the temperature from the sensor
+  return ((temp[0] + temp[2]) / 2); // Read the temperature from the sensor and averge the two sensors. 
 }
 
-float Humidity::Stackhumidity()
+float Humidity::Stack_humidity()
 {
   float humidity[4]; //
   for (int i = 0; i < 4; i++)
   {
-    humidity[i] = ReadSensor();
+    humidity[i] = Read_Sensor();
   }
   return ((humidity[1] + humidity[3]) / 2); // Read the humidity from the sensor
 }
 
-float Humidity::ReadSensor()
+float Humidity::Read_Sensor()
 {
   float t = sht31.readTemperature();
   float h = sht31.readHumidity();
@@ -194,21 +202,23 @@ float Humidity::ReadSensor()
   return t, h, t_2, h_2;
 }
 
+//SFM3003 Mass Air Flow Sensor code to be integrated
+//Below PID Relay code is an example of how to use the PID controller
+// This code should only be used durign the Charging phase. Integrate State Machine to use this code
 void Humidity::hum_relay_On_Off(int time)
 {
-  float climate_data = Stackhumidity();
+  float climate_data = Stack_humidity();
   Input = climate_data;
   myPID.Compute();
 
   // turn the output pin on/off based on pid output
-
   unsigned long now = millis();
   if (now - windowStartTime > WindowSize)
   { // time to shift the Relay Window
     windowStartTime += WindowSize;
   }
   if (Output > now - windowStartTime)
-    digitalWrite(relays[0, 1], HIGH);
+    digitalWrite(relays[0], HIGH);
   else
-    digitalWrite(relays[0, 1], LOW);
+    digitalWrite(relays[0], LOW);
 }

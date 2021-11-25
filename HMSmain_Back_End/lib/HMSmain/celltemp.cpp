@@ -28,12 +28,12 @@ OneWire oneWire(ONE_WIRE_BUS);
 // Pass our oneWire reference to Dallas Temperature.
 DallasTemperature sensors(&oneWire);
 // variable to hold device addresses
-int sensors_count;
+
 DeviceAddress temp_sensor_addresses;
 
 void CELLTEMP::setup_sensors()
 {
-  // Start up the ds18b20 library
+    // Start up the ds18b20 library
     sensors.begin();
 
     // Grab a count of devices on the wire
@@ -84,15 +84,15 @@ void CELLTEMP::printAddress(DeviceAddress deviceAddress)
     }
 }
 
-int CELLTEMP::read_temp_sensor_data()
+void *CELLTEMP::read_temp_sensor_data(float *cell_temp_sensor_results)
 {
-    int cell_temp_sensor_results[10];
     for (int i = 0; i < sensors_count; i++)
     {
         // Search the wire for address
         if (sensors.getAddress(temp_sensor_addresses, i))
         {
             cell_temp_sensor_results[i] = sensors.getTempC(temp_sensor_addresses);
+
             printAddress(temp_sensor_addresses);
             Serial.println();
         }
@@ -103,4 +103,5 @@ int CELLTEMP::read_temp_sensor_data()
             Serial.print(" but could not detect address. Check power and cabling");
         }
     }
+    return cell_temp_sensor_results;
 }

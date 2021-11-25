@@ -112,7 +112,6 @@ void setup()
 
 void accumulate_data(data_arrays &data)
 {
-
   // Stack level data
   data.stack_humidity = Hum.StackHumidity();
 

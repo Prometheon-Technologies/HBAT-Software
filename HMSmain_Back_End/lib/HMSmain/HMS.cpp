@@ -11,7 +11,7 @@ ACS712 ACS(_amppin, 5.0, 4095, 100);
 CellTemp Cell_Temp = CellTemp();
 
 // ESP 32 (requires resistors to step down the logic voltage)
-//ACS712  ACS(25, 5.0, 4095, 185);
+// ACS712  ACS(25, 5.0, 4095, 185);
 
 int voltageValues[10];
 
@@ -26,7 +26,7 @@ float HMS::readVoltage(int pinnumber)
 
 float *HMS::readSensAndCondition(float *cell_voltage)
 {
-    for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
+    for (int i = 0; i < 5; i++)
     {
         cell_voltage[0] += readVoltage(39); // sensor on analog pin
         cell_voltage[1] += readVoltage(34);
@@ -49,49 +49,49 @@ float *HMS::readSensAndCondition(float *cell_voltage)
     return cell_voltage;
 }
 
-//if (input_voltage < 0.50 && input_voltage >= 0.00 )
+// if (input_voltage < 0.50 && input_voltage >= 0.00 )
 //{
-//digitalWrite(2, HIGH);
-//delay (30);
-//digitalWrite(2, LOW);
-//delay (30);
-//}
-//else if (input_voltage < 1.00 && input_voltage >= 0.50)
+// digitalWrite(2, HIGH);
+// delay (30);
+// digitalWrite(2, LOW);
+// delay (30);
+// }
+// else if (input_voltage < 1.00 && input_voltage >= 0.50)
 //{
-// DO STUFF
-//}
-//else if (input_voltage < 1.50 && input_voltage >= 1.00)
+//  DO STUFF
+// }
+// else if (input_voltage < 1.50 && input_voltage >= 1.00)
 //{
-// DO STUFF
-//}
-//else if (input_voltage < 2.00 && input_voltage >= 1.50)
+//  DO STUFF
+// }
+// else if (input_voltage < 2.00 && input_voltage >= 1.50)
 //{
-// DO STUFF
-//}
-//else if (input_voltage < 2.50 && input_voltage >= 2.00)
+//  DO STUFF
+// }
+// else if (input_voltage < 2.50 && input_voltage >= 2.00)
 //{
-// DO STUFF
-//}
-//else if (input_voltage < 3.00 && input_voltage >= 2.50)
+//  DO STUFF
+// }
+// else if (input_voltage < 3.00 && input_voltage >= 2.50)
 //{
-// DO STUFF
-//}
-//else if (input_voltage < 3.50 && input_voltage >= 3.00)
+//  DO STUFF
+// }
+// else if (input_voltage < 3.50 && input_voltage >= 3.00)
 //{
-// DO STUFF
-//}
-//else if (input_voltage < 4.00 && input_voltage >= 3.50)
+//  DO STUFF
+// }
+// else if (input_voltage < 4.00 && input_voltage >= 3.50)
 //{
-// DO STUFF
-//}
-//else if (input_voltage < 4.50 && input_voltage >= 4.00)
+//  DO STUFF
+// }
+// else if (input_voltage < 4.50 && input_voltage >= 4.00)
 //{
-// DO STUFF
-//}
-//else if (input_voltage < 5.00 && input_voltage >= 4.50)
+//  DO STUFF
+// }
+// else if (input_voltage < 5.00 && input_voltage >= 4.50)
 //{
-// DO STUFF
-//}
+//  DO STUFF
+// }
 
 // ACS712 5A  uses 185 mV per A
 // ACS712 20A uses 100 mV per A
@@ -131,7 +131,7 @@ void HMS::calibrateAmps()
             break;
         case '/':
             ACS.setmVperAmp(ACS.getmVperAmp() / 1.05);
-            //SerialBT.print("," + ACS.getmVperAmp());
+            // SerialBT.print("," + ACS.getmVperAmp());
             break;
         default:
             Serial.printf("No input detected");

@@ -5,18 +5,24 @@
 
 #ifndef HMS_h
 #define HMS_h
-#include "Arduino.h"
+#include <Arduino.h>
+#include <Wire.h>
+#include <ACS712.h>
+#include <Adafruit_SHT31.h>
+#include <Humidity.h>
+#include <CellTemp.h>
 
 class HMS
 {
-  public:
-    HMS();
-    float *readSensAndCondition();
-    void calibrateAmps();
-    float readAmps();
-    float readVoltage(int pinnumber);
-    uint8_t _amppin = 18;
-    void setupSensor();
-  /* private: */
+public:
+  HMS();
+  float *readSensAndCondition();
+  void calibrateAmps();
+  float readAmps();
+  float readVoltage(int pinnumber);
+  void setupSensor();
+  int voltageValues[10];
+
+private:
 };
 #endif

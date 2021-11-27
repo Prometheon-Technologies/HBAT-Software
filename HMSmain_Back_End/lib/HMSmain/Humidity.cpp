@@ -131,7 +131,7 @@ float Humidity::StackHumidity()
   {
     stack_humidity[i] = ReadSensor();
   }
-  return (stack_humidity[1] + stack_humidity[3]) / 2; 
+  return (stack_humidity[1] + stack_humidity[3]) / 2;
 }
 
 float Humidity::ReadSensor()

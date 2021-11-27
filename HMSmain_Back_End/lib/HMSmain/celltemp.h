@@ -20,6 +20,7 @@ public:
     float *read_temp_sensor_data();
     int GetSensorCount();
     void SetSensorCount();
+
 private:
     int sensors_count;
 };

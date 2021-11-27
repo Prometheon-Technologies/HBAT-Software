@@ -86,7 +86,7 @@ void CellTemp::printAddress(DeviceAddress deviceAddress)
 
 float *CellTemp::read_temp_sensor_data()
 {
-    float cell_temp_sensor_results = new float[sensors_count];
+    float *cell_temp_sensor_results = new float[sensors_count];
     for (int i = 0; i < sensors_count; i++)
     {
         // Search the wire for address
@@ -114,5 +114,5 @@ void CellTemp::SetSensorCount()
 
 int CellTemp::GetSensorCount()
 {
-    return sensor_count;
+    return sensors_count;
 }

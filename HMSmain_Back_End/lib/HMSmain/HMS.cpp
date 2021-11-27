@@ -1,19 +1,11 @@
-#include <Wire.h>
-#include <ACS712.h>
-#include <Adafruit_SHT31.h>
-#include <HMS.h>
-#include <Arduino.h>
-#include <Humidity.h>
-#include <CellTemp.h>
 
-uint8_t _amppin = 18;
-ACS712 ACS(_amppin, 5.0, 4095, 100);
-CellTemp Cell_Temp = CellTemp();
+#include <HMS.h>
 
 // ESP 32 (requires resistors to step down the logic voltage)
 // ACS712  ACS(25, 5.0, 4095, 185);
-
-int voltageValues[10];
+uint8_t _amppin = 18;
+ACS712 ACS(_amppin, 5.0, 4095, 100);
+CellTemp Cell_Temp = CellTemp();
 
 HMS::HMS()
 {

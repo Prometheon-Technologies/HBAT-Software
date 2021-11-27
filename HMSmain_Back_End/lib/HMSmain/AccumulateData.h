@@ -14,8 +14,13 @@
 class AccumulateData
 {
 public:
+    //Functions
     AccumulateData();
     struct data_arrays;
+    void SetupMainLoop();
+    void AccumulateDataMainLoop(data_arrays &data);
+    // Variables
+    int received;
 
 private:
 };

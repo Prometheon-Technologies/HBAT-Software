@@ -17,10 +17,6 @@
 #define LED1 37
 #define LED2 47
 
-// Variables
-
-int received;
-
 HMS HMSmain = HMS();
 Humidity Hum = Humidity();
 CellTemp Cell_Temp = CellTemp();
@@ -29,8 +25,7 @@ AccumulateData::AccumulateData()
 {
 }
 
-
-struct data_arrays
+struct AccumulateData::data_arrays
 {
   float stack_humidity;
   float stack_temp;
@@ -91,7 +86,7 @@ struct data_arrays
   }
 } */
 
-void setup()
+void AccumulateData::SetupMainLoop()
 {
   Serial.begin(115200);
   while (!Serial)
@@ -110,7 +105,7 @@ void setup()
   delay(100);
 }
 
-void accumulate_data(data_arrays &data)
+void AccumulateData::AccumulateDataMainLoop(data_arrays &data)
 {
   // Stack level data
   data.stack_humidity = Hum.StackHumidity();
@@ -141,19 +136,3 @@ void accumulate_data(data_arrays &data)
   }
   delete[] cell_temp, cell_voltage;
 }
-
-/* {
-  float stack_humidity = Hum.Stack_humidity();
-  float cell_voltage[] = {HMSmain.readSensAndCondition()};
-  float stack_temp = Hum.average_Stack_temp();
-  float *cell_temp[10];
-  CellTemp.read_temp_sensor_data(*cell_temp);
-
-  float stack_voltage = {0};
-  for (int i = 0; i < sizeof(cell_voltage); i++)
-  {
-    stack_voltage += cell_voltage[i];
-  }
-  stack_voltage = stack_voltage / 10;
-  return {stack_humidity, stack_temp, stack_voltage, cell_voltage, *cell_temp};
-} */

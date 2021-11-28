@@ -11,11 +11,23 @@ HMS::HMS()
 {
 }
 
+/******************************************************************************
+ * Function: Read Voltage per Cell
+ * Description: Reads the voltage from the cell and returns the value
+ * Parameters: int pinnumber
+ * Return: float
+ ******************************************************************************/
 float HMS::readVoltage(int pinnumber)
 {
     return (float)((analogRead(pinnumber) * 5.0) / 1024.0);
 }
 
+/******************************************************************************
+ * Function: Read Voltage per Cell and average
+ * Description: This function loops through 5 times and reads the voltage from each cell. Adding the last result to the next one then averages these values - and stores it in a float array
+ * Parameters: None
+ * Return: float array
+ ******************************************************************************/
 float *HMS::readSensAndCondition()
 {
     float *cell_voltage = new float[5];
@@ -42,66 +54,40 @@ float *HMS::readSensAndCondition()
     return cell_voltage;
 }
 
-// if (input_voltage < 0.50 && input_voltage >= 0.00 )
-//{
-// digitalWrite(2, HIGH);
-// delay (30);
-// digitalWrite(2, LOW);
-// delay (30);
-// }
-// else if (input_voltage < 1.00 && input_voltage >= 0.50)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 1.50 && input_voltage >= 1.00)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 2.00 && input_voltage >= 1.50)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 2.50 && input_voltage >= 2.00)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 3.00 && input_voltage >= 2.50)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 3.50 && input_voltage >= 3.00)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 4.00 && input_voltage >= 3.50)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 4.50 && input_voltage >= 4.00)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 5.00 && input_voltage >= 4.50)
-//{
-//  DO STUFF
-// }
-
 // ACS712 5A  uses 185 mV per A
 // ACS712 20A uses 100 mV per A
 // ACS712 30A uses  66 mV per A
+/******************************************************************************
+ * Function: Setup the ACS712 sensor
+ * Description: This function setups the ACS712 sensor by calculating the automidpoint and setting the sensitivty to the correct value
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
 void HMS::setupSensor()
 {
     ACS.autoMidPoint();
 }
 
-float HMS::readAmps()
+/******************************************************************************
+ * Function: Read Amps for stack
+ * Description: This function reads the current from the ACS712 sensor and returns the value
+ * Parameters: None
+ * Return: String
+ ******************************************************************************/
+String HMS::readAmps()
 {
     int mA = ACS.mA_DC();
     String Amps = String(mA);
     Serial.println("," + Amps);
-    return Amps.toFloat();
+    return Amps;
 }
 
+/******************************************************************************
+ * Function: Calibrate the ACS712 sensor
+ * Description: This function allows for manual calibration of the ACS712 sensor by setting the sensitivity to the correct value
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
 void HMS::calibrateAmps()
 {
     if (Serial.available())

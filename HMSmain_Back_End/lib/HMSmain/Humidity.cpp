@@ -1,8 +1,4 @@
-#include <Arduino.h>
-#include <Wire.h>
-#include "Adafruit_SHT31.h"
-#include "Humidity.h"
-#include <PID_v1.h>
+#include <Humidity.h>
 
 #define DEBUG 1
 
@@ -16,15 +12,6 @@
 #define debugln(x)
 #define debugf(x)
 #endif
-
-// Define Variables we'll be connecting to
-double Setpoint, Input, Output;
-
-// Specify the links and initial tuning parameters
-PID myPID(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
-
-int WindowSize = 5000;
-unsigned long windowStartTime;
 
 bool enableHeater = false;
 uint8_t loopCnt = 0;
@@ -54,31 +41,8 @@ Humidity::Humidity()
 {
 }
 
-void Humidity::setup_relays()
-{
-  // initialize the Relay pins and set them to off state
-  for (int i = 0; i < 5; i++)
-  {
-    pinMode(relays[i], OUTPUT);
-    digitalWrite(relays[i], LOW);
-  }
-}
-
 void Humidity::SetupSensor()
 {
-  // Initialize the relay pins
-  setup_relays();
-
-  windowStartTime = millis();
-
-  // initialize the variables we're linked to
-  Setpoint = 80;
-
-  // tell the PID to range between 0 and the full window size
-  myPID.SetOutputLimits(0, WindowSize);
-
-  // turn the PID on
-  myPID.SetMode(AUTOMATIC);
   Serial.printf("SHT31 Sensors Setup Beginning");
   // Set to 0x45 for alternate i2c address
   if (!sht31.begin(0x44) ^ !sht31_2.begin(0x45))
@@ -206,25 +170,4 @@ float Humidity::ReadSensor()
     loopCnt = 0;
   }
   return t, h, t_2, h_2;
-}
-
-// SFM3003 Mass Air Flow Sensor code to be integrated
-// Below PID Relay code is an example of how to use the PID controller
-//  This code should only be used durign the Charging phase. Integrate State Machine to use this code
-void Humidity::HumRelayOnOff(int time, float *stack_humidity)
-{
-  float climate_data = StackHumidity();
-  Input = climate_data;
-  myPID.Compute();
-
-  // turn the output pin on/off based on pid output
-  unsigned long now = millis();
-  if (now - windowStartTime > WindowSize)
-  { // time to shift the Relay Window
-    windowStartTime += WindowSize;
-  }
-  if (Output > now - windowStartTime)
-    digitalWrite(relays[0], HIGH);
-  else
-    digitalWrite(relays[0], LOW);
 }

@@ -18,7 +18,7 @@ public:
   HMS();
   float *readSensAndCondition();
   void calibrateAmps();
-  float readAmps();
+  String readAmps();
   float readVoltage(int pinnumber);
   void setupSensor();
   int voltageValues[10];

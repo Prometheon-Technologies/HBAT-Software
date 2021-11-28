@@ -5,7 +5,9 @@
 
 #ifndef Humidity_h
 #define Humidity_h
-#include "Arduino.h"
+#include <Arduino.h>
+#include <Wire.h>
+#include <Adafruit_SHT31.h>
 
 class Humidity
 {
@@ -15,10 +17,6 @@ public:
   float StackHumidity();
   float AverageStackTemp();
   float ReadSensor();
-  void HumRelayOnOff(int time, float *stack_humidity);
-  // Setup an array of relays to control peripherals. Numbers represent pin numbers.
-  const int relays[5] = {45, 38, 36, 35, 48};
-  void setup_relays();
   /* private:
     int _pin;
     const int ADC1 = analogRead(_pin); */

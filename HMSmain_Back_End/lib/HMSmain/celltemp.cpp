@@ -31,6 +31,34 @@ DallasTemperature sensors(&oneWire);
 
 DeviceAddress temp_sensor_addresses;
 
+/******************************************************************************
+ * Function: Set Sensor Count
+ * Description: Find the number of sensors on the bus
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
+void CellTemp::SetSensorCount()
+{
+    sensors_count = sensors.getDeviceCount();
+}
+
+/******************************************************************************
+ * Function: Get Sensor Count
+ * Description: Return the number of sensors on the bus
+ * Parameters: None
+ * Return: Int - Number of sensors on the bus
+ ******************************************************************************/
+int CellTemp::GetSensorCount()
+{
+    return sensors_count;
+}
+
+/******************************************************************************
+ * Function: Setup DS18B20 sensors
+ * Description: Setup DS18B20 sensors by beginning the Dallas Temperature library and counting the connected sensors
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
 void CellTemp::setup_sensors()
 {
     // Start up the ds18b20 library
@@ -66,6 +94,12 @@ void CellTemp::setup_sensors()
     }
 }
 
+/******************************************************************************
+ * Function: Display Free Heap
+ * Description: Get and return the free heap space
+ * Parameters: None
+ * Return: int - Free heap space
+ ******************************************************************************/
 int CellTemp::freeRam()
 {
     extern int __heap_start, *__brkval;
@@ -73,6 +107,12 @@ int CellTemp::freeRam()
     return (int)&v - (__brkval == 0 ? (int)&__heap_start : (int)__brkval);
 }
 
+/******************************************************************************
+ * Function: Print Address
+ * Description: Print the addresses of the sensors
+ * Parameters: DeviceAddress - Address of the sensor
+ * Return: None
+ ******************************************************************************/
 // function to print a device address
 void CellTemp::printAddress(DeviceAddress deviceAddress)
 {
@@ -84,6 +124,12 @@ void CellTemp::printAddress(DeviceAddress deviceAddress)
     }
 }
 
+/******************************************************************************
+ * Function: Get Temperature
+ * Description: Get the temperatures of the sensors
+ * Parameters: None
+ * Return: float array - Temperature of the sensors
+ ******************************************************************************/
 float *CellTemp::read_temp_sensor_data()
 {
     float *cell_temp_sensor_results = new float[sensors_count];
@@ -105,14 +151,4 @@ float *CellTemp::read_temp_sensor_data()
         }
     }
     return cell_temp_sensor_results;
-}
-
-void CellTemp::SetSensorCount()
-{
-    sensors_count = sensors.getDeviceCount();
-}
-
-int CellTemp::GetSensorCount()
-{
-    return sensors_count;
 }

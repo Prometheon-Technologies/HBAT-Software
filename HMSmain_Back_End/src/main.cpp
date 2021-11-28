@@ -1,4 +1,5 @@
-#include <Arduino.h>
+#include <AccumulateData.h>
+#include <RelayLogic.h>
 
 #define DEBUG 1
 
@@ -9,21 +10,22 @@
 #define debugCalibrateAmps() HMSmain.calibrateAmps()
 
 #else
+
 #define debug(x)
 #define debugln(x)
 #define debugf(x)
 #define debugCalibrateAmps()
+
 #endif
 
 #define LED1 37
 #define LED2 47
 
-/******************************************************************************
- * Function: Main Loop
- * Description: This is the main loop for the whole program.
- * Parameters: None
- * Return: None
- ******************************************************************************/
+HMS HMSmain = HMS();
+Humidity Hum = Humidity();
+CellTemp Cell_Temp = CellTemp();
+AccumulateData StackData = AccumulateData();
+RelayLogic Relays = RelayLogic();
 
 // if (input_voltage < 0.50 && input_voltage >= 0.00 )
 //{
@@ -69,6 +71,9 @@
 //  DO STUFF
 // }
 
-void setup(){}
+void setup()
+{
+    StackData.SetupMainLoop();
+}
 
-void loop(){}
+void loop() {}

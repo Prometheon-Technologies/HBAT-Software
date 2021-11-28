@@ -25,13 +25,20 @@ AccumulateData::AccumulateData()
 {
 }
 
+
+/******************************************************************************
+ * Function: Main Sensor Data Structure
+ * Description: This is the main Data Structure where all sensor data is accumulated. To be passed into the main program.
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
 struct AccumulateData::data_arrays
 {
-  float stack_humidity;
-  float stack_temp;
-  float stack_voltage;
-  float cell_temp[10];
-  float cell_voltage[10];
+    float stack_humidity;
+    float stack_temp;
+    float stack_voltage;
+    float cell_temp[10];
+    float cell_voltage[10];
 };
 
 /* void led2OnOff(int time)
@@ -86,53 +93,69 @@ struct AccumulateData::data_arrays
   }
 } */
 
+/******************************************************************************
+ * Function: Setup Main Loop
+ * Description: This is the setup function for the main loop of the whole program. Use this to setup the main loop.
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
 void AccumulateData::SetupMainLoop()
 {
-  Serial.begin(115200);
-  while (!Serial)
-    delay(10); // will pause until serial console opens
+    Serial.begin(115200);
+    while (!Serial)
+        delay(10); // will pause until serial console opens
 
-  // debug("freeMemory()="+freeMemory());
+    // debug("freeMemory()="+freeMemory());
 
-  debugln();
-  delay(1000);
+    debugln();
+    delay(1000);
 
-  debugln("\n===================================");
-  Hum.SetupSensor();
-  HMSmain.setupSensor();
-  debugf("HMS booting - please wait");
-  debugf("Setup Complete");
-  delay(100);
+    debugln("\n===================================");
+    Hum.SetupSensor();
+    HMSmain.setupSensor();
+    debugf("HMS booting - please wait");
+    debugf("Setup Complete");
+    delay(100);
 }
 
+/******************************************************************************
+ * Function: Accumulate Data from sensor arrays
+ * Description: This function accumualtes all sensor data and stores it in the main data structure.
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
 void AccumulateData::AccumulateDataMainLoop(data_arrays &data)
 {
-  // Stack level data
-  data.stack_humidity = Hum.StackHumidity();
+    // Stack level data
+    data.stack_humidity = Hum.StackHumidity();
+    debugln(data.stack_humidity);
+    data.stack_temp = Hum.AverageStackTemp();
+    debugln(data.stack_temp);
 
-  data.stack_temp = Hum.AverageStackTemp();
+    // Cell level data
+    float *cell_temp = Cell_Temp.read_temp_sensor_data();
 
-  // Cell level data
-  float *cell_temp = Cell_Temp.read_temp_sensor_data();
+    for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
+    {
+        data.cell_temp[i] = cell_temp[i];
+        debugln(data.cell_temp[i]);
+    }
 
-  for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
-  {
-    data.cell_temp[i] = cell_temp[i];
-    debugln(data.cell_temp[i]);
-  }
+    float *cell_voltage = HMSmain.readSensAndCondition();
 
-  float *cell_voltage = HMSmain.readSensAndCondition();
+    for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
+    {
+        data.cell_voltage[i] = cell_voltage[i];
+        debugln(data.cell_voltage[i]);
+    }
 
-  for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
-  {
-    data.cell_voltage[i] = cell_voltage[i];
-    debugln(data.cell_voltage[i]);
-  }
-
-  data.stack_voltage = 0;
-  for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
-  {
-    data.stack_voltage += cell_voltage[i];
-  }
-  delete[] cell_temp, cell_voltage;
+    data.stack_voltage = 0;
+    for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
+    {
+        data.stack_voltage += cell_voltage[i];
+        debugln(data.cell_temp[i]);
+    }
+    delete[] cell_temp, cell_voltage;
+    /* free (cell_temp);
+    free (cell_voltage); */
 }

@@ -50,3 +50,7 @@
 //{
 //  DO STUFF
 // }
+
+void setup(){}
+
+void loop(){}

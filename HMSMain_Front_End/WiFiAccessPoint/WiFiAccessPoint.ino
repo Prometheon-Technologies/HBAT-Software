@@ -8,7 +8,7 @@
 #define LED_BUILTIN 2   // Set the GPIO pin where you connected your test LED or comment this line out if your dev board has a built-in LED
 
 // Set these to your desired credentials.
-const char *ssid = "H-BAT-" + (String)WiFi.macAddress();
+const char *ssid = "H-BAT-" + (char)WiFi.macAddress();
 const char *password = "hbat";
 
 WebServer server(80);

@@ -16,7 +16,7 @@ public:
   void SetupSensor();
   float StackHumidity();
   float AverageStackTemp();
-  float ReadSensor();
+  float *ReadSensor();
   /* private:
     int _pin;
     const int ADC1 = analogRead(_pin); */

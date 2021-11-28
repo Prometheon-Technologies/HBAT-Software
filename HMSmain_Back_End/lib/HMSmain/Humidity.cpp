@@ -20,12 +20,6 @@ Adafruit_SHT31 sht31 = Adafruit_SHT31();
 
 Adafruit_SHT31 sht31_2 = Adafruit_SHT31();
 
-struct humidity_array
-{
-  float stack_humidity;
-  float stack_temp;
-};
-
 byte degree[8] =
     {
         0b00011,
@@ -41,6 +35,12 @@ Humidity::Humidity()
 {
 }
 
+/******************************************************************************
+ * Function: Setup Humidity Sensors
+ * Description: This function is used to initialise the humidity sensors and their respective heaters
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
 void Humidity::SetupSensor()
 {
   Serial.printf("SHT31 Sensors Setup Beginning");
@@ -77,58 +77,73 @@ void Humidity::SetupSensor()
   }
 }
 
+/******************************************************************************
+ * Function: Average Stack Humidity Temp
+ * Description: This function is used to average the Temp of the stack - from the temp sensors built into the Humidity Sensors
+ * Parameters: None
+ * Return: float
+ ******************************************************************************/
 float Humidity::AverageStackTemp()
 {
   float stack_temp[4];
   for (int i = 0; i < 4; i++)
   {
-    stack_temp[i] = ReadSensor();
+    stack_temp[i] = *ReadSensor();
   }
   return (stack_temp[0] + stack_temp[2]) / 2; // Read the temperature from the sensor and averge the two sensors.
 }
 
+/******************************************************************************
+ * Function: Average Stack Humidity
+ * Description: This function is used to average the humidity of the stack
+ * Parameters: None
+ * Return: float
+ ******************************************************************************/
 float Humidity::StackHumidity()
 {
   float stack_humidity[4];
 
   for (int i = 0; i < 4; i++)
   {
-    stack_humidity[i] = ReadSensor();
+    stack_humidity[i] = *ReadSensor();
   }
   return (stack_humidity[1] + stack_humidity[3]) / 2;
 }
 
-float Humidity::ReadSensor()
+/******************************************************************************
+ * Function: Read Humidity Sensors
+ * Description: This function is used to read the humidity of the stack sensors
+ * Parameters: None
+ * Return: float array
+ ******************************************************************************/
+float *Humidity::ReadSensor()
 {
-  float t = sht31.readTemperature();
-  float h = sht31.readHumidity();
-  float t_2 = sht31_2.readTemperature();
-  float h_2 = sht31_2.readHumidity();
+  float *climatedata = new float[4];
 
-  // float climatedata[4] = {t, h, t_2, h_2};
-
-  if (!isnan(t and t_2))
-  { // check if 'is not a number'
-    /* climatedata[0] = t;
-    climatedata[2] = t; */
+  // check if 'is not a number'
+  if (!isnan(climatedata[0] and climatedata[1]))
+  {
+    climatedata[0] = sht31.readTemperature();
+    climatedata[1] = sht31_2.readTemperature();
     Serial.printf("Sensor 1 Temp *C = ");
-    Serial.print(t);
+    Serial.print(climatedata[0]);
     Serial.printf("Sensor 2 Temp *C = ");
-    Serial.print(t_2);
+    Serial.print(climatedata[1]);
   }
   else
   {
     Serial.printf("Failed to read temperature");
   }
 
-  if (!isnan(h and h_2))
-  { // check if 'is not a number'
-    /* climatedata[1] = h;
-    climatedata[3] = h_2; */
+  // check if 'is not a number'
+  if (!isnan(climatedata[2] and climatedata[3]))
+  {
+    climatedata[2] = sht31.readHumidity();
+    climatedata[3] = sht31_2.readHumidity();
     Serial.printf("Sensor 1 Humidity % = ");
-    Serial.print(h);
+    Serial.print(climatedata[2]);
     Serial.printf("Sensor 2 Humidity % = ");
-    Serial.print(h_2);
+    Serial.print(climatedata[3]);
   }
   else
   {
@@ -169,5 +184,5 @@ float Humidity::ReadSensor()
 
     loopCnt = 0;
   }
-  return t, h, t_2, h_2;
+  return climatedata;
 }

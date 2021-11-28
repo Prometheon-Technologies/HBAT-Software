@@ -18,7 +18,7 @@
 #define LED1 37
 #define LED2 47
 
-//Variables
+// Variables
 double Setpoint, Input, Output;
 int WindowSize = 5000;
 unsigned long windowStartTime;
@@ -40,11 +40,11 @@ AccumulateData::AccumulateData()
  ******************************************************************************/
 struct AccumulateData::data_arrays
 {
-    float stack_humidity;
-    float stack_temp;
-    float stack_voltage;
-    float cell_temp[10];
-    float cell_voltage[10];
+  float stack_humidity;
+  float stack_temp;
+  float stack_voltage;
+  float cell_temp[10];
+  float cell_voltage[10];
 };
 
 /******************************************************************************
@@ -173,21 +173,21 @@ void AccumulateData::HumRelayOnOff(int time, float *stack_humidity)
  ******************************************************************************/
 void AccumulateData::SetupMainLoop()
 {
-    Serial.begin(115200);
-    while (!Serial)
-        delay(10); // will pause until serial console opens
+  Serial.begin(115200);
+  while (!Serial)
+    delay(10); // will pause until serial console opens
 
-    // debug("freeMemory()="+freeMemory());
+  // debug("freeMemory()="+freeMemory());
 
-    debugln();
-    delay(1000);
+  debugln();
+  delay(1000);
 
-    debugln("\n===================================");
-    Hum.SetupSensor();
-    HMSmain.setupSensor();
-    debugf("HMS booting - please wait");
-    debugf("Setup Complete");
-    delay(100);
+  debugln("\n===================================");
+  Hum.SetupSensor();
+  HMSmain.setupSensor();
+  debugf("HMS booting - please wait");
+  debugf("Setup Complete");
+  delay(100);
 }
 
 /******************************************************************************
@@ -198,39 +198,39 @@ void AccumulateData::SetupMainLoop()
  ******************************************************************************/
 void AccumulateData::AccumulateDataMainLoop(data_arrays &data)
 {
-    // Stack level data
-    data.stack_humidity = Hum.StackHumidity();
-    debugln(data.stack_humidity);
-    data.stack_temp = Hum.AverageStackTemp();
-    debugln(data.stack_temp);
+  // Stack level data
+  data.stack_humidity = Hum.StackHumidity();
+  debugln(data.stack_humidity);
+  data.stack_temp = Hum.AverageStackTemp();
+  debugln(data.stack_temp);
 
-    // Cell level data
-    
-    float *cell_temp = Cell_Temp.read_temp_sensor_data();
+  // Cell level data
 
-    for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
-    {
-        data.cell_temp[i] = cell_temp[i];
-        debugln(data.cell_temp[i]);
-    }
+  float *cell_temp = Cell_Temp.read_temp_sensor_data();
 
-    float *cell_voltage = HMSmain.readSensAndCondition();
+  for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
+  {
+    data.cell_temp[i] = cell_temp[i];
+    debugln(data.cell_temp[i]);
+  }
 
-    for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
-    {
-        data.cell_voltage[i] = cell_voltage[i];
-        debugln(data.cell_voltage[i]);
-    }
+  float *cell_voltage = HMSmain.readSensAndCondition();
 
-    data.stack_voltage = 0;
-    for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
-    {
-        data.stack_voltage += cell_voltage[i];
-        debugln(data.cell_temp[i]);
-    }
-    delete[] cell_temp, cell_voltage;
-    /* free (cell_temp);
-    free (cell_voltage); */
+  for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
+  {
+    data.cell_voltage[i] = cell_voltage[i];
+    debugln(data.cell_voltage[i]);
+  }
+
+  data.stack_voltage = 0;
+  for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
+  {
+    data.stack_voltage += cell_voltage[i];
+    debugln(data.cell_temp[i]);
+  }
+  delete[] cell_temp, cell_voltage;
+  /* free (cell_temp);
+  free (cell_voltage); */
 }
 
 /******************************************************************************
@@ -241,5 +241,5 @@ void AccumulateData::AccumulateDataMainLoop(data_arrays &data)
  ******************************************************************************/
 void AccumulateData::debugdata(String str)
 {
-    Serial.print(str);
+  Serial.print(str);
 }

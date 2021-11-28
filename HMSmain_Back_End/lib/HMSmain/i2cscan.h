@@ -12,8 +12,8 @@ class Scanner
 {
 public:
     Scanner();
-    void setup_scan();
-    void begin_scan();
+    void SetupScan();
+    void BeginScan();
     /* private: */
 };
 #endif

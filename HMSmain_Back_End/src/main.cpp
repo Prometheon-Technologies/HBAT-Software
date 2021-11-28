@@ -1,5 +1,23 @@
 #include <Arduino.h>
 
+#define DEBUG 1
+
+#if DEBUG == 1
+#define debug(x) Serial.print(x)
+#define debugln(x) Serial.println(x)
+#define debugf(x) Serial.printf(x)
+#define debugCalibrateAmps() HMSmain.calibrateAmps()
+
+#else
+#define debug(x)
+#define debugln(x)
+#define debugf(x)
+#define debugCalibrateAmps()
+#endif
+
+#define LED1 37
+#define LED2 47
+
 /******************************************************************************
  * Function: Main Loop
  * Description: This is the main loop for the whole program.

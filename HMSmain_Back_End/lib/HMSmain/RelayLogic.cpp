@@ -1,9 +1,4 @@
-#include <AccumulateData.h>
 #include <RelayLogic.h>
-
-HMS HMSmain = HMS();
-Humidity Hum = Humidity();
-CellTemp Cell_Temp = CellTemp();
 
 // Variables
 double Setpoint, Input, Output;
@@ -65,7 +60,7 @@ void RelayLogic::SetupPID()
  ******************************************************************************/
 void RelayLogic::HumRelayOnOff(int time, float *stack_humidity)
 {
-  float climate_data = Hum.StackHumidity();
+  float climate_data = StackData.Hum.StackHumidity();
   Input = climate_data;
   myPID.Compute();
 

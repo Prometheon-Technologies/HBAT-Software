@@ -1,36 +1,5 @@
 #include <Humidity.h>
 
-#define DEBUG 1
-
-#if DEBUG == 1
-#define debug(x) Serial.print(x)
-#define debugln(x) Serial.println(x)
-#define debugf(x) Serial.printf(x)
-
-#else
-#define debug(x)
-#define debugln(x)
-#define debugf(x)
-#endif
-
-bool enableHeater = false;
-uint8_t loopCnt = 0;
-
-Adafruit_SHT31 sht31 = Adafruit_SHT31();
-
-Adafruit_SHT31 sht31_2 = Adafruit_SHT31();
-
-byte degree[8] =
-    {
-        0b00011,
-        0b00011,
-        0b00000,
-        0b00000,
-        0b00000,
-        0b00000,
-        0b00000,
-        0b00000};
-
 Humidity::Humidity()
 {
 }
@@ -43,37 +12,24 @@ Humidity::Humidity()
  ******************************************************************************/
 void Humidity::SetupSensor()
 {
-  Serial.printf("SHT31 Sensors Setup Beginning");
+  Serial.println("SHT31 Sensors Setup Beginning");
   // Set to 0x45 for alternate i2c address
   if (!sht31.begin(0x44) ^ !sht31_2.begin(0x45))
   {
-    Serial.printf("Couldn't find SHT31 sensors");
+    Serial.println("Couldn't find SHT31 sensors");
     while (1)
       delay(1);
   }
-  Serial.printf("SHT31 Sensors Setup Complete");
+  Serial.println("SHT31 Sensors Setup Complete");
   delay(1); // delay in between reads for stability
 
-  Serial.print("Heater Enabled State: ");
-
-  switch (sht31.isHeaterEnabled())
+  if (sensor1 ^ sensor2)
   {
-  case false:
-    Serial.printf("Sensor 1 Heater Disabled");
-    break;
-  case true:
-    Serial.printf("Sensor 2 Heater ENABLED");
-    break;
+    Serial.println("Sensors have Heater ENABLED");
   }
-
-  switch (sht31_2.isHeaterEnabled())
+  else
   {
-  case false:
-    Serial.printf("Sensor 1 Heater Disabled");
-    break;
-  case true:
-    Serial.printf("Sensor 2 Heater ENABLED");
-    break;
+    Serial.println("Sensor 1 Heater Disabled");
   }
 }
 
@@ -125,14 +81,14 @@ float *Humidity::ReadSensor()
   {
     climatedata[0] = sht31.readTemperature();
     climatedata[1] = sht31_2.readTemperature();
-    Serial.printf("Sensor 1 Temp *C = ");
+    Serial.println("Sensor 1 Temp *C = ");
     Serial.print(climatedata[0]);
-    Serial.printf("Sensor 2 Temp *C = ");
+    Serial.println("Sensor 2 Temp *C = ");
     Serial.print(climatedata[1]);
   }
   else
   {
-    Serial.printf("Failed to read temperature");
+    Serial.println("Failed to read temperature");
   }
 
   // check if 'is not a number'
@@ -140,14 +96,14 @@ float *Humidity::ReadSensor()
   {
     climatedata[2] = sht31.readHumidity();
     climatedata[3] = sht31_2.readHumidity();
-    Serial.printf("Sensor 1 Humidity % = ");
+    Serial.println("Sensor 1 Humidity %% = ");
     Serial.print(climatedata[2]);
-    Serial.printf("Sensor 2 Humidity % = ");
+    Serial.println("Sensor 2 Humidity %% = ");
     Serial.print(climatedata[3]);
   }
   else
   {
-    Serial.printf("Failed to read humidity");
+    Serial.println("Failed to read humidity");
   }
 
   delay(1000);
@@ -162,24 +118,13 @@ float *Humidity::ReadSensor()
     sht31_2.heater(enableHeater);
     Serial.print("Heater Enabled State: ");
 
-    switch (sht31.isHeaterEnabled())
+    if (sensor1 ^ sensor2)
     {
-    case false:
-      Serial.printf("Sensor 1 Heater Disabled");
-      break;
-    case true:
-      Serial.printf("Sensor 1 Heater ENABLED");
-      break;
+      Serial.print("Sensors have Heater ENABLED");
     }
-
-    switch (sht31_2.isHeaterEnabled())
+    else
     {
-    case false:
-      Serial.printf("Sensor 1 Heater Disabled");
-      break;
-    case true:
-      Serial.printf("Sensor 1 Heater ENABLED");
-      break;
+      Serial.println("Sensor 1 Heater Disabled");
     }
 
     loopCnt = 0;

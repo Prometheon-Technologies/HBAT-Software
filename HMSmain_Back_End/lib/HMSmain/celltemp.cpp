@@ -1,6 +1,3 @@
-#include <Arduino.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
 #include <CellTemp.h>
 
 // Data wire is plugged into port 42 on the ESP32

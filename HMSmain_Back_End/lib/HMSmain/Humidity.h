@@ -3,8 +3,8 @@
  Copyright (c) 2021 Zacariah Austin Heim.
  */
 
-#ifndef Humidity_h
-#define Humidity_h
+#ifndef HUMIDITY_h
+#define HUMIDITY_h
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_SHT31.h>
@@ -17,8 +17,26 @@ public:
   float StackHumidity();
   float AverageStackTemp();
   float *ReadSensor();
-  /* private:
-    int _pin;
-    const int ADC1 = analogRead(_pin); */
+  bool enableHeater = false;
+  uint8_t loopCnt = 0;
+
+  Adafruit_SHT31 sht31 = Adafruit_SHT31();
+
+  Adafruit_SHT31 sht31_2 = Adafruit_SHT31();
+
+  byte degree[8] =
+      {
+          0b00011,
+          0b00011,
+          0b00000,
+          0b00000,
+          0b00000,
+          0b00000,
+          0b00000,
+          0b00000};
+
+private:
+  bool sensor1 = sht31.isHeaterEnabled();
+  bool sensor2 = sht31_2.isHeaterEnabled();
 };
 #endif

@@ -3,7 +3,7 @@
  Copyright (c) 2021 Zacariah Austin Heim.
  */
 
-#ifndef ACCUMULATEDAT_h
+#ifndef ACCUMULATEDATA_h
 #define ACCUMULATEDATA_h
 #include <Arduino.h>
 #include <HMS.h>
@@ -24,6 +24,10 @@ public:
     void debugdata(String str);
     void setup_relays();
     void SetupPID();
+    HMS HMSmain = HMS();
+    Humidity Hum = Humidity();
+    CellTemp Cell_Temp = CellTemp();
+
     // Variables
     // Setup an array of relays to control peripherals. Numbers represent pin numbers.
     const int relays[5] = {45, 38, 36, 35, 48};

@@ -21,9 +21,6 @@
 #define LED1 37
 #define LED2 47
 
-HMS HMSmain = HMS();
-Humidity Hum = Humidity();
-CellTemp Cell_Temp = CellTemp();
 AccumulateData StackData = AccumulateData();
 RelayLogic Relays = RelayLogic();
 
@@ -71,9 +68,24 @@ RelayLogic Relays = RelayLogic();
 //  DO STUFF
 // }
 
+/******************************************************************************
+ * Function: Debug Print Data
+ * Description: This function prints all string data to the serial console.
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
+void debugdata(String value)
+{
+    debugln(value);
+}
+
 void setup()
 {
     StackData.SetupMainLoop();
+    debugdata("Software Stack is being initialized ... ");
 }
 
-void loop() {}
+void loop()
+{
+    
+}

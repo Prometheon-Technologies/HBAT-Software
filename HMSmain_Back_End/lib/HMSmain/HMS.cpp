@@ -5,7 +5,6 @@
 // ACS712  ACS(25, 5.0, 4095, 185);
 uint8_t _amppin = 18;
 ACS712 ACS(_amppin, 5.0, 4095, 100);
-CellTemp Cell_Temp = CellTemp();
 
 HMS::HMS()
 {
@@ -54,14 +53,14 @@ float *HMS::readSensAndCondition()
     return cell_voltage;
 }
 
-// ACS712 5A  uses 185 mV per A
-// ACS712 20A uses 100 mV per A
-// ACS712 30A uses  66 mV per A
 /******************************************************************************
  * Function: Setup the ACS712 sensor
  * Description: This function setups the ACS712 sensor by calculating the automidpoint and setting the sensitivty to the correct value
  * Parameters: None
  * Return: None
+ * ACS712 5A  uses 185 mV per A
+ * ACS712 20A uses 100 mV per A
+ * ACS712 30A uses  66 mV per A
  ******************************************************************************/
 void HMS::setupSensor()
 {

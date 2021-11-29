@@ -13,10 +13,6 @@
 #define debugf(x)
 #endif
 
-HMS HMSmain = HMS();
-Humidity Hum = Humidity();
-CellTemp Cell_Temp = CellTemp();
-
 AccumulateData::AccumulateData()
 {
 }
@@ -151,18 +147,8 @@ void AccumulateData::AccumulateDataMainLoop(data_arrays &data)
     data.stack_voltage += cell_voltage[i];
     debugln(data.cell_temp[i]);
   }
-  delete[] cell_temp, cell_voltage;
+  delete[] cell_temp;
+  delete[] cell_voltage;
   /* free (cell_temp);
   free (cell_voltage); */
-}
-
-/******************************************************************************
- * Function: Debug Print Data
- * Description: This function prints all string data to the serial console.
- * Parameters: None
- * Return: None
- ******************************************************************************/
-void AccumulateData::debugdata(String str)
-{
-  Serial.print(str);
 }

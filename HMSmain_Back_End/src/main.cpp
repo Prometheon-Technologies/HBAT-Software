@@ -24,6 +24,15 @@
 AccumulateData StackData = AccumulateData();
 RelayLogic Relays = RelayLogic();
 
+struct data_arrays
+{
+  float stack_humidity;
+  float stack_temp;
+  float stack_voltage;
+  float cell_temp[10];
+  float cell_voltage[10];
+};
+
 // if (input_voltage < 0.50 && input_voltage >= 0.00 )
 //{
 // digitalWrite(2, HIGH);
@@ -68,6 +77,8 @@ RelayLogic Relays = RelayLogic();
 //  DO STUFF
 // }
 
+
+
 /******************************************************************************
  * Function: Debug Print Data
  * Description: This function prints all string data to the serial console.
@@ -87,5 +98,5 @@ void setup()
 
 void loop()
 {
-    
+    StackData.AccumulateDataMainLoop();
 }

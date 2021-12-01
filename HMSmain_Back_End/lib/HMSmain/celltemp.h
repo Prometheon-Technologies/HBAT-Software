@@ -14,10 +14,10 @@ class CellTemp
 public:
     CellTemp();
     int freeRam();
-    void setup_sensors();
+    void SetupSensors();
     void readAddresses(DeviceAddress deviceAddress);
     void printAddress(DeviceAddress deviceAddress);
-    float *read_temp_sensor_data();
+    float *ReadTempSensorData();
     int GetSensorCount();
     void SetSensorCount();
 

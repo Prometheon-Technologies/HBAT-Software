@@ -104,6 +104,7 @@ void AccumulateData::SetupMainLoop()
   debugln("\n===================================");
   Hum.SetupSensor();
   HMSmain.setupSensor();
+  Cell_Temp.SetupSensors();
   debugf("HMS booting - please wait");
   debugf("Setup Complete");
   delay(100);
@@ -125,7 +126,7 @@ void AccumulateData::AccumulateDataMainLoop(data_arrays &data)
 
   // Cell level data
 
-  float *cell_temp = Cell_Temp.read_temp_sensor_data();
+  float *cell_temp = Cell_Temp.ReadTempSensorData();
 
   for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
   {

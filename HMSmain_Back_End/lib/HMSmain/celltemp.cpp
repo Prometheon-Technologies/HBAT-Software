@@ -56,7 +56,7 @@ int CellTemp::GetSensorCount()
  * Parameters: None
  * Return: None
  ******************************************************************************/
-void CellTemp::setup_sensors()
+void CellTemp::SetupSensors()
 {
     // Start up the ds18b20 library
     sensors.begin();
@@ -127,7 +127,7 @@ void CellTemp::printAddress(DeviceAddress deviceAddress)
  * Parameters: None
  * Return: float array - Temperature of the sensors
  ******************************************************************************/
-float *CellTemp::read_temp_sensor_data()
+float *CellTemp::ReadTempSensorData()
 {
     float *cell_temp_sensor_results = new float[sensors_count];
     for (int i = 0; i < sensors_count; i++)

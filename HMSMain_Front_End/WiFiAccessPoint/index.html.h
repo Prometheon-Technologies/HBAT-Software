@@ -302,11 +302,11 @@ const char *indexHtml = R"====(
     x = 1;
     async function grabData() {
         if (x >= 10) { x = 1 } else { x++ };
-
-        setMeeterValue("batteryLevel", 3 * x, "%", "Yellow");
-        setMeeterValue("batteryTemp", 3 * x, "℃", "red");
-        setMeeterValue("batteryHumidity", 3 * x, "%💧", "cyan");
         graphData = await JSON.parse(await getHTML("./data.json"));
+        setMeeterValue("batteryLevel", graphData.stack_voltage, "%", "Yellow");
+        setMeeterValue("batteryTemp", graphData.stack_temp, "℃", "red");
+        setMeeterValue("batteryHumidity", graphData.stack_humidity, "%💧", "cyan");
+        
         console.log(graphData.fakeGraphData);
         buildGraph(graphData.fakeGraphData);
     }

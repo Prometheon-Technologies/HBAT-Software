@@ -11,11 +11,12 @@
 
 // Set these to your desired credentials.
 const String ssid = "H-BAT-" + String(WiFi.macAddress());
-const String password = "hbat";
+const String password = "hbathbat";
 
 WebServer server(80);
 
-
+const int maxVolatage = 24;
+const int maxTemp = 100;
 
 struct AccumulateData
 {
@@ -27,20 +28,14 @@ struct AccumulateData
 };
 AccumulateData dataTosend;
 
-
-
-
-
-
-
 void setup() {
   Serial.begin(115200);
   Serial.println();
   Serial.println("Configuring access point...");
 
-  dataTosend.stack_humidity = 10;
-  dataTosend.stack_temp = 11;
-  dataTosend.stack_voltage = 12;
+  dataTosend.stack_humidity = 60;
+  dataTosend.stack_temp = 120;
+  dataTosend.stack_voltage = 24;
   dataTosend.cell_temp[0] = 13;
   dataTosend.cell_temp[1] = 14;
   dataTosend.cell_temp[2] = 15;
@@ -89,6 +84,7 @@ void setup() {
     String NewApName = server.arg("apName");
     String NewApPass = server.arg("apPass");
     server.send(200, "application/json", "yay");
+    connectToApWithFailToStation("LoveHouse2G", "71663951");
   });
 
 
@@ -97,34 +93,43 @@ void setup() {
     json += R"====({)====";
 
     json += R"====("stack_humidity":)====";
-    json += (String)dataTosend.stack_humidity + ",";
+    json += (String)dataTosend.stack_humidity + ",\n";
 
     json += R"====("stack_temp":)====";
-    json += (String)dataTosend.stack_temp + ",";
+    json += (String)dataTosend.stack_temp + ",\n";
 
     json += R"====("stack_voltage":)====";
-    json += (String)dataTosend.stack_voltage + ",";
+    json += (String)dataTosend.stack_voltage + ",\n";
 
     json += R"====("fakeGraphData":[)====";
-    for (int i = 0; i <= 10; i++) {
-      json += R"====({"label": "🌡 )====" + (String)i + '",';
-      json += R"====("type": "temp",)====";
-      json += R"====({"value": )====" + (String)dataTosend.cell_temp[i] + '",';
-            
-            
-      json += R"====("maxValue": 80},)====";
+    json +=  "\n";
+    for (int i = 0; i < 10; i++) {
 
-
-      
-      //doc["cell_temp"][0] = (String)dataTosend.cell_temp[i];
-      //doc["cell_voltage"][0] = (String)dataTosend.cell_voltage[i];
       delay(0);
-      json += R"====(})====";
-      if(i>10){json += R"====(,)====";};
+      json += R"====({"label": "🌡 )====" + (String)i + "\",\n";
+      json += R"====("type": "temp",)====" + (String)"\n";
+      json += R"====("value": )====" + (String)dataTosend.cell_temp[i] + (String)",\n";
+      json += R"====("maxValue": )====" + (String) maxTemp;
+      json += R"====(})====" + (String)"\n";
+      json += R"====(,)====";
+
+      json += R"====({"label": "⚡ )====" + (String)i + "\",\n";
+      json += R"====("type": "volt",)====" + (String)"\n";
+      json += R"====("value": )====" + (String)dataTosend.cell_voltage[i] + (String)",\n";
+      json += R"====("maxValue": )====" + (String) maxVolatage;
+      json += R"====(})====" + (String)"\n";
+
+
+
+
+      if (i < 9) {
+        json += R"====(,)====";
+      };
     }
     json += R"====(])====";
     json += R"====(})====";
     server.send(200, "application/json", json);
+    json = "";
   });
 
 
@@ -151,15 +156,17 @@ void connectToApWithFailToStation(String WIFI_STA_SSID, String WIFI_STA_PASS)
 
   while (WiFi.status() != WL_CONNECTED)
   {
+    numberOfAttempts++;
     delay(200);
     Serial.print(".");
-    if (numberOfAttempts > 50)
+    if (numberOfAttempts > 100)
     {
       WiFi.mode(WIFI_AP);
       // You can remove the password parameter if you want the AP to be open.
       WiFi.softAP(ssid.c_str(), password.c_str());
       Serial.print("Wifi Connect Failed. \r\nStarting AP. \r\nAP IP address: ");
       Serial.println(WiFi.softAPIP());
+      return;
       break;
     }
   }

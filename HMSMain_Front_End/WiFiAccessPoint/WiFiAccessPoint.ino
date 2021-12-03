@@ -20,6 +20,7 @@ const int maxTemp = 100;
 
 struct AccumulateData
 {
+  boolean relays[5];
   float stack_humidity;
   float stack_temp;
   float stack_voltage;
@@ -31,7 +32,6 @@ AccumulateData dataTosend;
 void setup() {
   Serial.begin(115200);
   Serial.println();
-  Serial.println("Configuring access point...");
 
   dataTosend.stack_humidity = 60;
   dataTosend.stack_temp = 120;
@@ -56,6 +56,7 @@ void setup() {
   dataTosend.cell_voltage[7] = 30;
   dataTosend.cell_voltage[8] = 41;
   dataTosend.cell_voltage[9] = 42;
+  dataTosend.relays[2] = 1;
 
 
 
@@ -63,8 +64,7 @@ void setup() {
 
 
 
-
-  connectToApWithFailToStation("", "");
+  connectToApWithFailToStation("","");
 
 
 
@@ -77,16 +77,22 @@ void setup() {
     server.send(200, "text/html", indexHtml);
   });
 
-
-
   server.on(F("/wifiUpdate"), []() {
     //Place code here to setup wifi connectivity
     String NewApName = server.arg("apName");
     String NewApPass = server.arg("apPass");
     server.send(200, "application/json", "yay");
-    connectToApWithFailToStation("LoveHouse2G", "71663951");
+    connectToApWithFailToStation(NewApName, NewApPass);
   });
 
+  server.on(F("/toggle"), []() {
+    //Place code here to setup wifi connectivity
+    int pinToToggle = server.arg("pin").toInt();
+    Serial.print("switching state of pin :");
+    Serial.println(pinToToggle);
+    dataTosend.relays[pinToToggle] = (dataTosend.relays[pinToToggle] == true) ? false : true;
+    server.send(200, "application/json", "toggled");
+  });
 
   server.on(F("/data.json"), []() {
     String json = "";
@@ -98,8 +104,14 @@ void setup() {
     json += R"====("stack_temp":)====";
     json += (String)dataTosend.stack_temp + ",\n";
 
+    json += R"====("relays":[)====";
+    json += (String) dataTosend.relays[0] + "," + (String) dataTosend.relays[1] + "," +  (String) dataTosend.relays[2] + "," +  (String) dataTosend.relays[3] + "," +  (String) dataTosend.relays[4] + "],\n";
+
     json += R"====("stack_voltage":)====";
     json += (String)dataTosend.stack_voltage + ",\n";
+
+
+
 
     json += R"====("fakeGraphData":[)====";
     json +=  "\n";
@@ -149,8 +161,19 @@ void loop() {
 
 void connectToApWithFailToStation(String WIFI_STA_SSID, String WIFI_STA_PASS)
 {
+  WiFi.persistent(true);
+  Serial.println("Configuring access point...");
+  Serial.print("WIFI_STA_SSID:");
+  Serial.println(WIFI_STA_SSID);
+  Serial.print("WIFI_STA_PASS:");
+  Serial.println(WIFI_STA_PASS);
+  
   WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_STA_SSID.c_str(), WIFI_STA_PASS.c_str());
+  if (WIFI_STA_SSID == "") {
+    WiFi.reconnect();
+  } else {
+    WiFi.begin(WIFI_STA_SSID.c_str(), WIFI_STA_PASS.c_str());
+  }
 
   int numberOfAttempts = 0;
 

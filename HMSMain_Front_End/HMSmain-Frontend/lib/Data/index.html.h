@@ -1,4 +1,4 @@
-const char *indexHtml = R"====( 
+const char *indexHtml = R"====(
 <title>HBAT - Powering the future</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
@@ -15,7 +15,10 @@ const char *indexHtml = R"====(
         background-repeat: repeat;
     }
 
-
+    table,tr,td{
+      text-align:center;
+      vertical-align:middle;
+    }
 
     iframe {
         height: 100%;
@@ -245,10 +248,34 @@ const char *indexHtml = R"====(
         <div id="⚙widget" class="infoPane" style="text-align: left;">
             <h2>Settings</h2>
             <label>AP Name</label>
-            <input><br>
+            <input id="apName"><br>
             <label>AP Password</label>
-            <input><br><hr>
-            <button >Save</button>
+            <input id="apPass"><br><hr>
+            <button onclick="saveSettings()">Save</button>
+            <br>
+            <table style="color: ivory;">
+              <tr>
+                <td>Relay 0</td>
+                <td id="relay0" onclick="toggleRelay(this);"></td>
+              </tr>
+              <tr>
+                <td>Relay 1</td>
+                <td id="relay1" onclick="toggleRelay(this);"></td>
+              </tr>
+              <tr>
+                <td>Relay 2</td>
+                <td id="relay2" onclick="toggleRelay(this);"></td>
+              </tr>
+              <tr>
+                <td>Relay 3</td>
+                <td id="relay3" onclick="toggleRelay(this);"></td>
+              </tr>
+              <tr>
+                <td>Relay 4</td>
+                <td id="relay4" onclick="toggleRelay(this);"></td>
+              </tr>
+
+            </table>            
         </div>
 
 
@@ -270,6 +297,19 @@ const char *indexHtml = R"====(
 </body>
 
 <script>
+var graphData = {};
+
+const toggleOnString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330" style="width:50px;height:auto;">
+<path stroke="gray" stroke-width="1" fill="blue" d="M 240 0 H 90 c -49.626 0 -90 40.374 -90 90 s 40.374 90 90 90 h 150 c 49.626 0 90 -40.374 90 -90 S 289.626 0 240 0 z M 240 150 c -33.084 0 -60 -26.916 -60 -60 s 26.916 -60 60 -60 s 60 26.916 60 60 S 273.084 150 240 150 z"/>
+</svg>`;
+
+
+const toggleOffString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330" style="width:50px;height:auto;transform: scale(-1,1)">
+<path stroke="gray" stroke-width="1" fill="red" d="M 240 0 H 90 c -49.626 0 -90 40.374 -90 90 s 40.374 90 90 90 h 150 c 49.626 0 90 -40.374 90 -90 S 289.626 0 240 0 z M 240 150 c -33.084 0 -60 -26.916 -60 -60 s 26.916 -60 60 -60 s 60 26.916 60 60 S 273.084 150 240 150 z"/>
+</svg>`;
+
+    
+
     async function buildGraph(inputValues) {
         graphList = document.getElementById("graphList");
         graphList.innerHTML = "";
@@ -292,31 +332,50 @@ const char *indexHtml = R"====(
 
             newGraphElement.appendChild(newMeeterElement);
             graphList.appendChild(newGraphElement);
-            graphList.innerHTML += "<br>";
+            //graphList.innerHTML += "<br>";
         }
-
-
     }
+
+
 
 
     x = 1;
     async function grabData() {
         if (x >= 10) { x = 1 } else { x++ };
-
-        setMeeterValue("batteryLevel", 3 * x, "%", "Yellow");
-        setMeeterValue("batteryTemp", 3 * x, "℃", "red");
-        setMeeterValue("batteryHumidity", 3 * x, "%💧", "cyan");
         graphData = await JSON.parse(await getHTML("./data.json"));
-        console.log(graphData.fakeGraphData);
+        setMeeterValue("batteryLevel", graphData.stack_voltage, "%", "Yellow");
+        setMeeterValue("batteryTemp", graphData.stack_temp, "℃", "red");
+        setMeeterValue("batteryHumidity", graphData.stack_humidity, "%💧", "cyan");
+
+        updateToggls(graphData.relays);
+     
         buildGraph(graphData.fakeGraphData);
     }
 
     window.setInterval(grabData, 5000);
 
+    async function updateToggls(togglesToUpdate){
+      for (let i = 0; i < togglesToUpdate.length; i++) {
+        (await document.getElementById("relay"+i)).innerHTML = ((togglesToUpdate[i] == 1) ? toggleOnString:toggleOffString);
+      }
+    }
+
+
+    async function saveSettings(){
+      await getHTML("./wifiUpdate?apName="+document.getElementById("apName").value+ "&apPass="+ document.getElementById("apPass").value,false );
+    }
+    
+
     function setMeeterValue(itemId, itemValue, itemTypeString, colorForMeeter) {
         document.getElementById(itemId).style.cssText = `--value:` + itemValue + `;--typeOfValue:'` + itemTypeString + `';--fg: ` + colorForMeeter + `;`;
     }
 
+
+  async function toggleRelay(relayToToggle){
+    var relayNumberToToggle =relayToToggle.id.replace("relay","");
+    await getHTML("./toggle?pin="+relayNumberToToggle);
+    grabData();
+  }
 
     //Navigation menu
     function showDiv(inputValue) {
@@ -334,9 +393,15 @@ const char *indexHtml = R"====(
     }
 
 
-    async function getHTML(url) {
+    async function getHTML(url,sendTime = true) {
         try {
-            let response = await fetch(url + "?" + (new Date().getTime() / 1000));
+            let response = {};
+            if (sendTime==true){
+              response = await fetch(url + "?" + (new Date().getTime() / 1000));
+            }else{
+              response = await fetch(url);
+            }
+            
             return await response.text();
 
         } catch (err) {

@@ -131,3 +131,10 @@ float *Humidity::ReadSensor()
   }
   return climatedata;
 }
+
+/******************************************************************************
+ * Function: Control MPX2010DP - K014308 and AD623
+ * Description: This function allows for manual calibration of the ACS712 sensor by setting the sensitivity to the correct value
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/

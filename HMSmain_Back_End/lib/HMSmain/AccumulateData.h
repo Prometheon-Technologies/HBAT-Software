@@ -40,8 +40,6 @@ public:
     void SetupMainLoop();
     data_arrays AccumulateDataMainLoop();
     // Variables
-    // Setup an array of relays to control peripherals. Numbers represent pin numbers.
-    /* const int relays[5] = {45, 38, 36, 35, 48};*/
 
 private:
 };

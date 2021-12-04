@@ -50,8 +50,6 @@ const char *indexHtml = R"====(
         margin: 0 auto;
         border-color: hotpink;
         border-style: solid;
-
-
     }
 
     div {
@@ -79,7 +77,6 @@ const char *indexHtml = R"====(
             width: 100%;
             height:15vw;
         }
-
 
         button{
             width:100%;
@@ -220,9 +217,7 @@ const char *indexHtml = R"====(
             <path fill="white" d="M844.2,57.9c16,0,28.9-13,28.9-28.9S860.1,0,844.2,0c-16,0-28.9,13-28.9,28.9S828.2,57.9,844.2,57.9z" />
         </svg>
 
-
         <br>
-
 
         <div class="flex-container">
             <div class="flex-item" onclick="showDiv(this.id)" id="🔋">🔋</div>
@@ -232,7 +227,6 @@ const char *indexHtml = R"====(
             <div class="flex-item" onclick="showDiv(this.id)" id="⚙">⚙</div>
         </div>
         <br>
-
 
         <div id="🔋widget" class="infoPane">
             <h2>Charge</h2><br>
@@ -295,8 +289,6 @@ const char *indexHtml = R"====(
             </table>            
         </div>
 
-
-
         <div id="❔widget" class="infoPane">
             <div style="text-align: left;margin: 3vw;">
                 ❔ Help
@@ -325,8 +317,6 @@ const toggleOffString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330
 <path stroke="gray" stroke-width="1" fill="red" d="M 240 0 H 90 c -49.626 0 -90 40.374 -90 90 s 40.374 90 90 90 h 150 c 49.626 0 90 -40.374 90 -90 S 289.626 0 240 0 z M 240 150 c -33.084 0 -60 -26.916 -60 -60 s 26.916 -60 60 -60 s 60 26.916 60 60 S 273.084 150 240 150 z"/>
 </svg>`;
 
-    
-
     async function buildGraph(inputValues) {
         graphList = document.getElementById("graphList");
         graphList.innerHTML = "";
@@ -352,9 +342,6 @@ const toggleOffString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330
             //graphList.innerHTML += "<br>";
         }
     }
-
-
-
 
     x = 1;
     async function grabData() {
@@ -430,14 +417,6 @@ const toggleOffString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330
     grabData();
 </script>
 
-
-
-
-
-
-
-
-
 <script>
     if (window.location.search !== "?frame") {
         stringToReplaceContentsWith = `<div>
@@ -447,11 +426,7 @@ const toggleOffString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330
     }
 </script>
 
-
-
 )====";
-
-/* const char* indexHtml = "hello"; */
 
 WebServer server(80);
 data_arrays dataTosend;

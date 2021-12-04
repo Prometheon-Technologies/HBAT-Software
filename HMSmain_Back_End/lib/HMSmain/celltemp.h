@@ -12,7 +12,7 @@
 class CellTemp
 {
 public:
-    CellTemp();
+    CellTemp(void);
     int freeRam();
     void SetupSensors();
     void readAddresses(DeviceAddress deviceAddress);

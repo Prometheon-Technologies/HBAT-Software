@@ -15,7 +15,11 @@
 #define debugf(x)
 #endif
 
-CellTemp::CellTemp()
+CellTemp::CellTemp(void)
+{
+}
+
+CellTemp::~CellTemp(void)
 {
 }
 
@@ -123,7 +127,7 @@ void CellTemp::printAddress(DeviceAddress deviceAddress)
 
 /******************************************************************************
  * Function: Get Temperature
- * Description: Get the temperatures of the sensors
+ * Description: Get the temperatures of the sensors and allocate the memory for the temperatures
  * Parameters: None
  * Return: float array - Temperature of the sensors
  ******************************************************************************/

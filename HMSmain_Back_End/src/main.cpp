@@ -1,6 +1,7 @@
 #include <FrontEnd.h>
 #include <PID_v1.h>
 #include <timeObj.h>
+#define MAXNUMOFRELAYS 5
 
 timeObj ReadTimer(5000);
 AccumulateData StackData;
@@ -8,7 +9,7 @@ FrontEnd Front_End;
 
 // Variables
 // Setup an array of relays to control peripherals. Numbers represent pin numbers.
-const int relays[5] = {45, 38, 36, 35, 48};
+const int relays[MAXNUMOFRELAYS] = {45, 38, 36, 35, 48};
 int received;
 double Setpoint, Input, Output;
 int WindowSize = 5000;
@@ -79,7 +80,7 @@ PID myPID(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT); // Specify the links and
 void SetupRelays()
 {
     // initialize the Relay pins and set them to off state
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < MAXNUMOFRELAYS; i++)
     {
         pinMode(relays[i], OUTPUT);
         digitalWrite(relays[i], LOW);
@@ -118,7 +119,7 @@ void SetupPID()
  * Below PID Relay code is an example of how to use the PID controller
  * This code should only be used durign the Charging phase. Integrate State Machine to use this code
  ******************************************************************************/
-void HumRelayOnOff(int time, float *stack_humidity)
+void HumRelayOnOff(int time)
 {
     float climate_data = Hum.StackHumidity();
     Input = climate_data;

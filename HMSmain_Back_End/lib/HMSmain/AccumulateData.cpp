@@ -25,7 +25,6 @@ AccumulateData::~AccumulateData(void)
 {
 }
 
-
 /******************************************************************************
  * Function: Setup Main Loop
  * Description: This is the setup function for the main loop of the whole program. Use this to setup the main loop.

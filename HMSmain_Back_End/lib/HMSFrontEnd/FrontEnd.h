@@ -11,7 +11,7 @@
 #include <WebServer.h>
 #include <WiFiAP.h>
 #include <SPIFFS.h>
-#include <index.html.h>
+/* #include <index.html.h> */
 #include <AccumulateData.h>
 
 #define LED_BUILTIN 2 // Set the GPIO pin where you connected your test LED or comment this line out if your dev board has a built-in LED

@@ -9,7 +9,6 @@
 #include <HMS.h>
 #include <Humidity.h>
 #include <celltemp.h>
-#include <PID_v1.h>
 //#include <MemoryFree.h>
 
 /******************************************************************************
@@ -28,27 +27,21 @@ struct data_arrays
     float cell_voltage[10];
 };
 
-HMS HMSmain = HMS();
-Humidity Hum = Humidity();
-CellTemp Cell_Temp = CellTemp();
+extern HMS HMSmain;
+extern Humidity Hum;
+extern CellTemp Cell_Temp;
 
 class AccumulateData
 {
 public:
     // Functions
-    AccumulateData();
-    struct data_arrays;
+    AccumulateData(void);
+    virtual ~AccumulateData(void);
     void SetupMainLoop();
     data_arrays AccumulateDataMainLoop();
-    void HumRelayOnOff(int time, float *stack_humidity);
-    void debugdata(String str);
-    void setup_relays();
-    void SetupPID();
-
     // Variables
     // Setup an array of relays to control peripherals. Numbers represent pin numbers.
-    const int relays[5] = {45, 38, 36, 35, 48};
-    int received;
+    /* const int relays[5] = {45, 38, 36, 35, 48};*/
 
 private:
 };

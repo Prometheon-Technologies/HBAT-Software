@@ -1,4 +1,3 @@
-
 #include <HMS.h>
 
 // ESP 32 (requires resistors to step down the logic voltage)
@@ -29,8 +28,9 @@ float HMS::readVoltage(int pinnumber)
  ******************************************************************************/
 float *HMS::readSensAndCondition()
 {
-    float *cell_voltage = new float[5];
-    for (int i = 0; i < 5; i++)
+    int numtoaverage = 5;
+    float *cell_voltage = (float *)malloc(sizeof(float) * 10);
+    for (int i = 0; i < numtoaverage; i++)
     {
         cell_voltage[0] += readVoltage(39); // sensor on analog pin
         cell_voltage[1] += readVoltage(34);
@@ -42,13 +42,11 @@ float *HMS::readSensAndCondition()
         cell_voltage[7] += readVoltage(27);
         cell_voltage[8] += readVoltage(14);
         cell_voltage[9] += readVoltage(12);
-
-        delay(100);
     }
 
-    for (int i = 0; i < sizeof(cell_voltage); i++)
+    for (int i = 0; i < 10; i++)
     {
-        cell_voltage[i] = cell_voltage[i] / 5;
+        cell_voltage[i] = cell_voltage[i] / numtoaverage;
     }
     return cell_voltage;
 }

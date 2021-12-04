@@ -12,6 +12,26 @@
 #include <PID_v1.h>
 //#include <MemoryFree.h>
 
+/******************************************************************************
+ * Function: Main Sensor Data Structure
+ * Description: This is the main Data Structure where all sensor data is accumulated. To be passed into the main program.
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
+struct data_arrays
+{
+    boolean relays[5];
+    float stack_humidity;
+    float stack_temp;
+    float stack_voltage;
+    float cell_temp[10];
+    float cell_voltage[10];
+};
+
+HMS HMSmain = HMS();
+Humidity Hum = Humidity();
+CellTemp Cell_Temp = CellTemp();
+
 class AccumulateData
 {
 public:
@@ -19,14 +39,11 @@ public:
     AccumulateData();
     struct data_arrays;
     void SetupMainLoop();
-    void AccumulateDataMainLoop(data_arrays &data);
+    data_arrays AccumulateDataMainLoop();
     void HumRelayOnOff(int time, float *stack_humidity);
     void debugdata(String str);
     void setup_relays();
     void SetupPID();
-    HMS HMSmain = HMS();
-    Humidity Hum = Humidity();
-    CellTemp Cell_Temp = CellTemp();
 
     // Variables
     // Setup an array of relays to control peripherals. Numbers represent pin numbers.

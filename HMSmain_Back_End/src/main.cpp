@@ -1,5 +1,5 @@
-#include <AccumulateData.h>
 #include <RelayLogic.h>
+#include <FrontEnd.h>
 
 #define DEBUG 1
 
@@ -21,18 +21,9 @@
 #define LED1 37
 #define LED2 47
 
-AccumulateData StackData = AccumulateData();
+AccumulateData Data = AccumulateData();
+AccumulateData MainLoop = Data.AccumulateDataMainLoop();
 RelayLogic Relays = RelayLogic();
-
-struct data_arrays
-{
-  float stack_humidity;
-  float stack_temp;
-  float stack_voltage;
-  float cell_temp[10];
-  float cell_voltage[10];
-};
-
 // if (input_voltage < 0.50 && input_voltage >= 0.00 )
 //{
 // digitalWrite(2, HIGH);
@@ -77,8 +68,6 @@ struct data_arrays
 //  DO STUFF
 // }
 
-
-
 /******************************************************************************
  * Function: Debug Print Data
  * Description: This function prints all string data to the serial console.
@@ -92,11 +81,10 @@ void debugdata(String value)
 
 void setup()
 {
-    StackData.SetupMainLoop();
+    Data.SetupMainLoop();
     debugdata("Software Stack is being initialized ... ");
 }
 
 void loop()
 {
-    StackData.AccumulateDataMainLoop();
 }

@@ -17,21 +17,6 @@ AccumulateData::AccumulateData()
 {
 }
 
-/******************************************************************************
- * Function: Main Sensor Data Structure
- * Description: This is the main Data Structure where all sensor data is accumulated. To be passed into the main program.
- * Parameters: None
- * Return: None
- ******************************************************************************/
-struct AccumulateData::data_arrays
-{
-  float stack_humidity;
-  float stack_temp;
-  float stack_voltage;
-  float cell_temp[10];
-  float cell_voltage[10];
-};
-
 /* void led2OnOff(int time)
 {
   digitalWrite(LED2, HIGH);
@@ -116,8 +101,10 @@ void AccumulateData::SetupMainLoop()
  * Parameters: None
  * Return: None
  ******************************************************************************/
-void AccumulateData::AccumulateDataMainLoop(data_arrays &data)
+
+data_arrays AccumulateDataMainLoop()
 {
+  data_arrays data;
   // Stack level data
   data.stack_humidity = Hum.StackHumidity();
   debugln(data.stack_humidity);
@@ -152,4 +139,5 @@ void AccumulateData::AccumulateDataMainLoop(data_arrays &data)
   delete[] cell_voltage;
   /* free (cell_temp);
   free (cell_voltage); */
+  return data;
 }

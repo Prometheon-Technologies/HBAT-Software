@@ -1,61 +1,22 @@
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <WebServer.h>
-#include <WiFiAP.h>
-#include "SPIFFS.h"
-#include "index.html.h"
+#include <FrontEnd.h>
 
-#define LED_BUILTIN 2 // Set the GPIO pin where you connected your test LED or comment this line out if your dev board has a built-in LED
-
+const int maxVolatage = 24;
+const int maxTemp = 100;
 // Set these to your desired credentials.
 const String ssid = "H-BAT-" + String(WiFi.macAddress());
 const String password = "hbathbat";
 
 WebServer server(80);
+data_arrays dataTosend;
 
-const int maxVolatage = 24;
-const int maxTemp = 100;
-
-struct AccumulateData
+FrontEnd::FrontEnd()
 {
-  boolean relays[5];
-  float stack_humidity;
-  float stack_temp;
-  float stack_voltage;
-  float cell_temp[10];
-  float cell_voltage[10];
-};
-AccumulateData dataTosend;
+}
 
-void setup()
+void FrontEnd::SetupServer()
 {
   Serial.begin(115200);
   Serial.println();
-
-  dataTosend.stack_humidity = 60;
-  dataTosend.stack_temp = 120;
-  dataTosend.stack_voltage = 24;
-  dataTosend.cell_temp[0] = 13;
-  dataTosend.cell_temp[1] = 14;
-  dataTosend.cell_temp[2] = 15;
-  dataTosend.cell_temp[3] = 16;
-  dataTosend.cell_temp[4] = 17;
-  dataTosend.cell_temp[5] = 18;
-  dataTosend.cell_temp[6] = 19;
-  dataTosend.cell_temp[7] = 20;
-  dataTosend.cell_temp[8] = 21;
-  dataTosend.cell_temp[9] = 22;
-  dataTosend.cell_voltage[0] = 23;
-  dataTosend.cell_voltage[1] = 24;
-  dataTosend.cell_voltage[2] = 25;
-  dataTosend.cell_voltage[3] = 26;
-  dataTosend.cell_voltage[4] = 27;
-  dataTosend.cell_voltage[5] = 28;
-  dataTosend.cell_voltage[6] = 29;
-  dataTosend.cell_voltage[7] = 30;
-  dataTosend.cell_voltage[8] = 41;
-  dataTosend.cell_voltage[9] = 42;
-  dataTosend.relays[2] = 1;
 
   connectToApWithFailToStation("", "");
 
@@ -64,7 +25,7 @@ void setup()
   server.on(F("/"), []()
             { server.send(200, "text/html", indexHtml); });
 
-  server.on(F("/wifiUpdate"), []()
+  server.on(F("/wifiUpdate"), [&]()
             {
     //Place code here to setup wifi connectivity
     String NewApName = server.arg("apName");
@@ -72,7 +33,7 @@ void setup()
     server.send(200, "application/json", "yay");
     connectToApWithFailToStation(NewApName, NewApPass); });
 
-  server.on(F("/toggle"), []()
+  server.on(F("/toggle"), [&]()
             {
     //Place code here to setup wifi connectivity
     int pinToToggle = server.arg("pin").toInt();
@@ -81,7 +42,7 @@ void setup()
     dataTosend.relays[pinToToggle] = (dataTosend.relays[pinToToggle] == true) ? false : true;
     server.send(200, "application/json", "toggled"); });
 
-  server.on(F("/data.json"), []()
+  server.on(F("/data.json"), [&]()
             {
     String json = "";
     json += R"====({)====";
@@ -97,9 +58,6 @@ void setup()
 
     json += R"====("stack_voltage":)====";
     json += (String)dataTosend.stack_voltage + ",\n";
-
-
-
 
     json += R"====("fakeGraphData":[)====";
     json +=  "\n";
@@ -119,9 +77,6 @@ void setup()
       json += R"====("maxValue": )====" + (String) maxVolatage;
       json += R"====(})====" + (String)"\n";
 
-
-
-
       if (i < 9) {
         json += R"====(,)====";
       };
@@ -135,16 +90,16 @@ void setup()
   Serial.println("HTTP server started");
 }
 
-String json_return_data()
+String FrontEnd::json_return_data()
 {
 }
-void loop()
+void FrontEnd::ClientLoop()
 {
   server.handleClient();
   delay(0);
 }
 
-void connectToApWithFailToStation(String WIFI_STA_SSID, String WIFI_STA_PASS)
+void FrontEnd::connectToApWithFailToStation(String WIFI_STA_SSID, String WIFI_STA_PASS)
 {
   WiFi.persistent(true);
   Serial.println("Configuring access point...");

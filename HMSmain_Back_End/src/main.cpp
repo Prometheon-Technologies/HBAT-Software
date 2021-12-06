@@ -2,6 +2,8 @@
 #include <timeObj.h>
 #include <i2cscan.h>
 
+TaskHandle_t server;
+TaskHandle_t accumulatedata;
 Scanner scanner;
 timeObj ReadTimer(5000);
 AccumulateData StackData;
@@ -66,7 +68,52 @@ void setup()
 {
     Front_End.SetupServer();
     StackData.SetupMainLoop();
-    Hum.SetupPID();
+    // Hum.SetupPID();
+    xTaskCreatePinnedToCore(
+        Task1code, /* Function to implement the task */
+        "Task1",   /* Name of the task */
+        10000,     /* Stack size in words */
+        NULL,      /* Task input parameter */
+        0,         /* Priority of the task */
+        &server,   /* Task handle. */
+        0);        /* Core where the task should run */
+
+    delay(500);
+
+    // create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
+    xTaskCreatePinnedToCore(
+        Task2code,       /* Task function. */
+        "Task2",         /* name of task. */
+        10000,           /* Stack size of task */
+        NULL,            /* parameter of the task */
+        1,               /* priority of the task */
+        &accumulatedata, /* Task handle to keep track of created task */
+        1);              /* pin task to core 1 */
+    delay(500);
+}
+
+void Task1code(void *parameter)
+{
+    Serial.print("Task2 running on core ");
+    Serial.println(xPortGetCoreID());
+    for (;;)
+    {
+        Front_End.ClientLoop();
+    }
+}
+
+void Task2code(void *pvParameters)
+{
+    Serial.print("Task2 running on core ");
+    Serial.println(xPortGetCoreID());
+    for (;;)
+    {
+        if (ReadTimer.ding())
+        {
+            StackData.AccumulateDataMainLoop();
+            ReadTimer.start();
+        }
+    }
 }
 
 void ScanI2CBus()
@@ -77,17 +124,6 @@ void ScanI2CBus()
 
 void loop()
 {
-    Front_End.ClientLoop();
-
-    if (ReadTimer.ding())
-    {
-        for (;;)
-        {
-            StackData.AccumulateDataMainLoop();
-        }
-        ReadTimer.start();
-    }
-
     /* // HumRelayOnOff(5000);
     for (;;)
     {

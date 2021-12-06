@@ -9,6 +9,9 @@ timeObj ReadTimer(5000);
 AccumulateData StackData;
 FrontEnd Front_End;
 
+int period = 500;
+unsigned long time_now = 0;
+
 // if (input_voltage < 0.50 && input_voltage >= 0.00 )
 //{
 // digitalWrite(2, HIGH);
@@ -69,27 +72,33 @@ void setup()
     Front_End.SetupServer();
     StackData.SetupMainLoop();
     // Hum.SetupPID();
-    xTaskCreatePinnedToCore(
-        Task1code, /* Function to implement the task */
-        "Task1",   /* Name of the task */
-        10000,     /* Stack size in words */
-        NULL,      /* Task input parameter */
-        0,         /* Priority of the task */
-        &server,   /* Task handle. */
-        0);        /* Core where the task should run */
+    time_now = millis();
 
-    delay(500);
+    /* Cores where the task should run */
+    if (millis() < time_now + period)
+    {
+        xTaskCreatePinnedToCore(
+            Task1code, /* Function to implement the task */
+            "Task1",   /* Name of the task */
+            10000,     /* Stack size in words */
+            NULL,      /* Task input parameter */
+            2,         /* Priority of the task */
+            &server,   /* Task handle. */
+            0);
+    }
 
-    // create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
-    xTaskCreatePinnedToCore(
-        Task2code,       /* Task function. */
-        "Task2",         /* name of task. */
-        10000,           /* Stack size of task */
-        NULL,            /* parameter of the task */
-        1,               /* priority of the task */
-        &accumulatedata, /* Task handle to keep track of created task */
-        1);              /* pin task to core 1 */
-    delay(500);
+    if (millis() < time_now + period)
+    {
+        // create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
+        xTaskCreatePinnedToCore(
+            Task2code,       /* Task function. */
+            "Task2",         /* name of task. */
+            10000,           /* Stack size of task */
+            NULL,            /* parameter of the task */
+            1,               /* priority of the task */
+            &accumulatedata, /* Task handle to keep track of created task */
+            1);              /* pin task to core 1 */
+    }
 }
 
 void Task1code(void *parameter)

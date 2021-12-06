@@ -13,22 +13,16 @@
  *
  */
 #include <JediTimer.h>
-#if defined(ESP8266)
-#define ledPin 2
-#pragma message "This board is an ESP8266"
-#elif defined(ESP32)
-#pragma message "This board is an ESP32"
-#define ledPin 2
-#else
-#error "This ain't a ESP8266 or ESP32, most likely an Arduino board"
-#define ledPin LED_BUILTIN
-#endif
 
-JediTimer::JediTimer()
+JediTimer::JediTimer(void)
 {
     delay(1000);
-    Serial.begin(9600);
+    Serial.begin(Serial_Baud);
     pinMode(ledPin, OUTPUT);
+}
+
+JediTimer::~JediTimer(void)
+{
 }
 
 void JediTimer::LoopTimer()

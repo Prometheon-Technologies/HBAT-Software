@@ -1,6 +1,19 @@
 #include <Humidity.h>
 
-Humidity::Humidity()
+// Setup an array of relays to control peripherals. Numbers represent pin numbers.
+const int relays[MAXNUMOFRELAYS] = {45, 38, 36, 35, 48};
+int WindowSize = 5000;
+unsigned long windowStartTime;
+bool enableHeater = false;
+uint8_t loopCnt = 0;
+double Setpoint, Input, Output;
+PID myPID(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT); // Specify the links and initial tuning parameters
+
+Humidity::Humidity(void)
+{
+}
+
+Humidity::~Humidity(void)
 {
 }
 
@@ -138,3 +151,69 @@ float *Humidity::ReadSensor()
  * Parameters: None
  * Return: None
  ******************************************************************************/
+
+/******************************************************************************
+ * Function: Setup relays
+ * Description: Loop through and set all relays to output and off state
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
+void Humidity::SetupRelays()
+{
+  // initialize the Relay pins and set them to off state
+  for (int i = 0; i < MAXNUMOFRELAYS; i++)
+  {
+    pinMode(relays[i], OUTPUT);
+    digitalWrite(relays[i], LOW);
+  }
+}
+
+/******************************************************************************
+ * Function: Setup PID Controller
+ * Description: This function sets up the PID controller
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
+void Humidity::SetupPID()
+{
+  // Initialize the relay pins
+  SetupRelays();
+
+  windowStartTime = millis();
+
+  // initialize the variables we're linked to
+  Setpoint = 80;
+
+  // tell the PID to range between 0 and the full window size
+  myPID.SetOutputLimits(0, WindowSize);
+
+  // turn the PID on
+  myPID.SetMode(AUTOMATIC);
+}
+
+/******************************************************************************
+ * Function: Humidity Related Relay Control
+ * Description: Initialise a PID controller to control a relay based on humidity sensor readings
+ * Parameters: None
+ * Return: None
+ * SFM3003 Mass Air Flow Sensor code to be integrated
+ * Below PID Relay code is an example of how to use the PID controller
+ * This code should only be used during the Charging phase. Integrate State Machine to use this code
+ ******************************************************************************/
+void Humidity::HumRelayOnOff()
+{
+  float climate_data = StackHumidity();
+  Input = climate_data;
+  myPID.Compute();
+
+  // turn the output pin on/off based on pid output
+  unsigned long now = millis();
+  if (now - windowStartTime > WindowSize)
+  { // time to shift the Relay Window
+    windowStartTime += WindowSize;
+  }
+  if (Output > now - windowStartTime)
+    digitalWrite(relays[0], HIGH);
+  else
+    digitalWrite(relays[0], LOW);
+}

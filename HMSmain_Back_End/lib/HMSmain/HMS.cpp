@@ -5,7 +5,11 @@
 uint8_t _amppin = 18;
 ACS712 ACS(_amppin, 5.0, 4095, 100);
 
-HMS::HMS()
+HMS::HMS(void)
+{
+}
+
+HMS::~HMS(void)
 {
 }
 

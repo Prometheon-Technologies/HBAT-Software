@@ -13,6 +13,7 @@ class CellTemp
 {
 public:
     CellTemp(void);
+    virtual ~CellTemp(void);
     int freeRam();
     void SetupSensors();
     void readAddresses(DeviceAddress deviceAddress);

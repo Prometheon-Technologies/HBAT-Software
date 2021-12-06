@@ -11,7 +11,8 @@
 class Scanner
 {
 public:
-    Scanner();
+    Scanner(void);
+    virtual ~Scanner(void);
     void SetupScan();
     void BeginScan();
     /* private: */

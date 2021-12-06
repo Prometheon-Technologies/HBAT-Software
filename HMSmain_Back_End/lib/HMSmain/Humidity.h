@@ -5,25 +5,35 @@
 
 #ifndef HUMIDITY_h
 #define HUMIDITY_h
+#define MAXNUMOFRELAYS 5
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_SHT31.h>
+#include <PID_v1.h>
 
 class Humidity
 {
 public:
-  Humidity();
+  // Constructor
+  Humidity(void);
+  virtual ~Humidity(void);
+  // Initialize the library
   void SetupSensor();
   float StackHumidity();
   float AverageStackTemp();
   float *ReadSensor();
-  bool enableHeater = false;
-  uint8_t loopCnt = 0;
-
+  void HumRelayOnOff();
+  void SetupPID();
+  void SetupRelays();
+  // Variables
   Adafruit_SHT31 sht31 = Adafruit_SHT31();
 
   Adafruit_SHT31 sht31_2 = Adafruit_SHT31();
 
+private:
+  int received;
+  bool sensor1 = sht31.isHeaterEnabled();
+  bool sensor2 = sht31_2.isHeaterEnabled();
   byte degree[8] =
       {
           0b00011,
@@ -34,9 +44,5 @@ public:
           0b00000,
           0b00000,
           0b00000};
-
-private:
-  bool sensor1 = sht31.isHeaterEnabled();
-  bool sensor2 = sht31_2.isHeaterEnabled();
 };
 #endif

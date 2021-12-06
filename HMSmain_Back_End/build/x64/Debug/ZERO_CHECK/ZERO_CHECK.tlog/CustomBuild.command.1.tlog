@@ -1,0 +1,10 @@
+^C:\USERS\ZACAR\DOCUMENTS\GITHUB\HBAT-SOFTWARE\HMSMAIN_BACK_END\BUILD\CMAKEFILES\6096208CBC0070573F2BFAC54423C9BC\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/zacar/Documents/GitHub/HBAT-Software/HMSmain_Back_End -BC:/Users/zacar/Documents/GitHub/HBAT-Software/HMSmain_Back_End/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/zacar/Documents/GitHub/HBAT-Software/HMSmain_Back_End/build/HMSmain.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

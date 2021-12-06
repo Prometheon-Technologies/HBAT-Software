@@ -1,13 +1,17 @@
 #include <i2cscan.h>
 
-Scanner::Scanner()
+Scanner::Scanner(void)
+{
+}
+
+Scanner::~Scanner(void)
 {
 }
 
 void Scanner::SetupScan()
 {
   Wire.begin();
-  Serial.begin(115200);
+  //Serial.begin(115200);
   Serial.println("\nI2C Scanner");
 }
 

@@ -13,7 +13,8 @@
 class HMS
 {
 public:
-  HMS();
+  HMS(void);
+  virtual ~HMS(void);
   float *readSensAndCondition();
   void calibrateAmps();
   String readAmps();

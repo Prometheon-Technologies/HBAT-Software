@@ -25,6 +25,9 @@ struct data_arrays
     float stack_voltage;
     float cell_temp[10];
     float cell_voltage[10];
+    float flow_rate;
+    float flow_rate_sensor_temp;
+    int flow_rate_sensor_status;
 };
 
 extern HMS HMSmain;

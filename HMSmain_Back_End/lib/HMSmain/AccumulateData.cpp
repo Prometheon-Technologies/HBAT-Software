@@ -33,6 +33,7 @@ AccumulateData::~AccumulateData(void)
  ******************************************************************************/
 void AccumulateData::SetupMainLoop()
 {
+  Hum.SetupSFM3003();
   // debug("freeMemory()="+freeMemory());
 }
 
@@ -45,6 +46,20 @@ void AccumulateData::SetupMainLoop()
 data_arrays AccumulateData::AccumulateDataMainLoop()
 {
   data_arrays data;
+  // Flow Rate data
+  data.flow_rate_sensor_status = Hum.SFM3003();
+  if (data.flow_rate_sensor_status == 0)
+  {
+    // SFM3003 flow rate data in slm
+    data.flow_rate = Hum.flow;
+    // SFM3003 mass temp data
+    data.flow_rate_sensor_temp = Hum.temperature;
+  }
+  else
+  {
+    printf("Flow Rate Sensor Could Not Be Read\n");
+  }
+
   // Stack level data
   data.stack_humidity = Hum.StackHumidity();
   debugln(data.stack_humidity);

@@ -4,9 +4,6 @@
 // Setup an array of relays to control peripherals. Numbers represent pin numbers.
 const int relays[MAXNUMOFRELAYS] = {45, 38, 36, 35, 48};
 bool enableHeater = false;
-float *returnData = (float *)malloc(sizeof(float) * 3);
-float flow = returnData[0];
-float temperature = returnData[1];
 int WindowSize = 5000;
 unsigned long windowStartTime;
 uint16_t status;

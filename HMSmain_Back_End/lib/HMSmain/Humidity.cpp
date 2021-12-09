@@ -218,7 +218,7 @@ void Humidity::HumRelayOnOff()
     digitalWrite(relays[0], LOW);
 }
 
-int SFM3003()
+int Humidity::SFM3003()
 {
   const char *driver_version = sfm_common_get_driver_version();
   if (driver_version)

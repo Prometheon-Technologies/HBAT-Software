@@ -2,7 +2,7 @@
 #include <timeObj.h>
 #include <i2cscan.h>
 
-TaskHandle_t server;
+TaskHandle_t runserver;
 TaskHandle_t accumulatedata;
 Scanner scanner;
 timeObj ReadTimer(5000);
@@ -67,40 +67,6 @@ unsigned long time_now = 0;
     debugln(value);
 } */
 
-void setup()
-{
-    Front_End.SetupServer();
-    StackData.SetupMainLoop();
-    // Hum.SetupPID();
-    time_now = millis();
-
-    /* Cores where the task should run */
-    if (millis() < time_now + period)
-    {
-        xTaskCreatePinnedToCore(
-            Task1code, /* Function to implement the task */
-            "Task1",   /* Name of the task */
-            10000,     /* Stack size in words */
-            NULL,      /* Task input parameter */
-            2,         /* Priority of the task */
-            &server,   /* Task handle. */
-            0);
-    }
-
-    if (millis() < time_now + period)
-    {
-        // create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
-        xTaskCreatePinnedToCore(
-            Task2code,       /* Task function. */
-            "Task2",         /* name of task. */
-            10000,           /* Stack size of task */
-            NULL,            /* parameter of the task */
-            1,               /* priority of the task */
-            &accumulatedata, /* Task handle to keep track of created task */
-            1);              /* pin task to core 1 */
-    }
-}
-
 void Task1code(void *parameter)
 {
     Serial.print("Task2 running on core ");
@@ -122,6 +88,40 @@ void Task2code(void *pvParameters)
             StackData.AccumulateDataMainLoop();
             ReadTimer.start();
         }
+    }
+}
+
+void setup()
+{
+    Front_End.SetupServer();
+    StackData.SetupMainLoop();
+    // Hum.SetupPID();
+    time_now = millis();
+
+    /* Cores where the task should run */
+    if (millis() < time_now + period)
+    {
+        xTaskCreatePinnedToCore(
+            Task1code, /* Function to implement the task */
+            "Task1",   /* Name of the task */
+            10000,     /* Stack size in words */
+            NULL,      /* Task input parameter */
+            2,         /* Priority of the task */
+            &runserver,   /* Task handle. */
+            0);
+    }
+
+    if (millis() < time_now + period)
+    {
+        // create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
+        xTaskCreatePinnedToCore(
+            Task2code,       /* Task function. */
+            "Task2",         /* name of task. */
+            10000,           /* Stack size of task */
+            NULL,            /* parameter of the task */
+            1,               /* priority of the task */
+            &accumulatedata, /* Task handle to keep track of created task */
+            1);              /* pin task to core 1 */
     }
 }
 

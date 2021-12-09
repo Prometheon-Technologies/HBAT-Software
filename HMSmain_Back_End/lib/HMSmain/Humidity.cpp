@@ -1,10 +1,15 @@
 #include <Humidity.h>
 
+//Global Variables
 // Setup an array of relays to control peripherals. Numbers represent pin numbers.
 const int relays[MAXNUMOFRELAYS] = {45, 38, 36, 35, 48};
+bool enableHeater = false;
+float *returnData = (float *)malloc(sizeof(float) * 3);
+float flow = returnData[0];
+float temperature = returnData[1];
 int WindowSize = 5000;
 unsigned long windowStartTime;
-bool enableHeater = false;
+uint16_t status;
 uint8_t loopCnt = 0;
 double Setpoint, Input, Output;
 PID myPID(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT); // Specify the links and initial tuning parameters
@@ -87,9 +92,9 @@ float Humidity::StackHumidity()
  ******************************************************************************/
 float *Humidity::ReadSensor()
 {
-  float *climatedata = new float[4];
+  float *climatedata = (float *)malloc(sizeof(float) * 4);
 
-  // check if 'is not a number'
+  // check if 'is not a number
   if (!isnan(climatedata[0] and climatedata[1]))
   {
     climatedata[0] = sht31.readTemperature();
@@ -218,7 +223,7 @@ void Humidity::HumRelayOnOff()
     digitalWrite(relays[0], LOW);
 }
 
-int Humidity::SFM3003()
+int Humidity::SetupSFM3003()
 {
   const char *driver_version = sfm_common_get_driver_version();
   if (driver_version)
@@ -265,9 +270,13 @@ int Humidity::SFM3003()
     }
     printf("\n");
   }
+  return 0;
+}
 
+int Humidity::SFM3003()
+{
   SfmConfig sfm3003 = sfm3003_create();
-
+  int16_t error = sensirion_i2c_general_call_reset();
   error = sfm_common_start_continuous_measurement(
       &sfm3003, SFM3003_CMD_START_CONTINUOUS_MEASUREMENT_AIR);
   if (error)
@@ -283,7 +292,6 @@ int Humidity::SFM3003()
   {
     int16_t flow_raw;
     int16_t temperature_raw;
-    uint16_t status;
     error = sfm_common_read_measurement_raw(&sfm3003, &flow_raw,
                                             &temperature_raw, &status);
     if (error)
@@ -292,8 +300,7 @@ int Humidity::SFM3003()
     }
     else
     {
-      float flow;
-      float temperature;
+      // Convert the raw values to physical values in Standard Liter/Minute
       error = sfm_common_convert_flow_float(&sfm3003, flow_raw, &flow);
       if (error)
       {
@@ -304,7 +311,6 @@ int Humidity::SFM3003()
              flow, flow_raw, temperature, temperature_raw, status);
     }
   }
-
   sensirion_i2c_release();
   return 0;
 }

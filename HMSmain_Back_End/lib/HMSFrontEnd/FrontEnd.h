@@ -20,7 +20,8 @@ class FrontEnd
 {
 public:
     // Functions
-    FrontEnd();
+    FrontEnd(void);
+    virtual ~FrontEnd(void);
     String json_return_data();
     void SetupServer();
     void ClientLoop();

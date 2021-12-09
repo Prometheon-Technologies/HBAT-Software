@@ -69,7 +69,7 @@ unsigned long time_now = 0;
 
 void Task1code(void *parameter)
 {
-    Serial.print("Task2 running on core ");
+    Serial.print("Webserver running on core ");
     Serial.println(xPortGetCoreID());
     for (;;)
     {
@@ -79,13 +79,14 @@ void Task1code(void *parameter)
 
 void Task2code(void *pvParameters)
 {
-    Serial.print("Task2 running on core ");
+    Serial.print("Data Accumulation running on core ");
     Serial.println(xPortGetCoreID());
     for (;;)
     {
         if (ReadTimer.ding())
         {
             StackData.AccumulateDataMainLoop();
+            Hum.SFM3003();
             ReadTimer.start();
         }
     }
@@ -99,17 +100,14 @@ void setup()
     time_now = millis();
 
     /* Cores where the task should run */
-    if (millis() < time_now + period)
-    {
-        xTaskCreatePinnedToCore(
-            Task1code, /* Function to implement the task */
-            "Task1",   /* Name of the task */
-            10000,     /* Stack size in words */
-            NULL,      /* Task input parameter */
-            2,         /* Priority of the task */
-            &runserver,   /* Task handle. */
-            0);
-    }
+    xTaskCreatePinnedToCore(
+        Task1code,  /* Function to implement the task */
+        "Task1",    /* Name of the task */
+        10000,      /* Stack size in words */
+        NULL,       /* Task input parameter */
+        2,          /* Priority of the task */
+        &runserver, /* Task handle. */
+        0);
 
     if (millis() < time_now + period)
     {

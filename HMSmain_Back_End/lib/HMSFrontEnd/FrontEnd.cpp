@@ -431,7 +431,11 @@ const toggleOffString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330
 WebServer server(80);
 data_arrays dataTosend;
 
-FrontEnd::FrontEnd()
+FrontEnd::FrontEnd(void)
+{
+}
+
+FrontEnd::~FrontEnd(void)
 {
 }
 

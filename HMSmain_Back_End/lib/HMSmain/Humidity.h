@@ -10,6 +10,7 @@
 #include <Wire.h>
 #include <Adafruit_SHT31.h>
 #include <PID_v1.h>
+#include <sfm3003.h>
 
 class Humidity
 {

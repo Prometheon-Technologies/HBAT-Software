@@ -11,6 +11,7 @@
 #include <WebServer.h>
 #include <WiFiAP.h>
 #include <SPIFFS.h>
+#include <HMSmqtt.h>
 /* #include <index.html.h> */
 #include <AccumulateData.h>
 
@@ -26,8 +27,22 @@ public:
     void SetupServer();
     void ClientLoop();
     void connectToApWithFailToStation(String WIFI_STA_SSID, String WIFI_STA_PASS);
+    uint8_t GetChipID();
 
-    // Variable
+    // Variables
+
+    int maxVoltage;
+    int maxTemp;
+
+    String NewMQTTIP;
+    String NewMQTTPass;
+    String NewMQTTUser;
+    String json;
+    String temp;
+    unsigned long ClientID;
+    char clientIP;
+    String clientPass;
+    String clientUser;
 
 private:
 };

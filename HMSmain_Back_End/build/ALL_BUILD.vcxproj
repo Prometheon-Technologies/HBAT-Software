@@ -170,10 +170,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </ProjectReference>
-    <ProjectReference Include="C:\Users\zacar\Documents\GitHub\HBAT-Software\HMSmain_Back_End\build\HMSmain.vcxproj">
-      <Project>{C8478EB6-677C-33EE-B1CF-D7668FCF0AC3}</Project>
-      <Name>HMSmain</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

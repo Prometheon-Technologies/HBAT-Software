@@ -9,6 +9,7 @@
 #include <HMS.h>
 #include <Humidity.h>
 #include <celltemp.h>
+#include <HMSmqtt.h>
 //#include <MemoryFree.h>
 
 /******************************************************************************
@@ -38,11 +39,14 @@ class AccumulateData
 {
 public:
     // Functions
-    AccumulateData(void);
+    AccumulateData();
     virtual ~AccumulateData(void);
     void SetupMainLoop();
     data_arrays AccumulateDataMainLoop();
     // Variables
+    String json;
+    int maxVoltage;
+    int maxTemp;
 
 private:
 };

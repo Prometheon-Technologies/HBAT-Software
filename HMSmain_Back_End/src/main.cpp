@@ -7,54 +7,12 @@ TaskHandle_t accumulatedata;
 Scanner scanner;
 timeObj ReadTimer(5000);
 AccumulateData StackData;
-FrontEnd Front_End;
+HMSmqtt Mqtt_Data = HMSmqtt();
+FrontEnd FrontEnd_Data = FrontEnd();
 
 int period = 500;
 unsigned long time_now = 0;
-
-// if (input_voltage < 0.50 && input_voltage >= 0.00 )
-//{
-// digitalWrite(2, HIGH);
-// delay (30);
-// digitalWrite(2, LOW);
-// delay (30);
-// }
-// else if (input_voltage < 1.00 && input_voltage >= 0.50)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 1.50 && input_voltage >= 1.00)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 2.00 && input_voltage >= 1.50)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 2.50 && input_voltage >= 2.00)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 3.00 && input_voltage >= 2.50)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 3.50 && input_voltage >= 3.00)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 4.00 && input_voltage >= 3.50)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 4.50 && input_voltage >= 4.00)
-//{
-//  DO STUFF
-// }
-// else if (input_voltage < 5.00 && input_voltage >= 4.50)
-//{
-//  DO STUFF
-// }
+bool Charge_State;
 
 /******************************************************************************
  * Function: Debug Print Data
@@ -73,7 +31,8 @@ void Task1code(void *parameter)
     Serial.println(xPortGetCoreID());
     for (;;)
     {
-        Front_End.ClientLoop();
+        FrontEnd_Data.ClientLoop();
+        Mqtt_Data.MQTTLoop();
     }
 }
 
@@ -94,7 +53,7 @@ void Task2code(void *pvParameters)
 
 void setup()
 {
-    Front_End.SetupServer();
+    FrontEnd_Data.SetupServer();
     StackData.SetupMainLoop();
     // Hum.SetupPID();
     time_now = millis();

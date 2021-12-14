@@ -15,12 +15,15 @@ class HMS
 public:
   HMS(void);
   virtual ~HMS(void);
-  float *readSensAndCondition();
   void calibrateAmps();
-  String readAmps();
-  float readVoltage(int pinnumber);
   void setupSensor();
+  int readAmps();
+  int ChargeStatus();
   int voltageValues[10];
+  float sumArray(float array[], int size);
+  float readVoltage(int pinnumber);
+  float StackVoltage();
+  float *readSensAndCondition();
 
 private:
 };

@@ -55,6 +55,35 @@ float *HMS::readSensAndCondition()
     return cell_voltage;
 }
 
+float HMS::sumArray(float array[], int size)
+{
+    int sum = 0;
+    for (int i = 0; i < size; i++)
+    {
+        sum += array[i];
+    }
+    return sum;
+}
+
+/******************************************************************************
+ * Function: Setup the Stack Voltage
+ * Description: This function setups the mean Stack Voltage by calculating the sum of the cell_voltage array
+ * Parameters: None
+ * Return: The mean Stack Voltage
+ ******************************************************************************/
+float HMS::StackVoltage()
+{
+    float array[10];
+    for (int i = 0; i < 10; i++)
+    {
+        array[i] = readSensAndCondition()[i];
+    }
+    int size = sizeof(array) / sizeof(array[0]);
+    float sum = sumArray(array, size);
+    Serial.println(sum);
+    return sum;
+}
+
 /******************************************************************************
  * Function: Setup the ACS712 sensor
  * Description: This function setups the ACS712 sensor by calculating the automidpoint and setting the sensitivty to the correct value
@@ -75,12 +104,47 @@ void HMS::setupSensor()
  * Parameters: None
  * Return: String
  ******************************************************************************/
-String HMS::readAmps()
+int HMS::readAmps()
 {
     int mA = ACS.mA_DC();
     String Amps = String(mA);
-    Serial.println("," + Amps);
-    return Amps;
+    Serial.println("Stack Amps:" + Amps);
+    return mA;
+}
+
+/******************************************************************************
+ * Function: Return Charge Status of Stack
+ * Description: This function reads the current stack voltage and returns a number representing the charge status
+ * Parameters: None
+ * Return: String
+ ******************************************************************************/
+int HMS::ChargeStatus()
+{
+    if (StackVoltage() < 8.00 && StackVoltage() >= 0.00)
+    {
+        return 1;
+        printf("Stack is fully discharged");
+    }
+    else if (StackVoltage() < 10.00 && StackVoltage() >= 8.00)
+    {
+        return 2;
+        printf("Stack needs to be charged");
+    }
+    else if (StackVoltage() < 13.00 && StackVoltage() >= 11.0)
+    {
+        return 3;
+        printf("Stack has a full charge");
+    }
+    else if (StackVoltage() < 14.0 && StackVoltage() >= 12.0)
+    {
+        return 4;
+        printf("Stack is charging");
+    }
+    else if (StackVoltage() < 16.0 && StackVoltage() >= 14.0)
+    {
+        return 5;
+        printf("Stack has encountered an overcharge condition");
+    }
 }
 
 /******************************************************************************
@@ -114,7 +178,7 @@ void HMS::calibrateAmps()
             // SerialBT.print("," + ACS.getmVperAmp());
             break;
         default:
-            Serial.printf("No input detected");
+            printf("No input detected");
         }
     }
     delay(1000);

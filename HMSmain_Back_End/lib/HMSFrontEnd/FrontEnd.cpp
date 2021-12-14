@@ -13,8 +13,6 @@
 #define debugf(x)
 #endif
 
-const int maxVolatage = 24;
-const int maxTemp = 100;
 // Set these to your desired credentials.
 const String ssid = "H-BAT-" + String(WiFi.macAddress());
 const String password = "hbathbat";
@@ -263,6 +261,13 @@ const char *indexHtml = R"====(
             <label>AP Password</label>
             <input id="apPass"><br><hr>
             <button onclick="saveSettings()">Save</button>
+            <label>MQTT Broker IP</label>
+            <input id="mqttIP"><br>
+            <label>MQTT UserName</label>
+            <input id="mqttName"><br><hr>
+            <label>MQTT Password</label>
+            <input id="mqttPass"><br><hr>
+            <button onclick="saveMQTTSettings()">Save MQTT</button>
             <br>
             <table style="color: ivory;">
               <tr>
@@ -364,11 +369,13 @@ const toggleOffString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330
       }
     }
 
-
     async function saveSettings(){
       await getHTML("./wifiUpdate?apName="+document.getElementById("apName").value+ "&apPass="+ document.getElementById("apPass").value,false );
     }
-    
+
+    async function saveMQTTSettings(){
+      await getHTML("./mqttUpdate?mqttIP="+document.getElementById("mqttIP").value+ "&mqttName="+document.getElementById("mqttName").value+ "&mqttPass="+ document.getElementById("mqttPass").value,false );
+    }
 
     function setMeeterValue(itemId, itemValue, itemTypeString, colorForMeeter) {
         document.getElementById(itemId).style.cssText = `--value:` + itemValue + `;--typeOfValue:'` + itemTypeString + `';--fg: ` + colorForMeeter + `;`;
@@ -430,13 +437,30 @@ const toggleOffString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330
 
 WebServer server(80);
 data_arrays dataTosend;
+HMSmqtt Mqtt;
 
 FrontEnd::FrontEnd(void)
 {
+  json = AccumulateData().json;
+  maxVoltage = 24;
+  maxTemp = 100;
+  NewMQTTIP = server.arg("mqttIP");
+  NewMQTTPass = server.arg("mqttPass");
+  NewMQTTUser = server.arg("mqttUser");
+  temp = "ESP32-" + String(GetChipID());
+  ClientID = strtoul(temp.c_str(), NULL, 16);
 }
 
 FrontEnd::~FrontEnd(void)
 {
+}
+
+uint8_t FrontEnd::GetChipID()
+{
+  uint8_t ChipID[6];
+  esp_efuse_mac_get_default(ChipID);
+  size_t chip_id = Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x\n", ChipID[0], ChipID[1], ChipID[2], ChipID[3], ChipID[4], ChipID[5]);
+  return chip_id;
 }
 
 void FrontEnd::SetupServer()
@@ -469,11 +493,17 @@ void FrontEnd::SetupServer()
 
   server.on(F("/wifiUpdate"), [&]()
             {
-    //Place code here to setup wifi connectivity
+    //Place code here to setup wifi and mqtt connectivity
     String NewApName = server.arg("apName");
     String NewApPass = server.arg("apPass");
     server.send(200, "application/json", "yay");
     connectToApWithFailToStation(NewApName, NewApPass); });
+
+  server.on(F("/mqttUpdate"), [&]()
+            {
+    //Place code here to setup wifi and mqtt connectivity
+    server.send(200, "application/json", "yay");
+    Mqtt.MQTTConnect(); });
 
   server.on(F("/toggle"), [&]()
             {
@@ -486,7 +516,7 @@ void FrontEnd::SetupServer()
 
   server.on(F("/data.json"), [&]()
             {
-    String json = "";
+    json = "";
     json += R"====({)====";
 
     json += R"====("stack_humidity":)====";
@@ -516,7 +546,7 @@ void FrontEnd::SetupServer()
       json += R"====({"label": "⚡ )====" + (String)i + "\",\n";
       json += R"====("type": "volt",)====" + (String)"\n";
       json += R"====("value": )====" + (String)dataTosend.cell_voltage[i] + (String)",\n";
-      json += R"====("maxValue": )====" + (String) maxVolatage;
+      json += R"====("maxValue": )====" + (String) maxVoltage;
       json += R"====(})====" + (String)"\n";
 
       if (i < 9) {

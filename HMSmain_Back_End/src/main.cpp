@@ -25,7 +25,7 @@ bool Charge_State;
     debugln(value);
 } */
 
-void Task1code(void *parameter)
+void TasktoRunNetworkStack(void *parameter)
 {
     Serial.print("Webserver running on core ");
     Serial.println(xPortGetCoreID());
@@ -36,7 +36,7 @@ void Task1code(void *parameter)
     }
 }
 
-void Task2code(void *pvParameters)
+void TasktoAccumulateSensorData(void *pvParameters)
 {
     Serial.print("Data Accumulation running on core ");
     Serial.println(xPortGetCoreID());
@@ -60,7 +60,7 @@ void setup()
 
     /* Cores where the task should run */
     xTaskCreatePinnedToCore(
-        Task1code,  /* Function to implement the task */
+        TasktoRunNetworkStack,  /* Function to implement the task */
         "Task1",    /* Name of the task */
         10000,      /* Stack size in words */
         NULL,       /* Task input parameter */
@@ -72,7 +72,7 @@ void setup()
     {
         // create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
         xTaskCreatePinnedToCore(
-            Task2code,       /* Task function. */
+            TasktoAccumulateSensorData,       /* Task function. */
             "Task2",         /* name of task. */
             10000,           /* Stack size of task */
             NULL,            /* parameter of the task */

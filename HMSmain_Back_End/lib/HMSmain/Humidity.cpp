@@ -13,6 +13,10 @@ PID myPID(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT); // Specify the links and
 
 Humidity::Humidity(void)
 {
+  flow = returnData[0];
+  temperature = returnData[1];
+  sht31 = Adafruit_SHT31();
+  sht31_2 = Adafruit_SHT31();
 }
 
 Humidity::~Humidity(void)
@@ -149,7 +153,7 @@ float *Humidity::ReadSensor()
 
 /******************************************************************************
  * Function: Control MPX2010DP - K014308 and AD623
- * Description: This function allows for manual calibration of the ACS712 sensor by setting the sensitivity to the correct value
+ * Description: This function allows for the control of the MPX2010DP - K014308 and AD623
  * Parameters: None
  * Return: None
  ******************************************************************************/

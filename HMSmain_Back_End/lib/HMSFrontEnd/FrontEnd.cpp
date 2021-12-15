@@ -267,7 +267,7 @@ const char *indexHtml = R"====(
             <input id="mqttName"><br><hr>
             <label>MQTT Password</label>
             <input id="mqttPass"><br><hr>
-            <button onclick="saveMQTTSettings()">Save MQTT</button>
+            <button onclick="saveMQTTSettings()">Save MQTT Data</button>
             <br>
             <table style="color: ivory;">
               <tr>
@@ -289,6 +289,10 @@ const char *indexHtml = R"====(
               <tr>
                 <td>Relay 4</td>
                 <td id="relay4" onclick="toggleRelay(this);"></td>
+              </tr>
+              <tr>
+                <td>Enable MQTT</td>
+                <td id="relay5" onclick="toggleRelay(this);"></td>
               </tr>
 
             </table>            
@@ -366,6 +370,11 @@ const toggleOffString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330
     async function updateToggls(togglesToUpdate){
       for (let i = 0; i < togglesToUpdate.length; i++) {
         (await document.getElementById("relay"+i)).innerHTML = ((togglesToUpdate[i] == 1) ? toggleOnString:toggleOffString);
+      }
+    }
+
+    async function enableMQTT(){
+      await getHTML("./mqttEnable?mqttEnableState="+document.getElementById("mqttEnableState").value,false );
       }
     }
 
@@ -449,6 +458,7 @@ FrontEnd::FrontEnd(void)
   NewMQTTUser = server.arg("mqttUser");
   temp = "ESP32-" + String(GetChipID());
   ClientID = strtoul(temp.c_str(), NULL, 16);
+  mqttFrontEndCondition = false;
 }
 
 FrontEnd::~FrontEnd(void)
@@ -498,11 +508,18 @@ void FrontEnd::SetupServer()
     String NewApPass = server.arg("apPass");
     server.send(200, "application/json", "yay");
     connectToApWithFailToStation(NewApName, NewApPass); });
+  
+  server.on(F("/mqttEnable"), [&]()
+            {
+            mqttFrontEndCondition = true;
+    //Place code here to setup wifi and mqtt connectivity 
+            });
 
   server.on(F("/mqttUpdate"), [&]()
             {
     //Place code here to setup wifi and mqtt connectivity
-    server.send(200, "application/json", "yay");
+    mqttFrontEndCondition = true;
+    server.send(200, "application/json", "MQTT Updated");
     Mqtt.MQTTConnect(); });
 
   server.on(F("/toggle"), [&]()

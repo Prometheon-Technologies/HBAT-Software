@@ -32,7 +32,14 @@ void TasktoRunNetworkStack(void *parameter)
     for (;;)
     {
         FrontEnd_Data.ClientLoop();
-        Mqtt_Data.MQTTLoop();
+        if (FrontEnd_Data.mqttFrontEndCondition == true)
+        {
+            for(;;)
+            {
+                Mqtt_Data.MQTTLoop();
+            }
+            
+        }
     }
 }
 

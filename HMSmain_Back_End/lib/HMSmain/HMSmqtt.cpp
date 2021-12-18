@@ -4,10 +4,6 @@ FrontEnd Front_End = FrontEnd();
 
 HMSmqtt::HMSmqtt()
 {
-    last_mqtt_connect_attempt = 0;
-    last_mqtt_publish_attempt = 0;
-    lastMillis = 0;
-    client = Front_End.ClientID;
 }
 
 HMSmqtt::~HMSmqtt(void)

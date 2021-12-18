@@ -6,16 +6,18 @@
 #ifndef FRONTEND_h
 #define FRONTEND_h
 #include <Arduino.h>
+// wifi definition
 #include <WiFi.h>
+#include <WiFiManager.h> // https://github.com/tzapu/WiFiManager/tree/development
+WiFiManager wifiManager;
+bool wifiMangerPortalRunning = false;
+bool wifiConnected = false;
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <WiFiAP.h>
 #include <SPIFFS.h>
 #include <HMSmqtt.h>
-/* #include <index.html.h> */
 #include <AccumulateData.h>
-
-#define LED_BUILTIN 2 // Set the GPIO pin where you connected your test LED or comment this line out if your dev board has a built-in LED
 
 class FrontEnd
 {

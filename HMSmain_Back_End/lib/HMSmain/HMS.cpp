@@ -183,3 +183,26 @@ void HMS::calibrateAmps()
     }
     delay(1000);
 }
+
+// a function to get the device ID by returning generateDeviceID()
+String HMS::getDeviceID()
+{
+    return generateDeviceID();
+}
+
+// a function to generate the device ID and called generateDeviceID()
+String HMS::generateDeviceID()
+{
+    uint32_t chipId = 0;
+    for (int i = 0; i < 17; i = i + 8)
+    {
+        chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
+    }
+
+    SERIAL_DEBUG_ADDF("ESP32 Chip model = %s Rev %d\n", ESP.getChipModel(), ESP.getChipRevision());
+    SERIAL_DEBUG_ADDF("This chip has %d cores\n", ESP.getChipCores());
+    SERIAL_DEBUG_ADD("Chip ID: ");
+    SERIAL_DEBUG_LN(chipId);
+    String deviceID = String(chipId);
+    return deviceID;
+}

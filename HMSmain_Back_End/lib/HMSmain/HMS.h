@@ -21,6 +21,8 @@ public:
   float readVoltage(int pinnumber);
   float StackVoltage();
   float *readSensAndCondition();
+  String getDeviceID();
+  String generateDeviceID();
 
 private:
 };

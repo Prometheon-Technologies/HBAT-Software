@@ -45,6 +45,7 @@
 #define DEFAULT_HOSTNAME "HBAT_HMS" // default hostname
 #define ENABLE_MULTICAST_DNS // allows to access the UI via "http://<HOSTNAME>.local/"
 #define ENABLE_MQTT_SUPPORT               // allows integration in homeassistant/googlehome/mqtt
+#define maxCellCount 10 // max number of cells
 /*######################## MQTT Configuration ########################*/
 #ifdef ENABLE_MQTT_SUPPORT
 // these are deafault settings which can be changed in the web interface "settings" page

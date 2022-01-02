@@ -1,21 +1,4 @@
 #include <AccumulateData.h>
-#define DEBUG 1
-#define maxCellCount 10
-#if DEBUG == 1
-#define debug(x) Serial.print(x)
-#define debugln(x) Serial.println(x)
-#define debugf(x) Serial.printf(x)
-
-#else
-#define debug(x)
-#define debugln(x)
-#define debugf(x)
-#endif
-
-HMS HMSmain = HMS();
-Humidity Hum = Humidity();
-CellTemp Cell_Temp = CellTemp();
-HMSmqtt MqttData = HMSmqtt();
 
 AccumulateData::AccumulateData()
 {
@@ -61,7 +44,7 @@ void AccumulateData::SetupMainLoop()
   }
   else
   {
-    printf("Flow Rate Sensor Could Not Be Read\n");
+    SERIAL_DEBUG_LN(("Flow Rate Sensor Could Not Be Read\n"));
   }
 
   // Stack level dataTosend
@@ -115,6 +98,7 @@ void AccumulateData::SetupMainLoop()
  ******************************************************************************/
 void AccumulateData::InitAccumulateDataJson()
 {
+  // Temporary function to ensure that the correct number of cells are being read - this will be removed when the cell count is dynamically allocated
   int numSensors = Cell_Temp.GetSensorCount();
   if (numSensors > maxCellCount)
   {
@@ -149,7 +133,11 @@ void AccumulateData::InitAccumulateDataJson()
   }
   else
   {
-    printf("Flow Rate Sensor Could Not Be Read\n");
+    SERIAL_DEBUG_LN(("Flow Rate Sensor Could Not Be Read\n"));
+    // SFM3003 flow rate dataTosend in slm
+    doc["HMS_Flow_Rate"] = 0;
+    // SFM3003 mass temp dataTosend
+    doc["Flow_Rate_Sensor_Temp"] = 0;
   }
 
   // Add arrays for Cell level Data.
@@ -184,10 +172,17 @@ void AccumulateData::InitAccumulateDataJson()
     Humidity_Sensor_Data.add(stack_humidity[3]);
   }
 
-  serializeJson(doc, Serial);
-  debugln();
+  SERIAL_DEBUG_EOL(serializeJson(doc, Serial));
   json = doc.as<String>();
-  MqttData.MQTTPublish("/HMS", json);
+  if (json.length() > 0)
+  {
+    SERIAL_DEBUG_LN(json);
+  }
+  if (MQTT_ENABLED && MQTT_CONNECTED)
+  {
+    String currentTopic = MQTT_TOPIC + '//' + HMSmain.getDeviceID();
+    MqttData.MQTTPublish(currentTopic, json);
+  }
 }
 
 /* void InitJsonData()
@@ -242,5 +237,3 @@ void AccumulateData::InitAccumulateDataJson()
   MqttData.MQTTPublish("/HMS" ,json);
 }
  */
-
-// use the ArduinoJSON library to add all sensor data to the json string

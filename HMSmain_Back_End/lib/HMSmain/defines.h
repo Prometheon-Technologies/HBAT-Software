@@ -56,7 +56,7 @@
 #define MQTT_PASS ""
 #define MQTT_TOPIC_SET "/set" // MQTT Topic to subscribe to for changes(Home Assistant)
 #define MQTT_HOMEASSISTANT_TOPIC "homeassistant/HBAT/data" // MQTT Topic to Publish to for state and config (Home Assistant)
-#define MQTT_TOPIC "hms/data"  
+#define MQTT_TOPIC "hms/data/"  
 #define MQTT_DEVICE_NAME "HBAT_HMS"                           // MQTT Topic to Publish to for state and config (Any MQTT Broker)
 #define MQTT_UNIQUE_IDENTIFIER WiFi.macAddress() // A Unique Identifier for the device in Homeassistant (MAC Address used by default)
 #define MQTT_MAX_PACKET_SIZE 1024

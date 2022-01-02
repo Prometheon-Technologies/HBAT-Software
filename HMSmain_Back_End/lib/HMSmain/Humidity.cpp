@@ -2,7 +2,7 @@
 
 //Global Variables
 // Setup an array of relays to control peripherals. Numbers represent pin numbers.
-const int relays[MAXNUMOFRELAYS] = {45, 38, 36, 35, 48};
+
 bool enableHeater = false;
 int WindowSize = 5000;
 unsigned long windowStartTime;
@@ -17,6 +17,12 @@ Humidity::Humidity(void)
   temperature = returnData[1];
   sht31 = Adafruit_SHT31();
   sht31_2 = Adafruit_SHT31();
+  relays[0] = 45;
+  relays[1] = 38;
+  relays[2] = 36;
+  relays[3] = 35;
+  relays[4] = 48;
+  //relays[] = {45, 38, 36, 35, 48};
 }
 
 Humidity::~Humidity(void)

@@ -5,9 +5,7 @@
 
 #ifndef CELLTEMP_h
 #define CELLTEMP_h
-#include <Arduino.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
+#include <defines.h>
 
 class CellTemp
 {

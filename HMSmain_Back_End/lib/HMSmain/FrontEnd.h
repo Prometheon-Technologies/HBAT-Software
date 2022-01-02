@@ -5,19 +5,7 @@
 
 #ifndef FRONTEND_h
 #define FRONTEND_h
-#include <Arduino.h>
-// wifi definition
-#include <WiFi.h>
-#include <WiFiManager.h> // https://github.com/tzapu/WiFiManager/tree/development
-WiFiManager wifiManager;
-bool wifiMangerPortalRunning = false;
-bool wifiConnected = false;
-#include <WiFiClient.h>
-#include <WebServer.h>
-#include <WiFiAP.h>
-#include <SPIFFS.h>
-#include <HMSmqtt.h>
-#include <AccumulateData.h>
+#include <defines.h>
 
 class FrontEnd
 {
@@ -28,6 +16,7 @@ public:
     String json_return_data();
     void SetupServer();
     void ClientLoop();
+    void FrontEndLoop();
     void connectToApWithFailToStation(String WIFI_STA_SSID, String WIFI_STA_PASS);
     uint8_t GetChipID();
 
@@ -39,7 +28,7 @@ public:
     String NewMQTTIP;
     String NewMQTTPass;
     String NewMQTTUser;
-    String json;
+    String AccumulateSensorjson;
     String temp;
     unsigned long ClientID;
     char clientIP;

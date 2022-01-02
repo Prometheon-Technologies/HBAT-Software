@@ -5,11 +5,8 @@
 
 #ifndef ACCUMULATEDATA_h
 #define ACCUMULATEDATA_h
-#include <Arduino.h>
-#include <HMS.h>
-#include <Humidity.h>
-#include <celltemp.h>
-#include <HMSmqtt.h>
+#include <defines.h>
+
 //#include <MemoryFree.h>
 
 /******************************************************************************
@@ -18,7 +15,7 @@
  * Parameters: None
  * Return: None
  ******************************************************************************/
-struct data_arrays
+/* struct data_arrays
 {
     boolean relays[5];
     float stack_humidity;
@@ -29,11 +26,9 @@ struct data_arrays
     float flow_rate;
     float flow_rate_sensor_temp;
     int flow_rate_sensor_status;
-};
+}; */
 
-extern HMS HMSmain;
-extern Humidity Hum;
-extern CellTemp Cell_Temp;
+// extern DynamicJsonDocument  doc(200);
 
 class AccumulateData
 {
@@ -42,7 +37,8 @@ public:
     AccumulateData();
     virtual ~AccumulateData(void);
     void SetupMainLoop();
-    data_arrays AccumulateDataMainLoop();
+    void InitAccumulateDataJson();
+    /* data_arrays AccumulateDataMainLoop(); */
     // Variables
     String json;
     int maxVoltage;

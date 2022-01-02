@@ -21,7 +21,7 @@ AccumulateData::AccumulateData()
 {
   json = "";
   maxVoltage = 24;
-  maxTemp = 100;
+  maxTemp = 100; // in celcius
 }
 
 AccumulateData::~AccumulateData(void)
@@ -47,9 +47,9 @@ void AccumulateData::SetupMainLoop()
  * Parameters: None
  * Return: None
  ******************************************************************************/
-data_arrays AccumulateData::AccumulateDataMainLoop()
+/* data_arrays AccumulateData::AccumulateDataMainLoop()
 {
-  data_arrays dataTosend; 
+  data_arrays dataTosend;
   // Flow Rate dataTosend
   dataTosend.flow_rate_sensor_status = Hum.SFM3003();
   if (dataTosend.flow_rate_sensor_status == 0)
@@ -105,9 +105,92 @@ data_arrays AccumulateData::AccumulateDataMainLoop()
     debugln(dataTosend.cell_temp[i]);
   }
   return dataTosend;
+} */
+
+/******************************************************************************
+ * Function: Accumulate Data to send from sensors and store in json
+ * Description: This function accumualtes all sensor data and stores it in the main json data structure.
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
+void AccumulateData::InitAccumulateDataJson()
+{
+  int numSensors = Cell_Temp.GetSensorCount();
+  if (numSensors > maxCellCount)
+  {
+    numSensors = maxCellCount;
+  }
+
+  // Stack Data to send
+  doc["HMS_Stack_Humidity"] = Hum.StackHumidity();
+  doc["HMS_Stack_Temp"] = Hum.AverageStackTemp();
+  doc["HMS_Stack_Current"] = HMSmain.readAmps();
+  doc["HMS_Stack_Voltage"] = HMSmain.StackVoltage();
+
+  // Relays
+  JsonArray Relays = doc.createNestedArray("HMS_Relays");
+  bool relays[5] = {1, 2, 3, 4, 5};
+  for (int i = 0; i < 5; i++)
+  {
+    Relays.add(relays[i]);
+  }
+
+  doc["Flow_Rate_Sensor_Status"] = Hum.SFM3003();
+  // doc["HMS_Relays"] = "";
+
+  // Flow Rate dataTosend
+  int flow_rate_sensor_status = Hum.SFM3003();
+  if (flow_rate_sensor_status == 0)
+  {
+    // SFM3003 flow rate dataTosend in slm
+    doc["HMS_Flow_Rate"] = Hum.flow;
+    // SFM3003 mass temp dataTosend
+    doc["Flow_Rate_Sensor_Temp"] = Hum.temperature;
+  }
+  else
+  {
+    printf("Flow Rate Sensor Could Not Be Read\n");
+  }
+
+  // Add arrays for Cell level Data.
+  JsonArray Cell_Voltage = doc.createNestedArray("HMS_Cell_Voltage"); // from 0 - 10 in increasing order
+  float *cell_voltage = HMSmain.readSensAndCondition();
+  // loop through and store per cell voltage
+  for (int i = 0; i < numSensors; i++)
+  {
+    Cell_Voltage.add(cell_voltage[i]);
+  }
+
+  free(cell_voltage); // free the memory
+
+  JsonArray CellTemp = doc.createNestedArray("HMS_Cell_Temp");
+  float *cell_temp = Cell_Temp.ReadTempSensorData(); // returns a float array of cell temperatures
+  // loop through and store per cell temp data
+  for (int i = 0; i < numSensors; i++)
+  {
+    CellTemp.add(cell_temp[i]);
+  }
+
+  free(cell_temp); // free the memory
+
+  // Individual Huimidity sensor data
+  JsonArray Humidity_Sensor_Data = doc.createNestedArray("Humidity_Sensor_Data");
+  float stack_humidity[4];
+
+  for (int i = 0; i < 4; i++)
+  {
+    stack_humidity[i] = *Hum.ReadSensor();
+    Humidity_Sensor_Data.add(stack_humidity[1]);
+    Humidity_Sensor_Data.add(stack_humidity[3]);
+  }
+
+  serializeJson(doc, Serial);
+  debugln();
+  json = doc.as<String>();
+  MqttData.MQTTPublish("/HMS", json);
 }
 
-void InitJsonData()
+/* void InitJsonData()
 {
   data_arrays dataTosend;
   String json = AccumulateData().json;
@@ -158,3 +241,6 @@ void InitJsonData()
   Serial.println(json);
   MqttData.MQTTPublish("/HMS" ,json);
 }
+ */
+
+// use the ArduinoJSON library to add all sensor data to the json string

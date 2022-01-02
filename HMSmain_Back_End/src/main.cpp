@@ -52,7 +52,7 @@ void TasktoAccumulateSensorData(void *pvParameters)
     {
         if (ReadTimer.ding())
         {
-            StackData.AccumulateDataMainLoop();
+            StackData.AccumulateDataMainLoop();StackData.AccumulateDataMainLoop();
             Hum.SFM3003();
             ReadTimer.start();
         }
@@ -96,4 +96,4 @@ void ScanI2CBus()
     scanner.BeginScan();
 }
 
-void loop(){}
+void loop() {}

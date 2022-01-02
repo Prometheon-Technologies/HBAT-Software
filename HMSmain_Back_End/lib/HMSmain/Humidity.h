@@ -5,12 +5,7 @@
 
 #ifndef HUMIDITY_h
 #define HUMIDITY_h
-#define MAXNUMOFRELAYS 5
-#include <Arduino.h>
-#include <Wire.h>
-#include <Adafruit_SHT31.h>
-#include <PID_v1.h>
-#include <sfm3003.h>
+#include <defines.h>
 
 class Humidity
 {
@@ -33,6 +28,7 @@ public:
   float returnData[2];
   float flow;
   float temperature;
+  int relays[5];
   Adafruit_SHT31 sht31;
   Adafruit_SHT31 sht31_2;
 

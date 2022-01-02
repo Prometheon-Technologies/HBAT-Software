@@ -432,12 +432,11 @@ const toggleOffString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330
 )====";
 
 WebServer server(80);
-data_arrays dataTosend;
 HMSmqtt Mqtt;
 
 FrontEnd::FrontEnd(void)
 {
-  json = AccumulateData().json;
+  /* AccumulateSensorjson = AccumulateData().json; */
   maxVoltage = 24;
   maxTemp = 100;
   NewMQTTIP = server.arg("mqttIP");
@@ -591,9 +590,6 @@ void FrontEnd::FrontEndLoop()
       }
 #endif
     }
-#if defined(ENABLE_MULTICAST_DNS) && defined(ESP8266)
-    MDNS.update();
-#endif // ENABLE_MULTICAST_DNS
   }
 
 #ifdef ENABLE_MQTT_SUPPORT
@@ -764,9 +760,9 @@ void FrontEnd::SetupServer()
   SERIAL_DEBUG_LNF("Version: %s (%s)", VERSION, VERSION_DATE)
   SERIAL_DEBUG_LNF("Heap: %d", system_get_free_heap_size())
   SERIAL_DEBUG_LNF("SDK: %s", system_get_sdk_version())
+  SERIAL_DEBUG_LNF("MAC address: %s", WiFi.macAddress().c_str())
   SERIAL_DEBUG_LNF("CPU Speed: %d MHz", ESP.getCpuFreqMHz());
   SERIAL_DEBUG_LNF("Flash Size: %dKB", ESP.getFlashChipSize());
-  SERIAL_DEBUG_LNF("MAC address: %s", WiFi.macAddress().c_str())
   SERIAL_DEBUG_EOL
 
   // setting up Wifi
@@ -1015,46 +1011,46 @@ void FrontEnd::SetupServer()
   server.on("/reset", HTTP_POST, []()
             {
 
-        // delete EEPROM settings
-        if (server.arg("type") == String("all")) {
-            resetConfig();
-            SERIAL_DEBUG_LN("Resetting config")
-        }
+      // delete EEPROM settings
+      if (server.arg("type") == String("all")) {
+          resetConfig();
+          SERIAL_DEBUG_LN("Resetting config")
+      }
 
-        // delete wireless config
-        if (server.arg("type") == String("wifi") || server.arg("type") == String("all")) {
-            setWiFiConf(String(""), String(""));
-            SERIAL_DEBUG_LN("Resetting wifi settings");
-        }
-        server.send(200, "text/html", "<html><head></head><body><font face='arial'><b><h2>Config reset finished. Device is rebooting now and you need to connect to the wireless again.</h2></b></font></body></html>");
-        delay(500);
-        ESP.restart(); });
+      // delete wireless config
+      if (server.arg("type") == String("wifi") || server.arg("type") == String("all")) {
+          setWiFiConf(String(""), String(""));
+          SERIAL_DEBUG_LN("Resetting wifi settings");
+      }
+      server.send(200, "text/html", "<html><head></head><body><font face='arial'><b><h2>Config reset finished. Device is rebooting now and you need to connect to the wireless again.</h2></b></font></body></html>");
+      delay(500);
+      ESP.restart(); });
 
   server.on("/fieldValue", HTTP_GET, []()
             {
-        String name = server.arg("name");
-        String value = getFieldValue(name, fields, fieldCount);
-        server.send(200, "text/json", value); });
+      String name = server.arg("name");
+      String value = getFieldValue(name, fields, fieldCount);
+      server.send(200, "text/json", value); });
 
   server.on("/fieldValue", HTTP_POST, []()
             {
-        String name = server.arg("name");
-        String value = server.arg("value");
-        String newValue = setFieldValue(name, value, fields, fieldCount);
-        server.send(200, "text/json", newValue); });
+      String name = server.arg("name");
+      String value = server.arg("value");
+      String newValue = setFieldValue(name, value, fields, fieldCount);
+      server.send(200, "text/json", newValue); });
 
   server.on("/power", []()
             {
-        String value = server.arg("value");
-        value.toLowerCase();
-        if (value == String("1") || value == String("on")) {
-            setPower(1);
-        } else if (value == String("0") || value == String("off")) {
-            setPower(0);
-        } else if (value == String("toggle")) {
-            setPower((power == 1) ? 0 : 1);
-        }
-        sendInt(power); });
+      String value = server.arg("value");
+      value.toLowerCase();
+      if (value == String("1") || value == String("on")) {
+          setPower(1);
+      } else if (value == String("0") || value == String("off")) {
+          setPower(0);
+      } else if (value == String("toggle")) {
+          setPower((power == 1) ? 0 : 1);
+      }
+      sendInt(power); });
   server.serveStatic("/", SPIFFS, "/", "max-age=86400");
 
   Serial.println("INFO: HTTP web server started");
@@ -1075,76 +1071,37 @@ void FrontEnd::SetupServer()
 
   server.on(F("/wifiUpdate"), [&]()
             {
-  // Place code here to setup wifi and mqtt connectivity
-  String NewApName = server.arg("apName");
-  String NewApPass = server.arg("apPass");
-  server.send(200, "application/json", "yay");
-  connectToApWithFailToStation(NewApName, NewApPass); });
+// Place code here to setup wifi and mqtt connectivity
+String NewApName = server.arg("apName");
+String NewApPass = server.arg("apPass");
+server.send(200, "application/json", "yay");
+connectToApWithFailToStation(NewApName, NewApPass); });
 
-  server.on(F("/mqttEnable"), [&]()
-            {
+server.on(F("/mqttEnable"), [&]()
+          {
     mqttFrontEndCondition = true;
     // Place code here to setup wifi and mqtt connectivity });
 
     server.on(F("/mqttUpdate"), [&]()
               {
-    //Place code here to setup wifi and mqtt connectivity
-    mqttFrontEndCondition = true;
-    server.send(200, "application/json", "MQTT Updated");
-    Mqtt.MQTTConnect(); });
+  //Place code here to setup wifi and mqtt connectivity
+  mqttFrontEndCondition = true;
+  server.send(200, "application/json", "MQTT Updated");
+  Mqtt.MQTTConnect(); });
 
     server.on(F("/toggle"), [&]()
               {
-    //Place code here to setup wifi connectivity
-    int pinToToggle = server.arg("pin").toInt();
-    Serial.print("switching state of pin :");
-    Serial.println(pinToToggle);
-    dataTosend.relays[pinToToggle] = (dataTosend.relays[pinToToggle] == true) ? false : true;
-    server.send(200, "application/json", "toggled"); });
+  int pinToToggle = server.arg("pin").toInt();
+  Serial.print("switching state of pin :");
+  Serial.println(pinToToggle);
+  dataTosend.relays[pinToToggle] = (dataTosend.relays[pinToToggle] == true) ? false : true;
+  server.send(200, "application/json", "toggled"); });
 
     server.on(F("/data.json"), [&]()
-              {
-    json = "";
-    json += R"====({)====";
-
-    json += R"====("stack_humidity":)====";
-    json += (String)dataTosend.stack_humidity + ",\n";
-
-    json += R"====("stack_temp":)====";
-    json += (String)dataTosend.stack_temp + ",\n";
-
-    json += R"====("relays":[)====";
-    json += (String) dataTosend.relays[0] + "," + (String) dataTosend.relays[1] + "," +  (String) dataTosend.relays[2] + "," +  (String) dataTosend.relays[3] + "," +  (String) dataTosend.relays[4] + "],\n";
-
-    json += R"====("stack_voltage":)====";
-    json += (String)dataTosend.stack_voltage + ",\n";
-
-    json += R"====("fakeGraphData":[)====";
-    json +=  "\n";
-    for (int i = 0; i < 10; i++) {
-
-      delay(0);
-      json += R"====({"label": "🌡 )====" + (String)i + "\",\n";
-      json += R"====("type": "temp",)====" + (String)"\n";
-      json += R"====("value": )====" + (String)dataTosend.cell_temp[i] + (String)",\n";
-      json += R"====("maxValue": )====" + (String) maxTemp;
-      json += R"====(})====" + (String)"\n";
-      json += R"====(,)====";
-
-      json += R"====({"label": "⚡ )====" + (String)i + "\",\n";
-      json += R"====("type": "volt",)====" + (String)"\n";
-      json += R"====("value": )====" + (String)dataTosend.cell_voltage[i] + (String)",\n";
-      json += R"====("maxValue": )====" + (String) maxVoltage;
-      json += R"====(})====" + (String)"\n";
-
-      if (i < 9) {
-        json += R"====(,)====";
-      };
-    }
-    json += R"====(])====";
-    json += R"====(})====";
-    server.send(200, "application/json", json);
-    json = ""; });
+              { 
+              String json;
+              serializeJson(doc, json);
+              server.send(200, "application/json", json); });
 
     server.begin();
     Serial.println("HTTP server started");

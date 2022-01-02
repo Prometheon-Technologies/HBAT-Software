@@ -5,10 +5,7 @@
 
 #ifndef HMS_h
 #define HMS_h
-#include <Arduino.h>
-#include <Wire.h>
-#include <ACS712.h>
-#include <Adafruit_SHT31.h>
+#include <defines.h>
 
 class HMS
 {

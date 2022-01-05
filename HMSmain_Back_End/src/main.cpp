@@ -1,68 +1,12 @@
-#define VERSION "0.0.1"
-#define VERSION_DATE "2021-12-17"
-#include <FrontEnd.h>
-#include <timeObj.h>
-#include <i2cscan.h>
+#include <defines.h>
 
-TaskHandle_t runserver;
-TaskHandle_t accumulatedata;
-Scanner scanner;
-timeObj ReadTimer(5000);
-AccumulateData StackData;
-HMSmqtt Mqtt_Data = HMSmqtt();
-FrontEnd FrontEnd_Data = FrontEnd();
 
-int period = 500;
-unsigned long time_now = 0;
-bool Charge_State;
-
-/******************************************************************************
- * Function: Debug Print Data
- * Description: This function prints all string data to the serial console.
- * Parameters: None
- * Return: None
- ******************************************************************************/
-/* void debugdata(String value)
-{
-    debugln(value);
-} */
-
-void TasktoRunNetworkStack(void *parameter)
-{
-    Serial.print("Webserver running on core ");
-    Serial.println(xPortGetCoreID());
-    for (;;)
-    {
-        FrontEnd_Data.ClientLoop();
-        if (FrontEnd_Data.mqttFrontEndCondition == true)
-        {
-            for (;;)
-            {
-                Mqtt_Data.MQTTLoop();
-            }
-        }
-    }
-}
-
-void TasktoAccumulateSensorData(void *pvParameters)
-{
-    Serial.print("Data Accumulation running on core ");
-    Serial.println(xPortGetCoreID());
-    for (;;)
-    {
-        if (ReadTimer.ding())
-        {
-            StackData.AccumulateDataMainLoop();StackData.AccumulateDataMainLoop();
-            Hum.SFM3003();
-            ReadTimer.start();
-        }
-    }
-}
 
 void setup()
 {
-    FrontEnd_Data.SetupServer();
-    StackData.SetupMainLoop();
+    setupTasks();
+    Front_End.SetupServer();
+    accumulatedData.SetupMainLoop();
     // Hum.SetupPID();
     time_now = millis();
 
@@ -96,4 +40,11 @@ void ScanI2CBus()
     scanner.BeginScan();
 }
 
-void loop() {}
+void loop() {
+    runner.execute();
+}
+
+
+
+
+

@@ -25,72 +25,6 @@ void AccumulateData::SetupMainLoop()
 }
 
 /******************************************************************************
- * Function: Accumulate DataTosend from sensor arrays
- * Description: This function accumualtes all sensor data and stores it in the main data structure.
- * Parameters: None
- * Return: None
- ******************************************************************************/
-/* data_arrays AccumulateData::AccumulateDataMainLoop()
-{
-  data_arrays dataTosend;
-  // Flow Rate dataTosend
-  dataTosend.flow_rate_sensor_status = Hum.SFM3003();
-  if (dataTosend.flow_rate_sensor_status == 0)
-  {
-    // SFM3003 flow rate dataTosend in slm
-    dataTosend.flow_rate = Hum.flow;
-    // SFM3003 mass temp dataTosend
-    dataTosend.flow_rate_sensor_temp = Hum.temperature;
-  }
-  else
-  {
-    SERIAL_DEBUG_LN(("Flow Rate Sensor Could Not Be Read\n"));
-  }
-
-  // Stack level dataTosend
-  dataTosend.stack_humidity = Hum.StackHumidity();
-  debugln(dataTosend.stack_humidity);
-  dataTosend.stack_temp = Hum.AverageStackTemp();
-  debugln(dataTosend.stack_temp);
-
-  // Cell level dataTosend
-
-  float *cell_temp = Cell_Temp.ReadTempSensorData();
-  // loop through and store per cell temp data
-  for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
-  {
-    dataTosend.cell_temp[i] = cell_temp[i];
-    debugln(dataTosend.cell_temp[i]);
-  }
-
-  free(cell_temp);
-
-  float *cell_voltage = HMSmain.readSensAndCondition();
-  // loop through and store per cell voltage dataTosend
-  for (int i = 0; i < Cell_Temp.GetSensorCount(); i++)
-  {
-    dataTosend.cell_voltage[i] = cell_voltage[i];
-    debugln(dataTosend.cell_voltage[i]);
-  }
-
-  free(cell_voltage);
-
-  dataTosend.stack_voltage = 0;
-
-  int numSensors = Cell_Temp.GetSensorCount();
-  if (numSensors > maxCellCount)
-  {
-    numSensors = maxCellCount;
-  }
-  for (int i = 0; i < numSensors; i++)
-  {
-    dataTosend.stack_voltage += cell_voltage[i];
-    debugln(dataTosend.cell_temp[i]);
-  }
-  return dataTosend;
-} */
-
-/******************************************************************************
  * Function: Accumulate Data to send from sensors and store in json
  * Description: This function accumualtes all sensor data and stores it in the main json data structure.
  * Parameters: None
@@ -119,10 +53,8 @@ void AccumulateData::InitAccumulateDataJson()
     Relays.add(relays[i]);
   }
 
-  doc["Flow_Rate_Sensor_Status"] = Hum.SFM3003();
-  // doc["HMS_Relays"] = "";
-
   // Flow Rate dataTosend
+  doc["Flow_Rate_Sensor_Status"] = Hum.SFM3003();
   int flow_rate_sensor_status = Hum.SFM3003();
   if (flow_rate_sensor_status == 0)
   {
@@ -161,10 +93,9 @@ void AccumulateData::InitAccumulateDataJson()
 
   free(cell_temp); // free the memory
 
-  // Individual Huimidity sensor data
+  // Individual Humidity sensor data
   JsonArray Humidity_Sensor_Data = doc.createNestedArray("Humidity_Sensor_Data");
   float stack_humidity[4];
-
   for (int i = 0; i < 4; i++)
   {
     stack_humidity[i] = *Hum.ReadSensor();
@@ -180,60 +111,7 @@ void AccumulateData::InitAccumulateDataJson()
   }
   if (MQTT_ENABLED && MQTT_CONNECTED)
   {
-    String currentTopic = MQTT_TOPIC + HMSmain.getDeviceID() + "/all_json_data";
-    MqttData.MQTTPublish(currentTopic, json);
+    String currentTopic = MQTT_TOPIC + HMSmain.getDeviceID() + "/all_json_data"; //set the topic to the main topic + the device ID + /all_json_data
+    MqttData.MQTTPublish(currentTopic, json); // publish the json data to the topic as a string
   }
 }
-
-/* void InitJsonData()
-{
-  data_arrays dataTosend;
-  String json = AccumulateData().json;
-  int maxTemp = AccumulateData().maxTemp;
-  int maxVoltage = AccumulateData().maxVoltage;
-  json = "";
-  json += R"====({)====";
-
-  json += R"====("stack_humidity":)====";
-  json += (String)dataTosend.stack_humidity + ",\n";
-
-  json += R"====("stack_temp":)====";
-  json += (String)dataTosend.stack_temp + ",\n";
-
-  json += R"====("relays":[)====";
-  json += (String)dataTosend.relays[0] + "," + (String)dataTosend.relays[1] + "," + (String)dataTosend.relays[2] + "," + (String)dataTosend.relays[3] + "," + (String)dataTosend.relays[4] + "],\n";
-
-  json += R"====("stack_voltage":)====";
-  json += (String)dataTosend.stack_voltage + ",\n";
-
-  json += R"====("fakeGraphData":[)====";
-  json += "\n";
-  for (int i = 0; i < 10; i++)
-  {
-
-    delay(0);
-    json += R"====({"label": "🌡 )====" + (String)i + "\",\n";
-    json += R"====("type": "temp",)====" + (String) "\n";
-    json += R"====("value": )====" + (String)dataTosend.cell_temp[i] + (String) ",\n";
-    json += R"====("maxValue": )====" + (String)maxTemp;
-    json += R"====(})====" + (String) "\n";
-    json += R"====(,)====";
-
-    json += R"====({"label": "⚡ )====" + (String)i + "\",\n";
-    json += R"====("type": "volt",)====" + (String) "\n";
-    json += R"====("value": )====" + (String)dataTosend.cell_voltage[i] + (String) ",\n";
-    json += R"====("maxValue": )====" + (String)maxVoltage;
-    json += R"====(})====" + (String) "\n";
-
-    if (i < 9)
-    {
-      json += R"====(,)====";
-    };
-  }
-  json += R"====(])====";
-  json += R"====(})====";
-  json = "";
-  Serial.println(json);
-  MqttData.MQTTPublish("/HMS" ,json);
-}
- */

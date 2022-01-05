@@ -18,7 +18,10 @@ public:
     void ClientLoop();
     void FrontEndLoop();
     void connectToApWithFailToStation(String WIFI_STA_SSID, String WIFI_STA_PASS);
+    void updateCurrentData();
     uint8_t GetChipID();
+    char *StringtoChar(String inputString);
+    void loadConfig();
 
     // Variables
 

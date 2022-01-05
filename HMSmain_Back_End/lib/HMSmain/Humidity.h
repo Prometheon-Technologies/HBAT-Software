@@ -29,9 +29,7 @@ public:
   float flow;
   float temperature;
   int relays[5];
-  Adafruit_SHT31 sht31;
-  Adafruit_SHT31 sht31_2;
-
+  
 private:
   int received;
   bool sensor1 = sht31.isHeaterEnabled();

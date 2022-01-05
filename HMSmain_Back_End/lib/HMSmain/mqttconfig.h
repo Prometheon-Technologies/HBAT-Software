@@ -16,10 +16,9 @@
 //}
 //#endif
 
-#include <EEPROM.h>
-#define EEPROM_SIZE 512
-#include <Arduino.h>
+
 #include <defines.h>
+#define EEPROM_SIZE 512
 
 #define CONFIG_SAVE_MAX_DELAY 10 // delay in seconds when the settings are saved after last change occured
 #define CONFIG_COMMIT_DELAY 200  // commit delay in ms

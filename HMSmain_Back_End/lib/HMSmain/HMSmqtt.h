@@ -14,13 +14,14 @@ public:
   HMSmqtt();
   virtual ~HMSmqtt(void);
   // Initialize the library
-  MQTTClient mqtt;
-  WiFiClientSecure net;
+  void mqttSendStatus();
+  void mqttCallback(char *topic, byte *payload, unsigned int length);
   void MQTTSetup();
   int MQTTLoop();
+  void MessageReceived(String &topic, String &payload);
   void MQTTPublish(String topic, String payload);
   int CheckWifiState();
-  void MQTTConnect();
+  int MQTTConnect();
   int ReConnect();
 
 private:

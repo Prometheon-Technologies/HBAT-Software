@@ -180,10 +180,7 @@ void AccumulateData::InitAccumulateDataJson()
   }
   if (MQTT_ENABLED && MQTT_CONNECTED)
   {
-    char buffer[] = MQTT_TOPIC;
-    String topic = String(buffer);
-    String chipID = HMSmain.getDeviceID();
-    String currentTopic = topic.concat(chipID);
+    String currentTopic = MQTT_TOPIC + HMSmain.getDeviceID() + "/all_json_data";
     MqttData.MQTTPublish(currentTopic, json);
   }
 }

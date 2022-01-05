@@ -510,8 +510,15 @@ void FrontEnd::connectToApWithFailToStation(String WIFI_STA_SSID, String WIFI_ST
   Serial.println(WiFi.localIP());
 }
 
+char *FrontEnd::StringtoChar(String inputString)
+{
+  char *charString = new char[inputString.length() + 1];
+  strcpy(charString, inputString.c_str());
+  return charString;
+}
+
 // ############## functions to update current settings ###################
-void loadConfig()
+void FrontEnd::loadConfig()
 {
   SERIAL_DEBUG_LN(F("Loading config"))
   // Loads configuration from EEPROM into RAM
@@ -530,13 +537,21 @@ void loadConfig()
   if (!isValidHostname(cfg.MQTTHost, sizeof(cfg.MQTTHost)))
   {
     cfg.MQTTEnabled = MQTT_ENABLED;
-    strncpy(cfg.MQTTHost, MQTT_HOSTNAME, sizeof(cfg.MQTTHost));
+    // StringtoChar
+    char *MQTT_Host_Name = StringtoChar(MQTT_HOSTNAME);
+    char *mqtt_user = StringtoChar(MQTT_USER);
+    char *mqtt_pass = StringtoChar(MQTT_PASS);
+    char *mqtt_topic = StringtoChar(MQTT_TOPIC);
+    char *mqtt_topic_set = StringtoChar(MQTT_HOMEASSISTANT_TOPIC_SET);
+    char *mqtt_device_name = StringtoChar(MQTT_DEVICE_NAME);
+
+    strncpy(cfg.MQTTHost, MQTT_Host_Name, sizeof(cfg.MQTTHost));
     cfg.MQTTPort = uint16_t(MQTT_PORT);
-    strncpy(cfg.MQTTUser, MQTT_USER, sizeof(cfg.MQTTUser));
-    strncpy(cfg.MQTTPass, MQTT_PASS, sizeof(cfg.MQTTPass));
-    strncpy(cfg.MQTTTopic, MQTT_TOPIC, sizeof(cfg.MQTTTopic));
-    strncpy(cfg.MQTTSetTopic, MQTT_TOPIC_SET, sizeof(cfg.MQTTSetTopic));
-    strncpy(cfg.MQTTDeviceName, MQTT_DEVICE_NAME, sizeof(cfg.MQTTDeviceName));
+    strncpy(cfg.MQTTUser, mqtt_user, sizeof(cfg.MQTTUser));
+    strncpy(cfg.MQTTPass, mqtt_pass, sizeof(cfg.MQTTPass));
+    strncpy(cfg.MQTTTopic, mqtt_topic, sizeof(cfg.MQTTTopic));
+    strncpy(cfg.MQTTSetTopic, mqtt_topic_set, sizeof(cfg.MQTTSetTopic));
+    strncpy(cfg.MQTTDeviceName, mqtt_device_name, sizeof(cfg.MQTTDeviceName));
     setConfigChanged();
   }
 #endif
@@ -563,7 +578,8 @@ void FrontEnd::FrontEndLoop()
     wifiManager.process();
   }
 
-  EVERY_N_SECONDS(1)
+  // run current function every 5 seconds
+  if (loop_counter % 5 == 0)
   {
     int currentWifiStatus = wifiManager.getLastConxResult();
 
@@ -578,17 +594,6 @@ void FrontEnd::FrontEndLoop()
       Serial.print("INFO: WiFi Connected! Open http://");
       Serial.print(WiFi.localIP());
       Serial.println(" in your browser");
-#ifdef ENABLE_MULTICAST_DNS
-      if (!MDNS.begin(cfg.hostname))
-      {
-        Serial.println("\nERROR: problem while setting up MDNS responder! \n");
-      }
-      else
-      {
-        Serial.printf("INFO: mDNS responder started. Try to open http://%s.local in your browser\n", cfg.hostname);
-        MDNS.addService("http", "tcp", 80);
-      }
-#endif
     }
   }
 
@@ -597,15 +602,35 @@ void FrontEnd::FrontEndLoop()
 
   if (cfg.MQTTEnabled == 1)
     mqttClient.loop();
+  if (loop_counter % 10 == 0)
+  {
+    if (cfg.MQTTEnabled == 1)
+    {
+      if (!mqttConnected)
+      {
+        SERIAL_DEBUG_LN("Trying to connect to MQTT")
+        mqttConnected = mqttClient.connect(cfg.MQTTDeviceName);
+      }
+      if (mqttConnected)
+      {
+        SERIAL_DEBUG_LN("MQTT Connected!")
+        mqttClient.publish(cfg.MQTTTopic, "ON");
+      }
+      else
+      {
+        SERIAL_DEBUG_LN("MQTT Not Connected!")
+      }
+    }
+  }
   else
     mqttConnected = false;
 
-  EVERY_N_SECONDS(10)
+  if (loop_counter % 10 == 0)
   {
     if (!mqttClient.connected() && cfg.MQTTEnabled != 0)
     {
       mqttClient.setServer(cfg.MQTTHost, cfg.MQTTPort);
-      mqttClient.setCallback(mqttCallback);
+      mqttClient.setCallback(MESSAGEONRECIEVED);
       mqttConnected = false;
     }
     if (!mqttConnected && cfg.MQTTEnabled != 0)
@@ -678,18 +703,24 @@ void FrontEnd::FrontEndLoop()
     }
   }
 
-  EVERY_N_SECONDS(90)
+  if (loop_counter % 90 == 0)
   {
     mqttSendStatus();
   }
-#endif
-
-  EVERY_N_SECONDS(10){
-      SERIAL_DEBUG_LNF("Heap: %d", system_get_free_heap_size())}
-  // call to save config if config has changed
-  saveConfig();
 }
 
+#endif
+
+void FrontEnd::updateCurrentData()
+{
+  static unsigned int loop_counter = 0;
+  if (loop_counter % 10 == 0)
+  {
+    // call to save config if config has changed
+    saveConfig();
+    SERIAL_DEBUG_LNF("Heap: %d", system_get_free_heap_size())
+  }
+}
 // ######################## server functions #########################
 
 String getRebootString()
@@ -755,19 +786,20 @@ void FrontEnd::SetupServer()
     return;
   }
   loadConfig();
-  SERIAL_DEBUG_EOL
-  SERIAL_DEBUG_LN(F("System Information:"))
-  SERIAL_DEBUG_LNF("Version: %s (%s)", VERSION, VERSION_DATE)
-  SERIAL_DEBUG_LNF("Heap: %d", system_get_free_heap_size())
-  SERIAL_DEBUG_LNF("SDK: %s", system_get_sdk_version())
-  SERIAL_DEBUG_LNF("MAC address: %s", WiFi.macAddress().c_str())
-  SERIAL_DEBUG_LNF("CPU Speed: %d MHz", ESP.getCpuFreqMHz());
-  SERIAL_DEBUG_LNF("Flash Size: %dKB", ESP.getFlashChipSize());
-  SERIAL_DEBUG_EOL
+  /* SERIAL_DEBUG_EOL();
+  SERIAL_DEBUG_LN(F("System Information:"));
+  SERIAL_DEBUG_LNF("Version: %s (%s)", VERSION, VERSION_DATE);
+  SERIAL_DEBUG_LNF("Heap: %d", system_get_free_heap_size());
+  SERIAL_DEBUG_LNF("SDK: %s", system_get_sdk_version());
+  SERIAL_DEBUG_LNF("MAC address: %s", WiFi.macAddress().c_str());
+  SERIAL_DEBUG_LNF("CPU Speed: %d MHz", ESP.getCpuFreqMHz()); */
+  /* SERIAL_DEBUG_LNF("Flash Size: %dKB", ESP.getFlashChipSize());
+  SERIAL_DEBUG_EOL("System Information Sent"); */
 
   // setting up Wifi
   String macID = WiFi.macAddress().substring(12, 14) + WiFi.macAddress().substring(15, 17);
-  macID.toUpperCase();
+
+  String macIDUpper = macID.toUpperCase();
 
   String nameString = String(cfg.hostname) + String(" - ") + macID;
 
@@ -782,7 +814,7 @@ void FrontEnd::SetupServer()
 #if HMS_DEBUG != 0
   wifiManager.setDebugOutput(true);
 #else
-  wifiManager.setDebugOutput(false);
+    wifiManager.setDebugOutput(false);
 #endif
 
   // automatically connect using saved credentials if they exist

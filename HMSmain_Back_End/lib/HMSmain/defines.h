@@ -46,28 +46,35 @@
 #define ENABLE_MULTICAST_DNS // allows to access the UI via "http://<HOSTNAME>.local/"
 #define ENABLE_MQTT_SUPPORT               // allows integration in homeassistant/googlehome/mqtt
 #define maxCellCount 10 // max number of cells
+
+
 /*######################## MQTT Configuration ########################*/
 #ifdef ENABLE_MQTT_SUPPORT
 // these are deafault settings which can be changed in the web interface "settings" page
-#define MQTT_ENABLED 0
-#define MQTT_HOSTNAME "homeassistant.local"
+#define MQTT_ENABLED 0 // 0 = disabled, 1 = enabled
 #define MQTT_PORT 1883
-#define MQTT_USER "MyUserName"
-#define MQTT_PASS ""
-#define MQTT_TOPIC_SET "/set" // MQTT Topic to subscribe to for changes(Home Assistant)
-#define MQTT_HOMEASSISTANT_TOPIC "homeassistant/HBAT/data" // MQTT Topic to Publish to for state and config (Home Assistant)
-#define MQTT_TOPIC "hms/data/"  
-#define MQTT_DEVICE_NAME "HBAT_HMS"                           // MQTT Topic to Publish to for state and config (Any MQTT Broker)
-#define MQTT_UNIQUE_IDENTIFIER WiFi.macAddress() // A Unique Identifier for the device in Homeassistant (MAC Address used by default)
+#define MQTT_UNIQUE_IDENTIFIER HMSmain.getDeviceID() // A Unique Identifier for the device in Homeassistant (MAC Address used by default)
 #define MQTT_MAX_PACKET_SIZE 1024
 #define MQTT_MAX_TRANSFER_SIZE 1024
-//MQTT
+//MQTT includes
 #include <MQTT.h>
 #include <mqttconfig.h> /* MQTT data Struct */
 #include <PubSubClient.h> // Include the MQTT Library, must be installed via the library manager
 extern WiFiClient espClient;
 extern PubSubClient mqttClient(espClient);
 extern HMSmqtt MqttData;
+
+//Variables for MQTT
+const String MQTT_TOPIC = "hms/data/";
+const String HOMEASSISTANT_MQTT_HOSTNAME = "homeassistant.local";
+const String MQTT_HOSTNAME = "hbat.mqtt.local";
+const String MQTT_USER = "MyUserName";
+const String MQTT_PASS= "";
+const String MQTT_TOPIC = "hms/data/"; 
+const String MQTT_HOMEASSISTANT_TOPIC_SET = "/set"; // MQTT Topic to subscribe to for changes(Home Assistant) 
+const String MQTT_HOMEASSISTANT_TOPIC = "homeassistant/HBAT/data"; // MQTT Topic to Publish to for state and config (Home Assistant);
+const String MQTT_DEVICE_NAME = "HBAT_HMS" + MQTT_UNIQUE_IDENTIFIER;                           // MQTT Topic to Publish to for state and config (Any MQTT Broker)
+
 #endif
 /*###################### MQTT Configuration END ######################*/
 //define Debug MACROS
@@ -117,6 +124,12 @@ extern HMS HMSmain;
 extern Humidity Hum;
 extern CellTemp Cell_Temp;
 extern StaticJsonDocument<1000> doc;
+extern Adafruit_SHT31 sht31;
+extern Adafruit_SHT31 sht31_2;
+extern MQTTClient mqtt;
+extern WiFiClientSecure net;
+extern FrontEnd Front_End;
+
 
 //Variables
 

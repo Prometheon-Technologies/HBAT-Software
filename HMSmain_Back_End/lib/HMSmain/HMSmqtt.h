@@ -18,6 +18,7 @@ public:
   void mqttCallback(char *topic, byte *payload, unsigned int length);
   void MQTTSetup();
   int MQTTLoop();
+  void RunMqttService();
   void MessageReceived(String &topic, String &payload);
   void MQTTPublish(String topic, String payload);
   int CheckWifiState();

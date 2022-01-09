@@ -1,9 +1,5 @@
 #include <FrontEnd.h>
 
-// Set these to your desired credentials.
-const String ssid = "H-BAT-" + String(WiFi.macAddress());
-const String password = "hbathbat";
-
 const char *indexHtml = R"====(
 <title>HBAT - Powering the future</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -431,9 +427,6 @@ const toggleOffString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330
 
 )====";
 
-WebServer server(80);
-HMSmqtt Mqtt;
-
 FrontEnd::FrontEnd(void)
 {
   /* AccumulateSensorjson = AccumulateData().json; */
@@ -442,7 +435,6 @@ FrontEnd::FrontEnd(void)
   NewMQTTIP = server.arg("mqttIP");
   NewMQTTPass = server.arg("mqttPass");
   NewMQTTUser = server.arg("mqttUser");
-  mqttFrontEndCondition = false;
 }
 
 FrontEnd::~FrontEnd(void)
@@ -471,11 +463,11 @@ void FrontEnd::ClientLoop()
 void FrontEnd::connectToApWithFailToStation(String WIFI_STA_SSID, String WIFI_STA_PASS)
 {
   WiFi.persistent(true);
-  Serial.println("Configuring access point...");
+  SERIAL_DEBUG_LN("Configuring access point...");
   Serial.print("WIFI_STA_SSID:");
-  Serial.println(WIFI_STA_SSID);
+  SERIAL_DEBUG_LN(WIFI_STA_SSID);
   Serial.print("WIFI_STA_PASS:");
-  Serial.println(WIFI_STA_PASS);
+  SERIAL_DEBUG_LN(WIFI_STA_PASS);
 
   WiFi.mode(WIFI_STA);
   if (WIFI_STA_SSID == "")
@@ -500,14 +492,14 @@ void FrontEnd::connectToApWithFailToStation(String WIFI_STA_SSID, String WIFI_ST
       // You can remove the password parameter if you want the AP to be open.
       WiFi.softAP(ssid.c_str(), password.c_str());
       Serial.print("Wifi Connect Failed. \r\nStarting AP. \r\nAP IP address: ");
-      Serial.println(WiFi.softAPIP());
+      SERIAL_DEBUG_LN(WiFi.softAPIP());
       return;
       break;
     }
   }
-  Serial.println();
+  SERIAL_DEBUG_LN("");
   Serial.print("Connected! IP address: ");
-  Serial.println(WiFi.localIP());
+  SERIAL_DEBUG_LN(WiFi.localIP());
 }
 
 char *FrontEnd::StringtoChar(String inputString)
@@ -517,10 +509,10 @@ char *FrontEnd::StringtoChar(String inputString)
   return charString;
 }
 
-// ############## functions to update current settings ###################
+// ############## functions to update current server settings ###################
 void FrontEnd::loadConfig()
 {
-  SERIAL_DEBUG_LN(F("Loading config"))
+  SERIAL_DEBUG_LN(F("Loading config"));
   // Loads configuration from EEPROM into RAM
   EEPROM.begin(4095);
   EEPROM.get(0, cfg);
@@ -537,7 +529,7 @@ void FrontEnd::loadConfig()
   if (!isValidHostname(cfg.MQTTHost, sizeof(cfg.MQTTHost)))
   {
     cfg.MQTTEnabled = MQTT_ENABLED;
-    // StringtoChar
+    // Copnvert String data of global definitions into Char pointers for use in strncpy
     char *MQTT_Host_Name = StringtoChar(MQTT_HOSTNAME);
     char *mqtt_user = StringtoChar(MQTT_USER);
     char *mqtt_pass = StringtoChar(MQTT_PASS);
@@ -546,7 +538,15 @@ void FrontEnd::loadConfig()
     char *mqtt_device_name = StringtoChar(MQTT_DEVICE_NAME);
 
     strncpy(cfg.MQTTHost, MQTT_Host_Name, sizeof(cfg.MQTTHost));
-    cfg.MQTTPort = uint16_t(MQTT_PORT);
+    if (MQTT_SECURE_ENABLED != 0)
+    {
+      cfg.MQTTPort = uint16_t(MQTT_PORT_SECURE);
+    }
+    else
+    {
+      cfg.MQTTPort = uint16_t(MQTT_PORT);
+    }
+
     strncpy(cfg.MQTTUser, mqtt_user, sizeof(cfg.MQTTUser));
     strncpy(cfg.MQTTPass, mqtt_pass, sizeof(cfg.MQTTPass));
     strncpy(cfg.MQTTTopic, mqtt_topic, sizeof(cfg.MQTTTopic));
@@ -556,22 +556,21 @@ void FrontEnd::loadConfig()
   }
 #endif
 
-  /* SERIAL_DEBUG_LNF("Loaded config: hostname %s, MQTT enabled %s, MQTT host %s, MQTT port %d, MQTT user %s, MQTT pass %s, MQTT topic %s, MQTT set topic %s, MQTT device name %s",
-    cfg.hostname,
-    (cfg.MQTTEnabled == MQTT_ENABLED) ? "true" : "false",
-    cfg.MQTTHost,
-    cfg.MQTTPort,
-    cfg.MQTTUser,
-    cfg.MQTTPass,
-    cfg.MQTTTopic,
-    cfg.MQTTSetTopic,
-    cfg.MQTTDeviceName) */
+  SERIAL_DEBUG_LNF("Loaded config: hostname %s, MQTT enabled %s, MQTT host %s, MQTT port %d, MQTT user %s, MQTT pass %s, MQTT topic %s, MQTT set topic %s, MQTT device name %s",
+                   cfg.hostname,
+                   (cfg.MQTTEnabled == MQTT_ENABLED) ? "true" : "false",
+                   cfg.MQTTHost,
+                   cfg.MQTTPort,
+                   cfg.MQTTUser,
+                   cfg.MQTTPass,
+                   cfg.MQTTTopic,
+                   cfg.MQTTSetTopic,
+                   cfg.MQTTDeviceName)
 }
 
 void FrontEnd::FrontEndLoop()
 {
   static unsigned int loop_counter = 0;
-  server.handleClient();
 
   if (wifiMangerPortalRunning)
   {
@@ -593,123 +592,10 @@ void FrontEnd::FrontEndLoop()
       wifiConnected = true;
       Serial.print("INFO: WiFi Connected! Open http://");
       Serial.print(WiFi.localIP());
-      Serial.println(" in your browser");
+      SERIAL_DEBUG_LN(" in your browser");
     }
-  }
-
-#ifdef ENABLE_MQTT_SUPPORT
-  static bool mqttConnected = false;
-
-  if (cfg.MQTTEnabled == 1)
-    mqttClient.loop();
-  if (loop_counter % 10 == 0)
-  {
-    if (cfg.MQTTEnabled == 1)
-    {
-      if (!mqttConnected)
-      {
-        SERIAL_DEBUG_LN("Trying to connect to MQTT")
-        mqttConnected = mqttClient.connect(cfg.MQTTDeviceName);
-      }
-      if (mqttConnected)
-      {
-        SERIAL_DEBUG_LN("MQTT Connected!")
-        mqttClient.publish(cfg.MQTTTopic, "ON");
-      }
-      else
-      {
-        SERIAL_DEBUG_LN("MQTT Not Connected!")
-      }
-    }
-  }
-  else
-    mqttConnected = false;
-
-  if (loop_counter % 10 == 0)
-  {
-    if (!mqttClient.connected() && cfg.MQTTEnabled != 0)
-    {
-      mqttClient.setServer(cfg.MQTTHost, cfg.MQTTPort);
-      mqttClient.setCallback(MESSAGEONRECIEVED);
-      mqttConnected = false;
-    }
-    if (!mqttConnected && cfg.MQTTEnabled != 0)
-    {
-      mqttConnected = true;
-      SERIAL_DEBUG_BOL
-      SERIAL_DEBUG_ADD("Connecting to MQTT...");
-      if (mqttClient.connect(cfg.hostname, cfg.MQTTUser, cfg.MQTTPass))
-      {
-        mqttClient.setKeepAlive(10);
-        SERIAL_DEBUG_ADD("connected\n")
-
-        SERIAL_DEBUG_LN("Subscribing to MQTT Topics");
-        char mqttSetTopicC[129];
-        strlcpy(mqttSetTopicC, cfg.MQTTTopic, sizeof(mqttSetTopicC));
-        strlcat(mqttSetTopicC, cfg.MQTTSetTopic, sizeof(mqttSetTopicC));
-        mqttClient.subscribe(mqttSetTopicC);
-
-        char mqttSetTopicS[66];
-        strcpy(mqttSetTopicS, "~");
-        strlcat(mqttSetTopicS, cfg.MQTTSetTopic, sizeof(mqttSetTopicS));
-
-        DynamicJsonDocument JSONencoder(4096);
-        JSONencoder["~"] = cfg.MQTTTopic,
-        JSONencoder["name"] = cfg.MQTTDeviceName,
-        JSONencoder["dev"]["ids"] = MQTT_UNIQUE_IDENTIFIER,
-        JSONencoder["dev"]["mf"] = "Surrbradl08",
-        JSONencoder["dev"]["mdl"] = VERSION,
-        JSONencoder["dev"]["name"] = cfg.MQTTDeviceName,
-        JSONencoder["stat_t"] = "~",
-        JSONencoder["cmd_t"] = mqttSetTopicS,
-        JSONencoder["brightness"] = true,
-        JSONencoder["rgb"] = true,
-        JSONencoder["effect"] = true,
-        JSONencoder["uniq_id"] = MQTT_UNIQUE_IDENTIFIER,
-        JSONencoder["schema"] = "json";
-
-        JsonArray effect_list = JSONencoder.createNestedArray("effect_list");
-        for (uint8_t i = 0; i < patternCount; i++)
-        {
-          effect_list.add(patterns[i].name);
-        }
-        size_t n = measureJson(JSONencoder);
-        char mqttConfigTopic[85];
-        strlcat(mqttConfigTopic, cfg.MQTTTopic, sizeof(mqttConfigTopic));
-        strcat(mqttConfigTopic, "/config");
-        if (mqttClient.beginPublish(mqttConfigTopic, n, true) == true)
-        {
-          SERIAL_DEBUG_LN("Configuration Publishing Begun")
-          if (serializeJson(JSONencoder, mqttClient) == n)
-          {
-            SERIAL_DEBUG_LN("Configuration Sent")
-          }
-          if (mqttClient.endPublish() == true)
-          {
-            SERIAL_DEBUG_LN("Configuration Publishing Finished")
-            mqttSendStatus();
-            SERIAL_DEBUG_LN("Sending Initial Status")
-          }
-        }
-        else
-        {
-          SERIAL_DEBUG_LN("Error sending Configuration")
-        }
-      }
-      else
-      {
-        SERIAL_DEBUG_ADDF("failed with state %s\n", mqttClient.state())
-      }
-    }
-  }
-
-  if (loop_counter % 90 == 0)
-  {
-    mqttSendStatus();
   }
 }
-
-#endif
 
 void FrontEnd::updateCurrentData()
 {
@@ -721,25 +607,13 @@ void FrontEnd::updateCurrentData()
     SERIAL_DEBUG_LNF("Heap: %d", system_get_free_heap_size())
   }
 }
-// ######################## server functions #########################
-
-String getRebootString()
-{
-  return "<html><head><meta http-equiv=\"refresh\" content=\"4; url=/\"/></head><body><font face='arial'><b><h2>Rebooting... returning in 4 seconds</h2></b></font></body></html>";
-}
-
-void handleReboot()
-{
-  server.send(200, "text/html", getRebootString());
-  delay(500);
-  ESP.restart();
-}
 
 void addRebootPage(int serverNr)
 {
   if (serverNr < 2)
   {
-    server.on("/reboot", handleReboot);
+    server.on("/reboot", HTTP_GET, []()
+              { Network.handleReboot(); });
   }
 }
 
@@ -759,7 +633,7 @@ void broadcastInt(String name, uint8_t value)
 {
 // String json = "{\"name\":\"" + name + "\",\"value\":" + String(value) + "}";
 #ifdef ENABLE_MQTT_SUPPORT
-  mqttSendStatus();
+  MqttData.mqttSendStatus();
 #endif
 }
 
@@ -767,67 +641,41 @@ void broadcastString(String name, String value)
 {
 // String json = "{\"name\":\"" + name + "\",\"value\":\"" + String(value) + "\"}";
 #ifdef ENABLE_MQTT_SUPPORT
-  mqttSendStatus();
+  MqttData.mqttSendStatus();
 #endif
 }
 
 void FrontEnd::SetupServer()
 {
   Serial.begin(115200);
-  /* while (!Serial)
-    delay(10); // will pause until serial console opens */
-  Serial.println("Booting up...");
+#if HMS_DEBUG != 0
+  while (!Serial)
+    delay(10); // will pause until serial console opens
+#endif
+  SERIAL_DEBUG_LN(F("Starting Webserver"))
+  // start the server
 
-  Serial.println();
+  SERIAL_DEBUG_LN("Booting up...");
+
+  SERIAL_DEBUG_LN("Starting server...");
   // starting file system
   if (!SPIFFS.begin())
   {
-    Serial.println(F("An Error has occurred while mounting SPIFFS"));
+    SERIAL_DEBUG_LN(F("An Error has occurred while mounting SPIFFS"));
     return;
   }
   loadConfig();
-  /* SERIAL_DEBUG_EOL();
+
+  SERIAL_DEBUG_EOL("");
   SERIAL_DEBUG_LN(F("System Information:"));
   SERIAL_DEBUG_LNF("Version: %s (%s)", VERSION, VERSION_DATE);
   SERIAL_DEBUG_LNF("Heap: %d", system_get_free_heap_size());
   SERIAL_DEBUG_LNF("SDK: %s", system_get_sdk_version());
   SERIAL_DEBUG_LNF("MAC address: %s", WiFi.macAddress().c_str());
-  SERIAL_DEBUG_LNF("CPU Speed: %d MHz", ESP.getCpuFreqMHz()); */
-  /* SERIAL_DEBUG_LNF("Flash Size: %dKB", ESP.getFlashChipSize());
-  SERIAL_DEBUG_EOL("System Information Sent"); */
-
-  // setting up Wifi
-  String macID = WiFi.macAddress().substring(12, 14) + WiFi.macAddress().substring(15, 17);
-
-  String macIDUpper = macID.toUpperCase();
-
-  String nameString = String(cfg.hostname) + String(" - ") + macID;
-
-  char nameChar[nameString.length() + 1];
-  nameString.toCharArray(nameChar, sizeof(nameChar));
-
-  // setup wifiManager
-  wifiManager.setHostname(cfg.hostname);           // set hostname
-  wifiManager.setConfigPortalBlocking(false);      // config portal is not blocking (LEDs light up in AP mode)
-  wifiManager.setSaveConfigCallback(handleReboot); // after the wireless settings have been saved a reboot will be performed
-
-#if HMS_DEBUG != 0
-  wifiManager.setDebugOutput(true);
-#else
-    wifiManager.setDebugOutput(false);
-#endif
-
-  // automatically connect using saved credentials if they exist
-  // If connection fails it starts an access point with the specified name
-  if (wifiManager.autoConnect(nameChar))
-  {
-    Serial.println("INFO: Wi-Fi connected");
-  }
-  else
-  {
-    Serial.printf("INFO: Wi-Fi manager portal running. Connect to the Wi-Fi AP '%s' to configure your wireless connection\n", nameChar);
-    wifiMangerPortalRunning = true;
-  }
+  SERIAL_DEBUG_LNF("CPU Speed: %d MHz", ESP.getCpuFreqMHz());
+  SERIAL_DEBUG_LNF("Flash Size: %dKB", ESP.getFlashChipSize());
+  SERIAL_DEBUG_EOL("System Information Sent");
+  SERIAL_DEBUG_EOL("");
 
 // FS debug information
 // THIS NEEDS TO BE PAST THE WIFI SETUP!! OTHERWISE WIFI SETUP WILL BE DELAYED
@@ -874,230 +722,230 @@ void FrontEnd::SetupServer()
 
   server.on("/ota", HTTP_GET, []()
             {
-        IPAddress ip = WiFi.localIP();
-        String h = "<font face='arial'><h1> OTA Update Mode</h1>";
-        h += "<h2>Procedure: </h3>";
-        h += "The UI won't be available until reset.<br>";
-        h += "<b>Open your Arduino IDE and select the new PORT in Tools menu and upload the code!</b>";
-        h += "<br>Exit OTA mode: <a href=\"http://" + ip.toString() + "/reboot\"); ' value='Reboot'>Reboot</a>";
-        h += "</font>";
+      IPAddress ip = WiFi.localIP();
+      String h = "<font face='arial'><h1> OTA Update Mode</h1>";
+      h += "<h2>Procedure: </h3>";
+      h += "The UI won't be available until reset.<br>";
+      h += "<b>Open your Arduino IDE and select the new PORT in Tools menu and upload the code!</b>";
+      h += "<br>Exit OTA mode: <a href=\"http://" + ip.toString() + "/reboot\"); ' value='Reboot'>Reboot</a>";
+      h += "</font>";
 
-        server.send(200, "text/html", h);
-        delay(100);
+      server.send(200, "text/html", h);
+      delay(100);
 
-        ArduinoOTA.setHostname(cfg.hostname);
+      ArduinoOTA.setHostname(cfg.hostname);
 #ifdef OTA_PASSWORD
-        ArduinoOTA.setPassword(OTA_PASSWORD);
+      ArduinoOTA.setPassword(OTA_PASSWORD);
 #endif
-        ArduinoOTA.onStart([]() {
-            SPIFFS.end();
-            if (ArduinoOTA.getCommand() == U_FLASH) {
-                Serial.println("Start updating sketch");
-            } else { // U_FS
-                Serial.println("Start updating filesystem");
-            }
+      ArduinoOTA.onStart([]() {
+          SPIFFS.end();
+          if (ArduinoOTA.getCommand() == U_FLASH) {
+              SERIAL_DEBUG_LN("Start updating sketch");
+          } else { // U_FS
+              SERIAL_DEBUG_LN("Start updating filesystem");
+          }
 
-            // NOTE: if updating FS this would be the place to unmount FS using FS.end()
-            });
-        ArduinoOTA.onEnd([]() {
-            Serial.println("\nFinished OTA Update\nRebooting");
-            delay(500);
-            ESP.restart();
-            });
-        ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-            Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-            });
-        ArduinoOTA.onError([](ota_error_t error) {
-            Serial.printf("Error[%u]: ", error);
-            if (error == OTA_AUTH_ERROR) {
-                Serial.println("Auth Failed");
-            }
-            else if (error == OTA_BEGIN_ERROR) {
-                Serial.println("Begin Failed");
-            }
-            else if (error == OTA_CONNECT_ERROR) {
-                Serial.println("Connect Failed");
-            }
-            else if (error == OTA_RECEIVE_ERROR) {
-                Serial.println("Receive Failed");
-            }
-            else if (error == OTA_END_ERROR) {
-                Serial.println("End Failed");
-            }
-            });
-        ArduinoOTA.begin();
-        delay(100);
-        while (1) {
-            ArduinoOTA.handle();
-            delay(1);
-            server.handleClient();
-            delay(1);
-        } }); // GET /ota
+          // NOTE: if updating FS this would be the place to unmount FS using FS.end()
+          });
+      ArduinoOTA.onEnd([]() {
+          SERIAL_DEBUG_LN("\nFinished OTA Update\nRebooting");
+          delay(500);
+          ESP.restart();
+          });
+      ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+          Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+          });
+      ArduinoOTA.onError([](ota_error_t error) {
+          Serial.printf("Error[%u]: ", error);
+          if (error == OTA_AUTH_ERROR) {
+              SERIAL_DEBUG_LN("Auth Failed");
+          }
+          else if (error == OTA_BEGIN_ERROR) {
+              SERIAL_DEBUG_LN("Begin Failed");
+          }
+          else if (error == OTA_CONNECT_ERROR) {
+              SERIAL_DEBUG_LN("Connect Failed");
+          }
+          else if (error == OTA_RECEIVE_ERROR) {
+              SERIAL_DEBUG_LN("Receive Failed");
+          }
+          else if (error == OTA_END_ERROR) {
+              SERIAL_DEBUG_LN("End Failed");
+          }
+          });
+      ArduinoOTA.begin();
+      delay(100);
+      while (1) {
+          ArduinoOTA.handle();
+          delay(1);
+          server.handleClient();
+          delay(1);
+      } }); // GET /ota
 #endif
 
   addRebootPage(0);
 
   server.on("/config.json", HTTP_GET, []()
             {
-        String json = getFieldsJson(fields, fieldCount);
-        json += ",{\"name\":\"lines\",\"label\":\"Amount of Lines for the Visualizer\",\"type\":\"String\",\"value\":";
-        json += PACKET_LENGTH;
-        json += "}";
-        json += ",{\"name\":\"settings\",\"label\":\"Device settings\",\"type\":\"Setting\",\"value\":";
-        json += "{\"deviceHostname\":\"" + String(cfg.hostname) + "\"";
-        json += ",\"otaSupport\":";
+      String json = getFieldsJson(fields, fieldCount);
+      json += ",{\"name\":\"lines\",\"label\":\"Amount of Lines for the Visualizer\",\"type\":\"String\",\"value\":";
+      json += PACKET_LENGTH;
+      json += "}";
+      json += ",{\"name\":\"settings\",\"label\":\"Device settings\",\"type\":\"Setting\",\"value\":";
+      json += "{\"deviceHostname\":\"" + String(cfg.hostname) + "\"";
+      json += ",\"otaSupport\":";
 #ifdef ENABLE_OTA_SUPPORT
-        json += "true";
+      json += "true";
 #else
-        json += "false";
+      json += "false";
 #endif
-        json += ", \"mqttSupport\":";
+      json += ", \"mqttSupport\":";
 #ifdef ENABLE_MQTT_SUPPORT
-        json += "true";
+      json += "true";
 #else
-        json += "false";
+      json += "false";
 #endif
 #ifdef ENABLE_MQTT_SUPPORT
-        json += ",\"mqttEnabled\":" + String(cfg.MQTTEnabled);
-        json += ",\"mqttHostname\":\"" + String(cfg.MQTTHost) + "\"";
-        json += ",\"mqttPort\":\"" + String(cfg.MQTTPort) + "\"";
-        json += ",\"mqttUsername\":\"" + String(cfg.MQTTUser) + "\"";
-        json += ",\"mqttTopic\":\"" + String(cfg.MQTTTopic) + "\"";
-        json += ",\"mqttSetTopic\":\"" + String(cfg.MQTTSetTopic) + "\"";
-        json += ",\"mqttDevicename\":\"" + String(cfg.MQTTDeviceName) + "\"";
+      json += ",\"mqttEnabled\":" + String(cfg.MQTTEnabled);
+      json += ",\"mqttHostname\":\"" + String(cfg.MQTTHost) + "\"";
+      json += ",\"mqttPort\":\"" + String(cfg.MQTTPort) + "\"";
+      json += ",\"mqttUsername\":\"" + String(cfg.MQTTUser) + "\"";
+      json += ",\"mqttTopic\":\"" + String(cfg.MQTTTopic) + "\"";
+      json += ",\"mqttSetTopic\":\"" + String(cfg.MQTTSetTopic) + "\"";
+      json += ",\"mqttDevicename\":\"" + String(cfg.MQTTDeviceName) + "\"";
 #endif
-        json += "}}]";
-        server.send(200, "application/json", json); });
+      json += "}}]";
+      server.send(200, "application/json", json); });
 
   server.on("/settings", []()
             {
 
-        bool force_restart = false;
+      bool force_restart = false;
 
-        String ssid = server.arg("ssid");
-        String password = server.arg("password");
+      String ssid = server.arg("ssid");
+      String password = server.arg("password");
 
-        if (ssid.length() != 0 && password.length() != 0) {
-            setWiFiConf(ssid, password);
-            force_restart = true;
-        }
+      if (ssid.length() != 0 && password.length() != 0) {
+          setWiFiConf(ssid, password);
+          force_restart = true;
+      }
 
-        String new_hostname = server.arg("hostname");
+      String new_hostname = server.arg("hostname");
 
-        if (new_hostname.length() != 0 && String(cfg.hostname) != new_hostname) {
-            setHostname(new_hostname);
-            force_restart = true;
-        }
+      if (new_hostname.length() != 0 && String(cfg.hostname) != new_hostname) {
+          setHostname(new_hostname);
+          force_restart = true;
+      }
 
 #ifdef ENABLE_MQTT_SUPPORT
-        uint8_t mqtt_enabled = uint8_t(server.arg("mqtt-enabled").toInt());
-        String mqtt_hostname = server.arg("mqtt-hostname");
-        uint16_t mqtt_port = uint16_t(server.arg("mqtt-port").toInt());
-        String mqtt_username = server.arg("mqtt-user");
-        String mqtt_password = server.arg("mqtt-password");
-        String mqtt_topic = server.arg("mqtt-topic");
-        String mqtt_set_topic = server.arg("mqtt-set-topic");
-        String mqtt_device_name = server.arg("mqtt-device-name");
+      uint8_t mqtt_enabled = uint8_t(server.arg("mqtt-enabled").toInt());
+      String mqtt_hostname = server.arg("mqtt-hostname");
+      uint16_t mqtt_port = uint16_t(server.arg("mqtt-port").toInt());
+      String mqtt_username = server.arg("mqtt-user");
+      String mqtt_password = server.arg("mqtt-password");
+      String mqtt_topic = server.arg("mqtt-topic");
+      String mqtt_set_topic = server.arg("mqtt-set-topic");
+      String mqtt_device_name = server.arg("mqtt-device-name");
 
-        if (cfg.MQTTEnabled != mqtt_enabled) {
-            cfg.MQTTEnabled = mqtt_enabled;
-            setConfigChanged();
-        }
-        if (cfg.MQTTPort != mqtt_port) {
-            cfg.MQTTPort = mqtt_port;
-            force_restart = true;
-        }
-        if (mqtt_hostname.length() > 0 && String(cfg.MQTTHost) != mqtt_hostname) {
-            mqtt_hostname.toCharArray(cfg.MQTTHost, sizeof(cfg.MQTTHost));
-            force_restart = true;
-        }
-        if (mqtt_username.length() > 0 && String(cfg.MQTTUser) != mqtt_username) {
-            mqtt_username.toCharArray(cfg.MQTTUser, sizeof(cfg.MQTTUser));
-            force_restart = true;
-        }
-        if (mqtt_password.length() > 0 && String(cfg.MQTTPass) != mqtt_password) {
-            mqtt_password.toCharArray(cfg.MQTTPass, sizeof(cfg.MQTTPass));
-            force_restart = true;
-        }
-        if (mqtt_topic.length() > 0 && String(cfg.MQTTTopic) != mqtt_topic) {
-            mqtt_topic.toCharArray(cfg.MQTTTopic, sizeof(cfg.MQTTTopic));
-            force_restart = true;
-        }
-        if (mqtt_set_topic.length() > 0 && String(cfg.MQTTSetTopic) != mqtt_set_topic) {
-            mqtt_set_topic.toCharArray(cfg.MQTTSetTopic, sizeof(cfg.MQTTSetTopic));
-            force_restart = true;
-        }
-        if (mqtt_device_name.length() > 0 && String(cfg.MQTTDeviceName) != mqtt_device_name) {
-            mqtt_device_name.toCharArray(cfg.MQTTDeviceName, sizeof(cfg.MQTTDeviceName));
-            force_restart = true;
-        }
+      if (cfg.MQTTEnabled != mqtt_enabled) {
+          cfg.MQTTEnabled = mqtt_enabled;
+          setConfigChanged();
+      }
+      if (cfg.MQTTPort != mqtt_port) {
+          cfg.MQTTPort = mqtt_port;
+          force_restart = true;
+      }
+      if (mqtt_hostname.length() > 0 && String(cfg.MQTTHost) != mqtt_hostname) {
+          mqtt_hostname.toCharArray(cfg.MQTTHost, sizeof(cfg.MQTTHost));
+          force_restart = true;
+      }
+      if (mqtt_username.length() > 0 && String(cfg.MQTTUser) != mqtt_username) {
+          mqtt_username.toCharArray(cfg.MQTTUser, sizeof(cfg.MQTTUser));
+          force_restart = true;
+      }
+      if (mqtt_password.length() > 0 && String(cfg.MQTTPass) != mqtt_password) {
+          mqtt_password.toCharArray(cfg.MQTTPass, sizeof(cfg.MQTTPass));
+          force_restart = true;
+      }
+      if (mqtt_topic.length() > 0 && String(cfg.MQTTTopic) != mqtt_topic) {
+          mqtt_topic.toCharArray(cfg.MQTTTopic, sizeof(cfg.MQTTTopic));
+          force_restart = true;
+      }
+      if (mqtt_set_topic.length() > 0 && String(cfg.MQTTSetTopic) != mqtt_set_topic) {
+          mqtt_set_topic.toCharArray(cfg.MQTTSetTopic, sizeof(cfg.MQTTSetTopic));
+          force_restart = true;
+      }
+      if (mqtt_device_name.length() > 0 && String(cfg.MQTTDeviceName) != mqtt_device_name) {
+          mqtt_device_name.toCharArray(cfg.MQTTDeviceName, sizeof(cfg.MQTTDeviceName));
+          force_restart = true;
+      }
 #endif
-        if (force_restart) {
-            SERIAL_DEBUG_LN("Saving settings and rebooting...")
-            saveConfig(true);
-            handleReboot();
-        } else {
-            server.send(200, "text/html", "<html><head><meta http-equiv=\"refresh\" content=\"0; url=/settings.htm\"/></head><body></body>");
-        } });
+      if (force_restart) {
+          SERIAL_DEBUG_LN("Saving settings and rebooting...")
+          saveConfig(true);
+          handleReboot();
+      } else {
+          server.send(200, "text/html", "<html><head><meta http-equiv=\"refresh\" content=\"0; url=/settings.htm\"/></head><body></body>");
+      } });
 
   server.on("/reset", HTTP_POST, []()
             {
 
-      // delete EEPROM settings
-      if (server.arg("type") == String("all")) {
-          resetConfig();
-          SERIAL_DEBUG_LN("Resetting config")
-      }
+    // delete EEPROM settings
+    if (server.arg("type") == String("all")) {
+        resetConfig();
+        SERIAL_DEBUG_LN("Resetting config")
+    }
 
-      // delete wireless config
-      if (server.arg("type") == String("wifi") || server.arg("type") == String("all")) {
-          setWiFiConf(String(""), String(""));
-          SERIAL_DEBUG_LN("Resetting wifi settings");
-      }
-      server.send(200, "text/html", "<html><head></head><body><font face='arial'><b><h2>Config reset finished. Device is rebooting now and you need to connect to the wireless again.</h2></b></font></body></html>");
-      delay(500);
-      ESP.restart(); });
+    // delete wireless config
+    if (server.arg("type") == String("wifi") || server.arg("type") == String("all")) {
+        setWiFiConf(String(""), String(""));
+        SERIAL_DEBUG_LN("Resetting wifi settings");
+    }
+    server.send(200, "text/html", "<html><head></head><body><font face='arial'><b><h2>Config reset finished. Device is rebooting now and you need to connect to the wireless again.</h2></b></font></body></html>");
+    delay(500);
+    ESP.restart(); });
 
   server.on("/fieldValue", HTTP_GET, []()
             {
-      String name = server.arg("name");
-      String value = getFieldValue(name, fields, fieldCount);
-      server.send(200, "text/json", value); });
+    String name = server.arg("name");
+    String value = getFieldValue(name, fields, fieldCount);
+    server.send(200, "text/json", value); });
 
   server.on("/fieldValue", HTTP_POST, []()
             {
-      String name = server.arg("name");
-      String value = server.arg("value");
-      String newValue = setFieldValue(name, value, fields, fieldCount);
-      server.send(200, "text/json", newValue); });
+    String name = server.arg("name");
+    String value = server.arg("value");
+    String newValue = setFieldValue(name, value, fields, fieldCount);
+    server.send(200, "text/json", newValue); });
 
   server.on("/power", []()
             {
-      String value = server.arg("value");
-      value.toLowerCase();
-      if (value == String("1") || value == String("on")) {
-          setPower(1);
-      } else if (value == String("0") || value == String("off")) {
-          setPower(0);
-      } else if (value == String("toggle")) {
-          setPower((power == 1) ? 0 : 1);
-      }
-      sendInt(power); });
+    String value = server.arg("value");
+    value.toLowerCase();
+    if (value == String("1") || value == String("on")) {
+        setPower(1);
+    } else if (value == String("0") || value == String("off")) {
+        setPower(0);
+    } else if (value == String("toggle")) {
+        setPower((power == 1) ? 0 : 1);
+    }
+    sendInt(power); });
   server.serveStatic("/", SPIFFS, "/", "max-age=86400");
 
-  Serial.println("INFO: HTTP web server started");
+  SERIAL_DEBUG_LN("INFO: HTTP web server started");
 
-  debugln("\n===================================");
+  SERIAL_DEBUG_LN("\n===================================");
   Hum.SetupSensor();
   HMSmain.setupSensor();
   Cell_Temp.SetupSensors();
-  debugln("HMS booting - please wait");
-  debugln("Setup Complete");
+  SERIAL_DEBUG_LN("HMS booting - please wait");
+  SERIAL_DEBUG_LN("Setup Complete");
   delay(100);
 
   connectToApWithFailToStation("", "");
 
-  Serial.println("Server started");
+  SERIAL_DEBUG_LN("Server started");
   server.on(F("/"), []()
             { server.send(200, "text/html", indexHtml); });
 
@@ -1109,32 +957,32 @@ String NewApPass = server.arg("apPass");
 server.send(200, "application/json", "yay");
 connectToApWithFailToStation(NewApName, NewApPass); });
 
-server.on(F("/mqttEnable"), [&]()
-          {
-    mqttFrontEndCondition = true;
-    // Place code here to setup wifi and mqtt connectivity });
+  server.on(F("/mqttEnable"), [&]()
+            {
+          // Place code here to setup wifi and mqtt connectivity
+          mqttFrontEndCondition = true; });
 
-    server.on(F("/mqttUpdate"), [&]()
-              {
-  //Place code here to setup wifi and mqtt connectivity
-  mqttFrontEndCondition = true;
-  server.send(200, "application/json", "MQTT Updated");
-  Mqtt.MQTTConnect(); });
+  server.on(F("/mqttUpdate"), [&]()
+            {
+//Place code here to setup wifi and mqtt connectivity
+mqttFrontEndCondition = true;
+server.send(200, "application/json", "MQTT Updated");
+MqttData.MQTTConnect(); });
 
-    server.on(F("/toggle"), [&]()
-              {
-  int pinToToggle = server.arg("pin").toInt();
-  Serial.print("switching state of pin :");
-  Serial.println(pinToToggle);
-  dataTosend.relays[pinToToggle] = (dataTosend.relays[pinToToggle] == true) ? false : true;
-  server.send(200, "application/json", "toggled"); });
+  server.on(F("/toggle"), [&]()
+            {
+int pinToToggle = server.arg("pin").toInt();
+Serial.print("switching state of pin :");
+SERIAL_DEBUG_LN(pinToToggle);
+dataTosend.relays[pinToToggle] = (dataTosend.relays[pinToToggle] == true) ? false : true;
+server.send(200, "application/json", "toggled"); });
 
-    server.on(F("/data.json"), [&]()
-              { 
-              String json;
-              serializeJson(doc, json);
-              server.send(200, "application/json", json); });
+  server.on(F("/data.json"), [&]()
+            { 
+            String json;
+            serializeJson(doc, json);
+            server.send(200, "application/json", json); });
 
-    server.begin();
-    Serial.println("HTTP server started");
+  server.begin();
+  SERIAL_DEBUG_LN("HTTP server started");
 }

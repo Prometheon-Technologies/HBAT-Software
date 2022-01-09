@@ -37,7 +37,7 @@ public:
     char clientIP;
     String clientPass;
     String clientUser;
-    bool mqttFrontEndCondition;
+    bool mqttEnabled;
 
 private:
 };

@@ -2,6 +2,7 @@
 
 HMSmqtt::HMSmqtt()
 {
+  MQTTSetup();
 }
 
 HMSmqtt::~HMSmqtt(void)
@@ -114,21 +115,16 @@ void HMSmqtt::MQTTSetup()
 
   auto getPort = [](bool secure)
   {
-    return secure ? 8883 : 1883;
+    return secure ? MQTT_PORT_SECURE : MQTT_PORT;
   };
-
-  int port = getPort(Front_End.MQTTSecure);
-
-  if (Front_End.MQTTSecure = true)
+  auto getHost = [](bool secure)
   {
-    MQTTConnect();
-    mqtt.begin(WiFi.localIP(), port, net); // use net for secure connections or espClient for non-secure connections
-  }
-  else
-  {
-    MQTTConnect();
-    mqtt.begin(WiFi.localIP(), port, espClient); // use the espClient for non-secure connections or net for secure connections
-  }
+    return secure ? net : espClient;
+  };
+  int port = getPort(cfg.MQTTSecure);
+  auto host = getHost(cfg.MQTTSecure);
+  MQTTConnect();
+  mqtt.begin(WiFi.localIP(), port, host); // use net for secure connections or espClient for non-secure connections
 }
 
 void HMSmqtt::MQTTPublish(String topic, String payload)
@@ -165,6 +161,120 @@ int HMSmqtt::MQTTLoop()
     return 1;
     delay(10); // <- fixes some issues with WiFi stability
   }
+}
+
+void HMSmqtt::RunMqttService()
+{
+#ifdef ENABLE_MQTT_SUPPORT
+  static unsigned int loop_counter = 0;
+  static bool mqttConnected = false;
+
+  if (cfg.MQTTEnabled == 1)
+    MQTTLoop();
+  if (loop_counter % 10 == 0)
+  {
+    if (cfg.MQTTEnabled == 1)
+    {
+      if (!mqttConnected)
+      {
+        SERIAL_DEBUG_LN("Trying to connect to MQTT")
+        mqttConnected = mqtt.connect(cfg.MQTTDeviceName);
+      }
+      if (mqttConnected)
+      {
+        SERIAL_DEBUG_LN("MQTT Connected!")
+            
+        MQTTPublish(cfg.MQTTTopic, "ON");
+      }
+      else
+      {
+        SERIAL_DEBUG_LN("MQTT Not Connected!")
+      }
+    }
+  }
+  else
+    mqttConnected = false;
+
+  if (loop_counter % 10 == 0)
+  {
+    if (!mqtt.connected() && cfg.MQTTEnabled != 0)
+    {
+      mqttConnected = false;
+    }
+    if (!mqttConnected && cfg.MQTTEnabled != 0)
+    {
+      mqttConnected = true;
+      SERIAL_DEBUG_BOL
+      SERIAL_DEBUG_ADD("Connecting to MQTT...");
+      if (MQTTLoop())
+      {
+        SERIAL_DEBUG_ADD("connected\n")
+
+        SERIAL_DEBUG_LN("Subscribing to MQTT Topics");
+        char mqttSetTopicC[129];
+        strlcpy(mqttSetTopicC, cfg.MQTTTopic, sizeof(mqttSetTopicC));
+        strlcat(mqttSetTopicC, cfg.MQTTSetTopic, sizeof(mqttSetTopicC));
+        mqttClient.subscribe(mqttSetTopicC);
+
+        char mqttSetTopicS[66];
+        strcpy(mqttSetTopicS, "~");
+        strlcat(mqttSetTopicS, cfg.MQTTSetTopic, sizeof(mqttSetTopicS));
+
+        DynamicJsonDocument JSONencoder(4096);
+        JSONencoder["~"] = cfg.MQTTTopic,
+        JSONencoder["name"] = cfg.MQTTDeviceName,
+        JSONencoder["dev"]["ids"] = MQTT_UNIQUE_IDENTIFIER,
+        JSONencoder["dev"]["mf"] = "Surrbradl08",
+        JSONencoder["dev"]["mdl"] = VERSION,
+        JSONencoder["dev"]["name"] = cfg.MQTTDeviceName,
+        JSONencoder["stat_t"] = "~",
+        JSONencoder["cmd_t"] = mqttSetTopicS,
+        JSONencoder["brightness"] = true,
+        JSONencoder["rgb"] = true,
+        JSONencoder["effect"] = true,
+        JSONencoder["uniq_id"] = MQTT_UNIQUE_IDENTIFIER,
+        JSONencoder["schema"] = "json";
+
+        JsonArray effect_list = JSONencoder.createNestedArray("effect_list");
+        for (uint8_t i = 0; i < patternCount; i++)
+        {
+          effect_list.add(patterns[i].name);
+        }
+        size_t n = measureJson(JSONencoder);
+        char mqttConfigTopic[85];
+        strlcat(mqttConfigTopic, cfg.MQTTTopic, sizeof(mqttConfigTopic));
+        strcat(mqttConfigTopic, "/config");
+        if (mqttClient.beginPublish(mqttConfigTopic, n, true) == true)
+        {
+          SERIAL_DEBUG_LN("Configuration Publishing Begun")
+          if (serializeJson(JSONencoder, mqttClient) == n)
+          {
+            SERIAL_DEBUG_LN("Configuration Sent")
+          }
+          if (mqttClient.endPublish() == true)
+          {
+            SERIAL_DEBUG_LN("Configuration Publishing Finished")
+            MqttData.mqttSendStatus();
+            SERIAL_DEBUG_LN("Sending Initial Status")
+          }
+        }
+        else
+        {
+          SERIAL_DEBUG_LN("Error sending Configuration")
+        }
+      }
+      else
+      {
+        SERIAL_DEBUG_ADDF("failed with state %s\n", mqttClient.state())
+      }
+    }
+  }
+
+  if (loop_counter % 90 == 0)
+  {
+    MqttData.mqttSendStatus();
+  }
+#endif
 }
 
 //############################## MQTT HELPER FUNCTIONS ##############################
@@ -277,7 +387,7 @@ void HMSmqtt::mqttSendStatus()
     return;
 
   StaticJsonDocument<128> JSONencoder;
-  JSONencoder["state"] = (== 1 ? "ON" : "OFF"),
+  JSONencoder["state"] = (power == 1 ? "ON" : "OFF"),
   JSONencoder["brightness"] = brightness,
   JSONencoder["effect"] = patterns[currentPatternIndex].name,
   JSONencoder["autoplay"] = autoplay,
@@ -295,3 +405,5 @@ void HMSmqtt::mqttSendStatus()
 }
 
 //############################## MQTT HELPER FUNCTIONS END ##############################
+
+//add an array of primes to a class variable

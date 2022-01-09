@@ -6,6 +6,7 @@
 #define DEFINES_h
 #define VERSION "0.0.1"
 #define VERSION_DATE "2021-12-17"
+#include <globaldebug.h>
 #include <Arduino.h>
 #include <stdio.h>  /* printf, NULL */
 #include <stdlib.h> /* strtoul */
@@ -41,6 +42,7 @@
 #include <WiFiAP.h>
 #include <Wifi.h>
 #include <WiFiClientSecure.h>
+#include <HMSNetwork.h>
 
 // define EEPROM settings
 // https://www.kriwanek.de/index.php/de/homeautomation/esp8266/364-eeprom-für-parameter-verwenden
@@ -54,7 +56,9 @@
 #ifdef ENABLE_MQTT_SUPPORT
 // these are deafault settings which can be changed in the web interface "settings" page
 #define MQTT_ENABLED 0 // 0 = disabled, 1 = enabled
+#define MQTT_SECURE_ENABLED 0 // 0 = disabled, 1 = enabled
 #define MQTT_PORT 1883
+#define MQTT_PORT_SECURE 8883
 #define MQTT_UNIQUE_IDENTIFIER HMSmain.getDeviceID() // A Unique Identifier for the device in Homeassistant (MAC Address used by default)
 #define MQTT_MAX_PACKET_SIZE 1024
 #define MQTT_MAX_TRANSFER_SIZE 1024
@@ -65,7 +69,7 @@
 extern WiFiClient espClient;
 extern PubSubClient mqttClient(espClient);
 extern HMSmqtt MqttData;
-extern MQTTClient mqtt();
+extern MQTTClient mqtt;
 
 // Variables for MQTT
 const String MQTT_TOPIC = "hms/data/";
@@ -80,46 +84,11 @@ const String MQTT_DEVICE_NAME = "HBAT_HMS" + MQTT_UNIQUE_IDENTIFIER; // MQTT Top
 
 #endif
 /*###################### MQTT Configuration END ######################*/
-// define Debug MACROS
-#define PURR_DEBUG 1
-#if PURR_DEBUG != 0
-#define SERIAL_DEBUG_ADD(s) Serial.print(s);
-#define SERIAL_DEBUG_ADDF(format, ...) Serial.printf(format, __VA_ARGS__);
-#define SERIAL_DEBUG_EOL Serial.print("\n");
-#define SERIAL_DEBUG_BOL Serial.printf("DEBUG [%lu]: ", millis());
-#define SERIAL_DEBUG_LN(s) SERIAL_DEBUG_BOL SERIAL_DEBUG_ADD(s) SERIAL_DEBUG_EOL
-#define SERIAL_DEBUG_LNF(format, ...) SERIAL_DEBUG_BOL SERIAL_DEBUG_ADDF(format, __VA_ARGS__) SERIAL_DEBUG_EOL
-#else
-#define SERIAL_DEBUG_ADD(s) \
-    do                      \
-    {                       \
-    } while (0);
-#define SERIAL_DEBUG_ADDF(format, ...) \
-    do                                 \
-    {                                  \
-    } while (0);
-#define SERIAL_DEBUG_EOL \
-    do                   \
-    {                    \
-    } while (0);
-#define SERIAL_DEBUG_BOL \
-    do                   \
-    {                    \
-    } while (0);
-#define SERIAL_DEBUG_LN(s) \
-    do                     \
-    {                      \
-    } while (0);
-#define SERIAL_DEBUG_LNF(format, ...) \
-    do                                \
-    {                                 \
-    } while (0);
-#endif
+
 // define externalised classes
 extern AccumulateData accumulatedData;
 extern Scanner i2cscanner;
-extern TaskHandle_t runserver;
-extern TaskHandle_t accumulatedata;
+
 extern Scanner scanner;
 extern WiFiManager wifiManager;
 extern timeObj ReadTimer(5000);
@@ -130,7 +99,10 @@ extern StaticJsonDocument<1000> doc;
 extern Adafruit_SHT31 sht31;
 extern Adafruit_SHT31 sht31_2;
 extern WiFiClientSecure net;
+extern WebServer server(80);
 extern FrontEnd Front_End;
+extern HMSNetwork Network;
+
 // Tasks for the Task Scheduler
 extern Scheduler runner;
 extern Task tcontrolTasks();
@@ -138,12 +110,18 @@ extern Task tbeginWiFiIfNeeded(1000, 10, &tbeginWiFiIfNeededCallback);
 extern Task tconnectMQTTClientIfNeeded(1000, TASK_FOREVER, &tconnectMQTTClientIfNeededCallback);
 extern Task tallOn(1000, TASK_EXTRA_STACK_SIZE, &tallOnCallback);
 extern Task tallOff(1000, TASK_EXTRA_STACK_SIZE, &tallOnCallback);
+extern TaskHandle_t runserver;
+extern TaskHandle_t accumulatedata;
 
 // Variables
 
 int period = 500;
 unsigned long time_now = 0;
 bool Charge_State;
+//Wifi Variables
+// Set these to your desired credentials.
+const String ssid = "HBAT-" + String(WiFi.macAddress());
+const String password = "hbathbat";
 bool wifiMangerPortalRunning = false;
 bool wifiConnected = false;
 
@@ -263,4 +241,5 @@ void setupTasks()
         SERIAL_DEBUG_LN("Enabled tconnectMQTTClientIfNeeded");
     }
 }
+
 #endif

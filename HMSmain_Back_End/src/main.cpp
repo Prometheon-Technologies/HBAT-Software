@@ -1,7 +1,5 @@
 #include <defines.h>
 
-
-
 void setup()
 {
     setupTasks();

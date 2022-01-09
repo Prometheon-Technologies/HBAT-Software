@@ -1,22 +1,3 @@
-//#if defined(ESP32)
-// if (WiFiGenericClass::getMode() != WIFI_MODE_NULL)
-//{
-//    wifi_config_t conf;
-//    esp_wifi_get_config(WIFI_IF_STA, &conf);
-
-//    memset(conf.sta.ssid, 0, sizeof(conf.sta.ssid));
-//    for (int i = 0; i < ssid.length() && i < sizeof(conf.sta.ssid); i++)
-//        conf.sta.ssid[i] = ssid.charAt(i);
-
-//    memset(conf.sta.password, 0, sizeof(conf.sta.password));
-//    for (int i = 0; i < password.length() && i < sizeof(conf.sta.password); i++)
-//        conf.sta.password[i] = password.charAt(i);
-
-//    esp_wifi_set_config(WIFI_IF_STA, &conf);
-//}
-//#endif
-
-
 #include <defines.h>
 #define EEPROM_SIZE 512
 
@@ -40,6 +21,7 @@ typedef struct
     uint8_t last_mqtt_publish_attempt;
     unsigned long lastMillis;
     char clientIP;
+    bool MQTTSecure;
 } configData_t;
 
 configData_t cfg;
@@ -125,7 +107,7 @@ void saveConfig(bool force = false)
     // Save configuration from RAM into EEPROM
     if (write_config == true)
     {
-        SERIAL_DEBUG_LN(F("Saving Config"))
+        SERIAL_DEBUG_LN(F("Saving Config"));
         EEPROM.begin(4095);
         EEPROM.put(0, cfg);
         write_config_done = true;

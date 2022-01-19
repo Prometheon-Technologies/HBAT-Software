@@ -196,3 +196,41 @@ void setHostname(String new_hostname)
     cfg.hostname[j] = '\0';
     setConfigChanged();
 }
+
+// we can't assing wifiManager.resetSettings(); to reset, somewhow it gets called straight away.
+void setWiFiConf(String ssid, String password) {
+#ifdef ESP8266
+    struct station_config conf;
+
+    wifi_station_get_config(&conf);
+
+    memset(conf.ssid, 0, sizeof(conf.ssid));
+    for (int i = 0; i < ssid.length() && i < sizeof(conf.ssid); i++)
+        conf.ssid[i] = ssid.charAt(i);
+
+    memset(conf.password, 0, sizeof(conf.password));
+    for (int i = 0; i < password.length() && i < sizeof(conf.password); i++)
+        conf.password[i] = password.charAt(i);
+
+    wifi_station_set_config(&conf);
+
+// untested due to lack of ESP32
+#elif defined(ESP32)
+    if(WiFiGenericClass::getMode() != WIFI_MODE_NULL){
+
+          wifi_config_t conf;
+          esp_wifi_get_config(WIFI_IF_STA, &conf);
+
+          memset(conf.sta.ssid, 0, sizeof(conf.sta.ssid));
+          for (int i = 0; i < ssid.length() && i < sizeof(conf.sta.ssid); i++)
+              conf.sta.ssid[i] = ssid.charAt(i);
+
+          memset(conf.sta.password, 0, sizeof(conf.sta.password));
+          for (int i = 0; i < password.length() && i < sizeof(conf.sta.password); i++)
+              conf.sta.password[i] = password.charAt(i);
+
+          esp_wifi_set_config(WIFI_IF_STA, &conf);
+    }
+#endif
+}
+// EOF

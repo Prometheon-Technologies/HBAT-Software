@@ -405,5 +405,3 @@ void HMSmqtt::mqttSendStatus()
 }
 
 //############################## MQTT HELPER FUNCTIONS END ##############################
-
-//add an array of primes to a class variable

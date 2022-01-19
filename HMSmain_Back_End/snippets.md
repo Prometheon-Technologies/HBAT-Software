@@ -1,8 +1,8 @@
 # This is a location for all code snippets related to this project
 
-# Code Snippets
+## Code Snippets
 
-# C++
+### C++
 
 ```cpp
 
@@ -60,7 +60,7 @@ void InitJsonData()
 
 /******************************************************************************
  * Function: Accumulate DataTosend from sensor arrays
- * Description: This function accumualtes all sensor data and stores it in the main data structure.
+ * Description: This function accumulates all sensor data and stores it in the main data structure.
  * Parameters: None
  * Return: None
  ******************************************************************************/
@@ -142,23 +142,98 @@ struct data_arrays
     float flow_rate_sensor_temp;
     int flow_rate_sensor_status;
 };
+```
+
+### C
+
+```c
+
 
 
 ```
 
-# C
+### JSON
 
-```c 
-
-
-
-```
-
-
-# JSON
-
-```json 
+```json
 
 
 
 ```
+
+### Mermaid
+
+```mermaid
+classDiagram
+    Animal "1" <|-- Duck
+    Animal <|-- Fish
+    Animal <--o Zebra
+    Animal : +int age
+    Animal : +String gender
+    Animal: +isMammal()
+    Animal: +mate()
+    class Duck{
+        +String beakColor
+        +swim()
+        +quack()
+    }
+    class Fish{
+        -int sizeInFeet
+        -canEat()
+    }
+    class Zebra{
+        +bool is_wild
+        +run()
+    }
+```
+
+```mermaid
+      stateDiagram
+        [*] --> Active
+
+        state Active {
+            [*] --> NumLockOff
+            NumLockOff --> NumLockOn : EvNumLockPressed
+            NumLockOn --> NumLockOff : EvNumLockPressed
+            --
+            [*] --> CapsLockOff
+            CapsLockOff --> CapsLockOn : EvCapsLockPressed
+            CapsLockOn --> CapsLockOff : EvCapsLockPressed
+            --
+            [*] --> ScrollLockOff
+            ScrollLockOff --> ScrollLockOn : EvCapsLockPressed
+            ScrollLockOn --> ScrollLockOff : EvCapsLockPressed
+        }
+        state SomethingElse {
+          A --> B
+          B --> A
+        }
+
+        Active --> SomethingElse
+        note right of SomethingElse : This is the note to the right.
+
+        SomethingElse --> [*]
+```
+
+```mermaid
+graph TD
+          A[Christmas] -->|Get money| B(Go shopping)
+          B --> C{Let me think}
+          B --> G[/Another/]
+          C ==>|One| D[Laptop]
+          C -->|Two| E[iPhone]
+          C -->|Three| F[fa:fa-car Car]
+          subgraph section
+            C
+            D
+            E
+            F
+            G
+          end
+
+```
+
+## USEFUL LINKS
+
+[Mermaid Live Editor](https://mermaid-js.github.io/mermaid-live-editor/edit#eyJjb2RlIjoiZ3JhcGggVERcbiAgICBBW0NocmlzdG1hc10gLS0-fEdldCBtb25leXwgQihHbyBzaG9wcGluZylcbiAgICBCIC0tPiBDe0xldCBtZSB0aGlua31cbiAgICBDIC0tPnxPbmV8IERbTGFwdG9wXVxuICAgIEMgLS0-fFR3b3wgRVtpUGhvbmVdXG4gICAgQyAtLT58VGhyZWV8IEZbZmE6ZmEtY2FyIENhcl0iLCJtZXJtYWlkIjoie1xuICBcInRoZW1lXCI6IFwiYmFzZVwiXG59IiwidXBkYXRlRWRpdG9yIjpmYWxzZSwiYXV0b1N5bmMiOnRydWUsInVwZGF0ZURpYWdyYW0iOmZhbHNlfQ)
+
+[Wifi QR code generator](https://qifi.org/)

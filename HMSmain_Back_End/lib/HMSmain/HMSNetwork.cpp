@@ -8,32 +8,6 @@ HMSNetwork::~HMSNetwork()
 {
 }
 
-#if defined(ESP32)
-void ESP_Get_Config()
-{
-    if (WiFiGenericClass::getMode() != WIFI_MODE_NULL)
-    {
-        wifi_config_t conf;
-        esp_wifi_get_config(WIFI_IF_STA, &conf);
-
-        memset(conf.sta.ssid, 0, sizeof(conf.sta.ssid));
-        for (int i = 0; i < ssid.length() && i < sizeof(conf.sta.ssid); i++)
-            conf.sta.ssid[i] = ssid.charAt(i);
-
-        memset(conf.sta.password, 0, sizeof(conf.sta.password));
-        for (int i = 0; i < password.length() && i < sizeof(conf.sta.password); i++)
-            conf.sta.password[i] = password.charAt(i);
-
-        esp_wifi_set_config(WIFI_IF_STA, &conf);
-    }
-}
-#endif
-
-bool HMSNetwork::Connect()
-{
-    return true;
-}
-
 // ######################## server functions #########################
 
 String HMSNetwork::getRebootString()
@@ -63,7 +37,7 @@ void HMSNetwork::HMSNetworkSetup()
     // setup wifiManager
     wifiManager.setHostname(cfg.hostname);           // set hostname
     wifiManager.setConfigPortalBlocking(false);      // config portal is not blocking (LEDs light up in AP mode)
-    wifiManager.setSaveConfigCallback(handleReboot); // after the wireless settings have been saved a reboot will be performed
+    wifiManager.setSaveConfigCallback(handleReboot()); // after the wireless settings have been saved a reboot will be performed
 
 #if HMS_DEBUG != 0
     wifiManager.setDebugOutput(true);

@@ -46,5 +46,30 @@
         "random": "cpp",
         "cmake.mingwSearchDirs": "C:\\mingw-w64\\mingw64\\bin",
         "cmake.generator": "MinGW Makefiles"
-    }
+    },
+    "cSpell.words": [
+        "Bezier",
+        "Bmath",
+        "debugln",
+        "EEPROM",
+        "HBAT",
+        "Heim",
+        "imgs",
+        "MQTT",
+        "PEMFC",
+        "println",
+        "Purbright",
+        "SSID",
+        "struct",
+        "Taskto",
+        "tbegin",
+        "tconnect",
+        "tcontrol",
+        "Tosend",
+        "Vmax",
+        "Vmin",
+        "Voxdale",
+        "Vreal",
+        "Zacariah"
+    ]
 }

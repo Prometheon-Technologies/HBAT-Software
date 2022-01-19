@@ -4,7 +4,7 @@ AccumulateData::AccumulateData()
 {
   json = "";
   maxVoltage = 24;
-  maxTemp = 100; // in celcius
+  maxTemp = 100; // in celsius
 }
 
 AccumulateData::~AccumulateData(void)
@@ -26,7 +26,7 @@ void AccumulateData::SetupMainLoop()
 
 /******************************************************************************
  * Function: Accumulate Data to send from sensors and store in json
- * Description: This function accumualtes all sensor data and stores it in the main json data structure.
+ * Description: This function accumulates all sensor data and stores it in the main json data structure.
  * Parameters: None
  * Return: None
  ******************************************************************************/

@@ -85,9 +85,8 @@ const String MQTT_DEVICE_NAME = "HBAT_HMS" + MQTT_UNIQUE_IDENTIFIER; // MQTT Top
 #endif
 /*###################### MQTT Configuration END ######################*/
 
-// define externalised classes
+// define externalized classes
 extern AccumulateData accumulatedData;
-extern Scanner i2cscanner;
 
 extern Scanner scanner;
 extern WiFiManager wifiManager;
@@ -120,7 +119,7 @@ unsigned long time_now = 0;
 bool Charge_State;
 //Wifi Variables
 // Set these to your desired credentials.
-const String ssid = "HBAT-" + String(WiFi.macAddress());
+const String ssid = "HBAT_HMS";
 const String password = "hbathbat";
 bool wifiMangerPortalRunning = false;
 bool wifiConnected = false;

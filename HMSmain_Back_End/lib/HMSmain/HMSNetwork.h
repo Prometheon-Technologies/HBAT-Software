@@ -21,7 +21,8 @@ public:
     void MessageReceived(String &topic, String &payload);
     String getRebootString();
     void handleReboot();
-    bool Connect();
+    void ClientLoop();
+    void connectToApWithFailToStation(String WIFI_STA_SSID, String WIFI_STA_PASS);
 
     //variables
 private:

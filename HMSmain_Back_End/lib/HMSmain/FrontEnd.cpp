@@ -454,54 +454,6 @@ String FrontEnd::json_return_data()
   return "";
 }
 
-void FrontEnd::ClientLoop()
-{
-  server.handleClient();
-  delay(0);
-}
-
-void FrontEnd::connectToApWithFailToStation(String WIFI_STA_SSID, String WIFI_STA_PASS)
-{
-  WiFi.persistent(true);
-  SERIAL_DEBUG_LN("Configuring access point...");
-  Serial.print("WIFI_STA_SSID:");
-  SERIAL_DEBUG_LN(WIFI_STA_SSID);
-  Serial.print("WIFI_STA_PASS:");
-  SERIAL_DEBUG_LN(WIFI_STA_PASS);
-
-  WiFi.mode(WIFI_STA);
-  if (WIFI_STA_SSID == "")
-  {
-    WiFi.reconnect();
-  }
-  else
-  {
-    WiFi.begin(WIFI_STA_SSID.c_str(), WIFI_STA_PASS.c_str());
-  }
-
-  int numberOfAttempts = 0;
-
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    numberOfAttempts++;
-    delay(200);
-    Serial.print(".");
-    if (numberOfAttempts > 100)
-    {
-      WiFi.mode(WIFI_AP);
-      // You can remove the password parameter if you want the AP to be open.
-      WiFi.softAP(ssid.c_str(), password.c_str());
-      Serial.print("Wifi Connect Failed. \r\nStarting AP. \r\nAP IP address: ");
-      SERIAL_DEBUG_LN(WiFi.softAPIP());
-      return;
-      break;
-    }
-  }
-  SERIAL_DEBUG_LN("");
-  Serial.print("Connected! IP address: ");
-  SERIAL_DEBUG_LN(WiFi.localIP());
-}
-
 char *FrontEnd::StringtoChar(String inputString)
 {
   char *charString = new char[inputString.length() + 1];

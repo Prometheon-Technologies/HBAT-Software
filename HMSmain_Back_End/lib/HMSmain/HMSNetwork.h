@@ -16,13 +16,12 @@ public:
     virtual ~HMSNetwork();
     //Functions
     void HMSNetworkSetup();
-    void HMSNetworkLoop();
-    void RunService();
-    void MessageReceived(String &topic, String &payload);
-    String getRebootString();
-    void handleReboot();
-    void ClientLoop();
-    void connectToApWithFailToStation(String WIFI_STA_SSID, String WIFI_STA_PASS);
+    int CheckWifiState();
+    void connectToApWithFailToStation();
+    void CheckNetworkLoop();
+    int DiscovermDNSBroker();
+    void SetupmDNSServer();
+    void SetupmDNSLoop();
 
     //variables
 private:

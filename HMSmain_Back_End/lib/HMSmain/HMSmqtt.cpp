@@ -9,48 +9,33 @@ HMSmqtt::~HMSmqtt(void)
 {
 }
 
-int HMSmqtt::CheckWifiState()
-{
-  int wifiStateCounter = 0;
-  Serial.print("checking wifi...");
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.print(". ");
-    delay(1000);
-    wifiStateCounter++;
-    if (wifiStateCounter > 100)
-      SERIAL_DEBUG_LN("WiFi not connected");
-    return 0;
-  }
-  if (WiFi.status() == WL_CONNECTED)
-  {
-    Serial.println("\nconnected!");
-    return 1;
-  }
-  return 0;
-}
-
 int HMSmqtt::MQTTConnect()
 {
-  // float *cell_voltage = (float *)malloc(sizeof(float) * 10);
-  const char *clientPass = (char *)malloc(sizeof(char));
-  const char *clientUser = (char *)malloc(sizeof(char));
-  clientPass = Front_End.NewMQTTPass.c_str();
-  clientUser = Front_End.NewMQTTUser.c_str();
-  CheckWifiState();
-  if (CheckWifiState() == 1)
+
+  int wifi_status = Network.CheckWifiState();
+  if (wifi_status == 1)
   {
-    String inputString = MQTT_DEVICE_NAME;
-    char *clientID = new char[inputString.length() + 1];
-    strcpy(clientID, inputString.c_str());
-    SERIAL_DEBUG_LN("connecting to MQTT Broker...");
-    while (!mqtt.connect(clientID, clientUser, clientPass))
+    if (cfg.MQTTSecureState != 0)
     {
-      Serial.print(". ");
-      delay(1000);
+      SERIAL_DEBUG_LN("connecting to MQTT Broker...");
+      while (!)
+      {
+        Serial.print(". ");
+        delay(1000);
+      }
+      SERIAL_DEBUG_LN("connected using a secure connection!");
+      return 1;
     }
-    SERIAL_DEBUG_LN("connected!");
-    return 1;
+    else
+    {
+      while (!)
+      {
+        Serial.print(". ");
+        delay(1000);
+      }
+      SERIAL_DEBUG_LN("connected using an insecure connection!");
+      return 1;
+    }
   }
   else
   {
@@ -62,7 +47,7 @@ int HMSmqtt::MQTTConnect()
 int HMSmqtt::ReConnect()
 {
   // reconnect failover
-  if (!mqtt.connected())
+  if (!mqttClient.connected())
   {
     MQTTConnect();
     return 0;
@@ -82,75 +67,45 @@ void HMSmqtt::MessageReceived(String &topic, String &payload)
 
 void HMSmqtt::MQTTSetup()
 {
-  // Note: Local domain names (e.g. "Computer.local" on OSX) are not supported
-  // by Arduino. You need to set the IP address directly.
-  //
-  // MQTT brokers usually use port 8883 for secure connections.
-  //
-  // If you're using the same broker for both secure and insecure connections,
-  // you can use the same port number.
-  //
-  // If you're using a different port for secure and insecure connections,
-  // you need to use different port numbers.
-  //
-  // For example, if you're using a secure connection for MQTT and a
-  // non-secure connection for websockets, you would use the following
-  // broker addresses:
-  //
-  //   MQTT broker:   "mqtt.mybroker.com"
-  //   Websocket:     "ws://mqtt.mybroker.com:1883"
-  //
-  // If you're using a secure connection for MQTT and a secure connection for
-  // websockets, you would use the following broker addresses:
-  //
-  //   MQTT broker:   "mqtt.mybroker.com"
-  //   Websocket:     "wss://mqtt.mybroker.com:443"
-  //
-  // If you're using a secure connection for MQTT and a non-secure connection
-  // for websockets, you would use the following broker addresses:
-  //
-  //   MQTT broker:   "mqtt.mybroker.com"
-  //   Websocket:     "ws://mqtt.mybroker.com:8883"
-  //
-
-  auto getPort = [](bool secure)
+  // MQTT client
+  if (Network.CheckWifiState() != 0)
   {
-    return secure ? MQTT_PORT_SECURE : MQTT_PORT;
-  };
-  auto getHost = [](bool secure)
+    auto getPort = [](bool secure)
+    {
+      return secure ? MQTT_PORT_SECURE : MQTT_PORT;
+    };
+    auto port = getPort(cfg.MQTTSecureState);
+    char host = cfg.MQTTServer;
+    mqttClient.setServer(host, port);
+    mqttClient.setCallback(callback);
+  }
+  else
   {
-    return secure ? net : espClient;
-  };
-  int port = getPort(cfg.MQTTSecure);
-  auto host = getHost(cfg.MQTTSecure);
-  MQTTConnect();
-  mqtt.begin(WiFi.localIP(), port, host); // use net for secure connections or espClient for non-secure connections
+    SERIAL_DEBUG_LN("MQTT setup failed! Please connect your device to a WiFi network.");
+  }
 }
 
 void HMSmqtt::MQTTPublish(String topic, String payload)
 {
   if (MQTTLoop() == 1)
   {
-    mqtt.publish(topic, payload);
+    mqttClient.publish(topic, payload);
   }
   else
   {
-    SERIAL_DEBUG_LN("MQTT not connected, not publishing. Attempting to reconnect...");
     if (Serial.available() > 0)
     {
       SERIAL_DEBUG_LN("MQTT not connected, not publishing. Attempting to reconnect...");
     }
-    MQTTSetup();
-    ReConnect();
-    mqtt.publish(topic, payload);
+    mqttClient.publish(topic, payload);
     MQTTLoop();
   }
 }
 
 int HMSmqtt::MQTTLoop()
 {
-  mqtt.loop();
-  if (!ReConnect() == 0)
+  mqttClient.loop();
+  if (ReConnect() != 1)
   {
     // reconnect if connection dropped
     ReConnect();
@@ -165,7 +120,6 @@ int HMSmqtt::MQTTLoop()
 
 void HMSmqtt::RunMqttService()
 {
-#ifdef ENABLE_MQTT_SUPPORT
   static unsigned int loop_counter = 0;
   static bool mqttConnected = false;
 
@@ -178,12 +132,12 @@ void HMSmqtt::RunMqttService()
       if (!mqttConnected)
       {
         SERIAL_DEBUG_LN("Trying to connect to MQTT")
-        mqttConnected = mqtt.connect(cfg.MQTTDeviceName);
+        mqttConnected = mqttClient.connect(cfg.MQTTDeviceName);
       }
       if (mqttConnected)
       {
         SERIAL_DEBUG_LN("MQTT Connected!")
-            
+
         MQTTPublish(cfg.MQTTTopic, "ON");
       }
       else
@@ -194,10 +148,11 @@ void HMSmqtt::RunMqttService()
   }
   else
     mqttConnected = false;
+  // create a time object to execute the below code every 10 seconds
 
-  if (loop_counter % 10 == 0)
+  if (ReadTimer_10.ding())
   {
-    if (!mqtt.connected() && cfg.MQTTEnabled != 0)
+    if (!mqttClient.connected() && cfg.MQTTEnabled != 0)
     {
       mqttConnected = false;
     }
@@ -208,7 +163,7 @@ void HMSmqtt::RunMqttService()
       SERIAL_DEBUG_ADD("Connecting to MQTT...");
       if (MQTTLoop())
       {
-        SERIAL_DEBUG_ADD("connected\n")
+        SERIAL_DEBUG_ADD("connected\n");
 
         SERIAL_DEBUG_LN("Subscribing to MQTT Topics");
         char mqttSetTopicC[129];
@@ -224,14 +179,14 @@ void HMSmqtt::RunMqttService()
         JSONencoder["~"] = cfg.MQTTTopic,
         JSONencoder["name"] = cfg.MQTTDeviceName,
         JSONencoder["dev"]["ids"] = MQTT_UNIQUE_IDENTIFIER,
-        JSONencoder["dev"]["mf"] = "Surrbradl08",
+        JSONencoder["dev"]["mf"] = "DaOfficialWizard",
         JSONencoder["dev"]["mdl"] = VERSION,
         JSONencoder["dev"]["name"] = cfg.MQTTDeviceName,
         JSONencoder["stat_t"] = "~",
         JSONencoder["cmd_t"] = mqttSetTopicS,
-        JSONencoder["brightness"] = true,
-        JSONencoder["rgb"] = true,
-        JSONencoder["effect"] = true,
+        JSONencoder[""] = true,
+        JSONencoder[""] = true,
+        JSONencoder[""] = true,
         JSONencoder["uniq_id"] = MQTT_UNIQUE_IDENTIFIER,
         JSONencoder["schema"] = "json";
 
@@ -260,21 +215,23 @@ void HMSmqtt::RunMqttService()
         }
         else
         {
-          SERIAL_DEBUG_LN("Error sending Configuration")
+          SERIAL_DEBUG_LN("Error sending Configuration");
         }
       }
       else
       {
-        SERIAL_DEBUG_ADDF("failed with state %s\n", mqttClient.state())
+        SERIAL_DEBUG_ADDF("failed with state %s\n", mqttClient.state());
       }
     }
   }
 
-  if (loop_counter % 90 == 0)
+  ReadTimer_10.start();
+  if (ReadTimer_90.ding())
   {
     MqttData.mqttSendStatus();
   }
-#endif
+  ReadTimer_90.start();
+  loop_counter++;
 }
 
 //############################## MQTT HELPER FUNCTIONS ##############################
@@ -286,7 +243,7 @@ void HMSmqtt::mqttCallback(char *topic, byte *payload, unsigned int length)
   DynamicJsonDocument doc(1024);
   deserializeJson(doc, payload);
 
-  SERIAL_DEBUG_LNF("Received MQTT package: %s", doc.as<String>().c_str())
+  SERIAL_DEBUG_LNF("Received MQTT package: %s", doc.as<String>().c_str());
 
   JsonObject obj = doc.as<JsonObject>();
   for (JsonPair p : obj)
@@ -388,12 +345,12 @@ void HMSmqtt::mqttSendStatus()
 
   StaticJsonDocument<128> JSONencoder;
   JSONencoder["state"] = (power == 1 ? "ON" : "OFF"),
-  JSONencoder["brightness"] = brightness,
-  JSONencoder["effect"] = patterns[currentPatternIndex].name,
-  JSONencoder["autoplay"] = autoplay,
-  JSONencoder["speed"] = speed;
-  JSONencoder["hue"] = getHueMapped((uint8_t)0, (uint8_t)255);
-  JSONencoder["saturation"] = getSatMapped((uint8_t)0, (uint8_t)255);
+  JSONencoder["brightness"] = ,
+  JSONencoder["effect"] = ,
+  JSONencoder["autoplay"] = ,
+  JSONencoder["speed"] = ;
+  JSONencoder["hue"] = ;
+  JSONencoder["saturation"] = ;
 
   uint8_t JSONmessage[128];
   size_t n = serializeJson(JSONencoder, JSONmessage);
@@ -403,5 +360,6 @@ void HMSmqtt::mqttSendStatus()
     SERIAL_DEBUG_LNF("Sending MQTT package: %s", JSONencoder.as<String>().c_str())
   }
 }
+//############################## MQTT HELPER FUNCTIONS END ##############################//
 
-//############################## MQTT HELPER FUNCTIONS END ##############################
+

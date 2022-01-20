@@ -9,7 +9,7 @@ typedef struct
     // Variables
     char hostname[33];
     uint8_t MQTTEnabled;
-    char MQTTHost[65];
+    char MQTTHost;
     uint16_t MQTTPort; // Port to use for unsecured MQTT
     uint16_t MQTTPort_Secure; //port to use if Secured MQTT is enabled
     char MQTTUser[33];
@@ -21,7 +21,13 @@ typedef struct
     uint8_t last_mqtt_publish_attempt;
     unsigned long lastMillis;
     char clientIP;
-    bool MQTTSecure;
+    bool MQTTSecureState;
+    char MQTTServer;
+    long lastMsg;
+    char msg;
+    int value;
+    char *WIFISSID;
+    char *WIFIPASS;
 } configData_t;
 
 configData_t cfg;
@@ -34,7 +40,7 @@ void initStruct()
 {
     // init default values
     default_cfg.MQTTEnabled = 0;
-    default_cfg.MQTTHost[0] = 0;
+    default_cfg.MQTTHost = 0;
     default_cfg.MQTTPort = 1883;
     default_cfg.MQTTPort_Secure = 8883; // 8883 or 8886 is the default port for MQTT over SSL
     default_cfg.MQTTUser[0] = 0;
@@ -46,6 +52,13 @@ void initStruct()
     default_cfg.last_mqtt_publish_attempt = 0;
     default_cfg.lastMillis = 0;
     default_cfg.clientIP = 0;
+    default_cfg.MQTTSecureState = 0;
+    default_cfg.MQTTServer = 0;
+    default_cfg.lastMsg = 0;
+    default_cfg.msg = 0;
+    default_cfg.value = 0;
+    default_cfg.WIFISSID = ssid;
+    default_cfg.WIFIPASS = password;
 }
 
 void initConfig()

@@ -432,9 +432,9 @@ FrontEnd::FrontEnd(void)
   /* AccumulateSensorjson = AccumulateData().json; */
   maxVoltage = 24;
   maxTemp = 100;
-  NewMQTTIP = server.arg("mqttIP");
+  /* NewMQTTIP = webServer.arg("mqttIP");
   NewMQTTPass = server.arg("mqttPass");
-  NewMQTTUser = server.arg("mqttUser");
+  NewMQTTUser = server.arg("mqttUser"); */
 }
 
 FrontEnd::~FrontEnd(void)
@@ -481,7 +481,7 @@ void FrontEnd::loadConfig()
   if (!isValidHostname(cfg.MQTTHost, sizeof(cfg.MQTTHost)))
   {
     cfg.MQTTEnabled = MQTT_ENABLED;
-    // Copnvert String data of global definitions into Char pointers for use in strncpy
+    // Convert String data of global definitions into Char pointers for use in strncpy
     char *MQTT_Host_Name = StringtoChar(MQTT_HOSTNAME);
     char *mqtt_user = StringtoChar(MQTT_USER);
     char *mqtt_pass = StringtoChar(MQTT_PASS);
@@ -520,68 +520,20 @@ void FrontEnd::loadConfig()
                    cfg.MQTTDeviceName)
 }
 
-void FrontEnd::FrontEndLoop()
-{
-  static unsigned int loop_counter = 0;
-
-  if (wifiMangerPortalRunning)
-  {
-    wifiManager.process();
-  }
-
-  // run current function every 5 seconds
-  if (loop_counter % 5 == 0)
-  {
-    int currentWifiStatus = wifiManager.getLastConxResult();
-
-    if (currentWifiStatus != WL_CONNECTED && !wifiMangerPortalRunning)
-    {
-      SERIAL_DEBUG_LN("Trying to connect to Wifi")
-      wifiConnected = false;
-    }
-    if (currentWifiStatus == WL_CONNECTED && !wifiConnected)
-    {
-      wifiConnected = true;
-      Serial.print("INFO: WiFi Connected! Open http://");
-      Serial.print(WiFi.localIP());
-      SERIAL_DEBUG_LN(" in your browser");
-    }
-  }
-}
-
 void FrontEnd::updateCurrentData()
 {
-  static unsigned int loop_counter = 0;
-  if (loop_counter % 10 == 0)
+  if (ReadTimer_10_2.ding())
   {
     // call to save config if config has changed
     saveConfig();
     SERIAL_DEBUG_LNF("Heap: %d", system_get_free_heap_size())
   }
-}
-
-void addRebootPage(int serverNr)
-{
-  if (serverNr < 2)
-  {
-    server.on("/reboot", HTTP_GET, []()
-              { Network.handleReboot(); });
-  }
-}
-
-void sendString(String value)
-{
-  server.send(200, "text/plain", value);
-}
-
-void sendInt(uint8_t value)
-{
-  sendString(String(value));
+  ReadTimer_10_2.start();
 }
 
 // These are old functions from previous websocket implementation
 // but we keep then as this could be still used in the future
-void broadcastInt(String name, uint8_t value)
+/* void broadcastInt(String name, uint8_t value)
 {
 // String json = "{\"name\":\"" + name + "\",\"value\":" + String(value) + "}";
 #ifdef ENABLE_MQTT_SUPPORT
@@ -596,6 +548,7 @@ void broadcastString(String name, String value)
   MqttData.mqttSendStatus();
 #endif
 }
+ */
 
 void FrontEnd::SetupServer()
 {
@@ -628,7 +581,6 @@ void FrontEnd::SetupServer()
   SERIAL_DEBUG_LNF("Flash Size: %dKB", ESP.getFlashChipSize());
   SERIAL_DEBUG_EOL("System Information Sent");
   SERIAL_DEBUG_EOL("");
-
 // FS debug information
 // THIS NEEDS TO BE PAST THE WIFI SETUP!! OTHERWISE WIFI SETUP WILL BE DELAYED
 #if HMS_DEBUG != 0
@@ -656,86 +608,13 @@ void FrontEnd::SetupServer()
 #endif
 
 // print setup details
-#ifdef defined(ESP32) && defined(ARDUINO_ESP32_RELEASE)
+/* #ifdef defined(ESP32) && defined(ARDUINO_ESP32_RELEASE)
   SERIAL_DEBUG_LNF("Arduino Core Version: %s", ARDUINO_ESP32_RELEASE)
 #endif
   SERIAL_DEBUG_LN(F("Enabled Features:"))
-#ifdef ENABLE_MULTICAST_DNS
-  SERIAL_DEBUG_LN(F("Feature: mDNS support enabled"))
-#endif
-#ifdef ENABLE_OTA_SUPPORT
-  SERIAL_DEBUG_LN(F("Feature: OTA support enabled"))
-#endif
 #ifdef ENABLE_MQTT_SUPPORT
   SERIAL_DEBUG_LNF("Feature: MQTT support enabled (mqtt version: %s)", String(MQTT_VERSION).c_str())
 #endif
-
-#ifdef ENABLE_OTA_SUPPORT
-
-  server.on("/ota", HTTP_GET, []()
-            {
-      IPAddress ip = WiFi.localIP();
-      String h = "<font face='arial'><h1> OTA Update Mode</h1>";
-      h += "<h2>Procedure: </h3>";
-      h += "The UI won't be available until reset.<br>";
-      h += "<b>Open your Arduino IDE and select the new PORT in Tools menu and upload the code!</b>";
-      h += "<br>Exit OTA mode: <a href=\"http://" + ip.toString() + "/reboot\"); ' value='Reboot'>Reboot</a>";
-      h += "</font>";
-
-      server.send(200, "text/html", h);
-      delay(100);
-
-      ArduinoOTA.setHostname(cfg.hostname);
-#ifdef OTA_PASSWORD
-      ArduinoOTA.setPassword(OTA_PASSWORD);
-#endif
-      ArduinoOTA.onStart([]() {
-          SPIFFS.end();
-          if (ArduinoOTA.getCommand() == U_FLASH) {
-              SERIAL_DEBUG_LN("Start updating sketch");
-          } else { // U_FS
-              SERIAL_DEBUG_LN("Start updating filesystem");
-          }
-
-          // NOTE: if updating FS this would be the place to unmount FS using FS.end()
-          });
-      ArduinoOTA.onEnd([]() {
-          SERIAL_DEBUG_LN("\nFinished OTA Update\nRebooting");
-          delay(500);
-          ESP.restart();
-          });
-      ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-          Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-          });
-      ArduinoOTA.onError([](ota_error_t error) {
-          Serial.printf("Error[%u]: ", error);
-          if (error == OTA_AUTH_ERROR) {
-              SERIAL_DEBUG_LN("Auth Failed");
-          }
-          else if (error == OTA_BEGIN_ERROR) {
-              SERIAL_DEBUG_LN("Begin Failed");
-          }
-          else if (error == OTA_CONNECT_ERROR) {
-              SERIAL_DEBUG_LN("Connect Failed");
-          }
-          else if (error == OTA_RECEIVE_ERROR) {
-              SERIAL_DEBUG_LN("Receive Failed");
-          }
-          else if (error == OTA_END_ERROR) {
-              SERIAL_DEBUG_LN("End Failed");
-          }
-          });
-      ArduinoOTA.begin();
-      delay(100);
-      while (1) {
-          ArduinoOTA.handle();
-          delay(1);
-          server.handleClient();
-          delay(1);
-      } }); // GET /ota
-#endif
-
-  addRebootPage(0);
 
   server.on("/config.json", HTTP_GET, []()
             {
@@ -883,19 +762,9 @@ void FrontEnd::SetupServer()
         setPower((power == 1) ? 0 : 1);
     }
     sendInt(power); });
-  server.serveStatic("/", SPIFFS, "/", "max-age=86400");
+  server.serveStatic("/", SPIFFS, "/", "max-age=86400"); */
 
-  SERIAL_DEBUG_LN("INFO: HTTP web server started");
-
-  SERIAL_DEBUG_LN("\n===================================");
-  Hum.SetupSensor();
-  HMSmain.setupSensor();
-  Cell_Temp.SetupSensors();
-  SERIAL_DEBUG_LN("HMS booting - please wait");
-  SERIAL_DEBUG_LN("Setup Complete");
-  delay(100);
-
-  connectToApWithFailToStation("", "");
+/*   connectToApWithFailToStation("", "");
 
   SERIAL_DEBUG_LN("Server started");
   server.on(F("/"), []()
@@ -936,5 +805,6 @@ server.send(200, "application/json", "toggled"); });
             server.send(200, "application/json", json); });
 
   server.begin();
-  SERIAL_DEBUG_LN("HTTP server started");
+  SERIAL_DEBUG_LN("HTTP server started");*/
 }
+ 

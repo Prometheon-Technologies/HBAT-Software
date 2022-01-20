@@ -48,17 +48,24 @@
         "cmake.generator": "MinGW Makefiles"
     },
     "cSpell.words": [
+        "ADDF",
+        "Avahi",
         "Bezier",
         "Bmath",
         "debugln",
+        "Discoverm",
         "EEPROM",
         "HBAT",
         "Heim",
+        "HMSMQTT",
         "imgs",
+        "mdns",
         "MQTT",
+        "myhost",
         "PEMFC",
         "println",
         "Purbright",
+        "Setupm",
         "SSID",
         "struct",
         "Taskto",
@@ -70,6 +77,8 @@
         "Vmin",
         "Voxdale",
         "Vreal",
-        "Zacariah"
+        "WIFISSID",
+        "Zacariah",
+        "Zeroconf"
     ]
 }

@@ -91,3 +91,32 @@ graph TD
           end
 
 ```
+
+## MQTT Broker Configuration and Connection
+
+The MQTT Broker is a free service that allows you to publish and subscribe to MQTT messages.
+To automate the connection process, we will use Multi-Cast DNS (mDNS/Zeroconf) to find the broker.
+For this to work, you must have a broker on your local network, and you must have only **_1_** MQTT broker within the range of the client, otherwise the client will simply connect to the first broker it finds.
+
+Using a Zeroconf approach we can avoid having to hard code the broker's IP address or hostname into the client device's firmware. Instead we can use **_DNS-SD_** and Avahi/Bonjour to discover the server hosting the MQTT broker.
+
+To enable MQTT discovery on the broker, simply install avahi-daemon. For a Raspberry Pi, use the following command:
+
+```bash
+sudo apt-get install avahi-daemon
+```
+
+For this to work, the MQTT service needs to be advertised. On a Linux host system, Avahi can be configured to do this by including the following in /etc/avahi/services/mqtt.service:
+
+```xml
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<service-group>
+ <name replace-wildcards="yes">MQTT on %h</name>
+  <service>
+   <type>_mqtt._tcp</type>
+   <port>1883</port>
+  </service>
+</service-group>
+```
+
+

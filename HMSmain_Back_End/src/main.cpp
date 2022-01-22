@@ -60,7 +60,7 @@ void setup()
     Hum.SetupSensor();
     HMSmain.setupSensor();
     Cell_Temp.SetupSensors();
-    
+
     SERIAL_DEBUG_LN("HMS booting - please wait");
     Front_End.SetupServer();
     accumulatedData.SetupMainLoop();

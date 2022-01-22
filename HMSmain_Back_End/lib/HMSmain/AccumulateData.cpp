@@ -109,9 +109,4 @@ void AccumulateData::InitAccumulateDataJson()
   {
     SERIAL_DEBUG_LN(json);
   }
-  if (MQTT_ENABLED && MQTT_CONNECTED)
-  {
-    String currentTopic = MQTT_TOPIC + HMSmain.getDeviceID() + "/all_json_data"; //set the topic to the main topic + the device ID + /all_json_data
-    MqttData.MQTTPublish(currentTopic, json); // publish the json data to the topic as a string
-  }
 }

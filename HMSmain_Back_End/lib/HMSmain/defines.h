@@ -69,15 +69,15 @@ extern WiFiClient espClient;
 extern PubSubClient mqttClient(espClient);
 
 // Variables for MQTT
-const String MQTT_TOPIC = "hms/data/";
+const char *MQTT_TOPIC = "hms/data/";
 const String HOMEASSISTANT_MQTT_HOSTNAME = "homeassistant.local";
 const String MQTT_HOSTNAME = "hbat.mqtt.local";
 const String MQTT_USER = "MyUserName";
 const String MQTT_PASS = "";
-const String MQTT_TOPIC = "hms/data/";
 const String MQTT_HOMEASSISTANT_TOPIC_SET = "/set";                  // MQTT Topic to subscribe to for changes(Home Assistant)
 const String MQTT_HOMEASSISTANT_TOPIC = "homeassistant/HBAT/data";   // MQTT Topic to Publish to for state and config (Home Assistant);
 String MQTT_DEVICE_NAME = "HBAT_HMS" + MQTT_UNIQUE_IDENTIFIER; // MQTT Topic to Publish to for state and config (Any MQTT Broker)
+static bool mqttProcessing = false;
 
 #endif
 /*###################### MQTT Configuration END ######################*/
@@ -98,6 +98,9 @@ extern timeObj ReadTimer_90_2(90000);
 extern timeObj ReadTimer_3(5000);
 extern timeObj ReadTimer_10_3(10000);
 extern timeObj ReadTimer_90_3(90000);
+extern timeObj ReadTimer_4(5000);
+extern timeObj ReadTimer_10_4(10000);
+extern timeObj ReadTimer_90_4(90000);
 
 //Custom Objects
 extern HMS HMSmain;
@@ -119,7 +122,7 @@ extern TaskHandle_t runserver;
 extern TaskHandle_t accumulatedata;
 
 // Variables
-
+const int ledPin = 2;
 const char* mqtt_mDNS_clientId = Front_End.StringtoChar(MQTT_HOSTNAME);
 char mDNS_hostname[4] = {'h','b' ,'a' ,'t'};
 

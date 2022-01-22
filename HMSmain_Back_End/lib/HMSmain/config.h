@@ -1,7 +1,7 @@
 #include <defines.h>
 #define EEPROM_SIZE 512
 
-#define CONFIG_SAVE_MAX_DELAY 10 // delay in seconds when the settings are saved after last change occured
+#define CONFIG_SAVE_MAX_DELAY 10 // delay in seconds when the settings are saved after last change occurred
 #define CONFIG_COMMIT_DELAY 200  // commit delay in ms
 
 typedef struct
@@ -9,9 +9,8 @@ typedef struct
     // Variables
     char hostname[33];
     uint8_t MQTTEnabled;
-    char MQTTHost;
-    uint16_t MQTTPort; // Port to use for unsecured MQTT
-    uint16_t MQTTPort_Secure; //port to use if Secured MQTT is enabled
+    uint16_t MQTTPort;        // Port to use for unsecured MQTT
+    uint16_t MQTTPort_Secure; // port to use if Secured MQTT is enabled
     char MQTTUser[33];
     char MQTTPass[65];
     char MQTTTopic[65];
@@ -22,12 +21,13 @@ typedef struct
     unsigned long lastMillis;
     char clientIP;
     bool MQTTSecureState;
-    char MQTTServer;
+    char MQTTBroker;
     long lastMsg;
     char msg;
     int value;
     char *WIFISSID;
     char *WIFIPASS;
+    bool MQTTConnectedState;
 } configData_t;
 
 configData_t cfg;
@@ -35,31 +35,6 @@ configData_t default_cfg;
 
 // save last "timestamp" the config has been saved
 unsigned long last_config_change = 0;
-
-void initStruct()
-{
-    // init default values
-    default_cfg.MQTTEnabled = 0;
-    default_cfg.MQTTHost = 0;
-    default_cfg.MQTTPort = 1883;
-    default_cfg.MQTTPort_Secure = 8883; // 8883 or 8886 is the default port for MQTT over SSL
-    default_cfg.MQTTUser[0] = 0;
-    default_cfg.MQTTPass[0] = 0;
-    default_cfg.MQTTTopic[0] = 0;
-    default_cfg.MQTTSetTopic[0] = 0;
-    default_cfg.MQTTDeviceName[0] = 0;
-    default_cfg.last_mqtt_connect_attempt = 0;
-    default_cfg.last_mqtt_publish_attempt = 0;
-    default_cfg.lastMillis = 0;
-    default_cfg.clientIP = 0;
-    default_cfg.MQTTSecureState = 0;
-    default_cfg.MQTTServer = 0;
-    default_cfg.lastMsg = 0;
-    default_cfg.msg = 0;
-    default_cfg.value = 0;
-    default_cfg.WIFISSID = ssid;
-    default_cfg.WIFIPASS = password;
-}
 
 void initConfig()
 {
@@ -131,7 +106,7 @@ void saveConfig(bool force = false)
     {
         if (force == true)
             delay(CONFIG_COMMIT_DELAY);
-        SERIAL_DEBUG_LN(F("Comitting config"))
+        SERIAL_DEBUG_LN(F("Committing config"))
         EEPROM.commit();
         EEPROM.end();
 
@@ -210,40 +185,24 @@ void setHostname(String new_hostname)
     setConfigChanged();
 }
 
-// we can't assing wifiManager.resetSettings(); to reset, somewhow it gets called straight away.
-void setWiFiConf(String ssid, String password) {
-#ifdef ESP8266
-    struct station_config conf;
+// we can't assign wifiManager.resetSettings(); to reset, somehow it gets called straight away.
+void setWiFiConf(String ssid, String password)
+{
+    if (WiFiGenericClass::getMode() != WIFI_MODE_NULL)
+    {
 
-    wifi_station_get_config(&conf);
+        wifi_config_t conf;
+        esp_wifi_get_config(WIFI_IF_STA, &conf);
 
-    memset(conf.ssid, 0, sizeof(conf.ssid));
-    for (int i = 0; i < ssid.length() && i < sizeof(conf.ssid); i++)
-        conf.ssid[i] = ssid.charAt(i);
+        memset(conf.sta.ssid, 0, sizeof(conf.sta.ssid));
+        for (int i = 0; i < ssid.length() && i < sizeof(conf.sta.ssid); i++)
+            conf.sta.ssid[i] = ssid.charAt(i);
 
-    memset(conf.password, 0, sizeof(conf.password));
-    for (int i = 0; i < password.length() && i < sizeof(conf.password); i++)
-        conf.password[i] = password.charAt(i);
+        memset(conf.sta.password, 0, sizeof(conf.sta.password));
+        for (int i = 0; i < password.length() && i < sizeof(conf.sta.password); i++)
+            conf.sta.password[i] = password.charAt(i);
 
-    wifi_station_set_config(&conf);
-
-// untested due to lack of ESP32
-#elif defined(ESP32)
-    if(WiFiGenericClass::getMode() != WIFI_MODE_NULL){
-
-          wifi_config_t conf;
-          esp_wifi_get_config(WIFI_IF_STA, &conf);
-
-          memset(conf.sta.ssid, 0, sizeof(conf.sta.ssid));
-          for (int i = 0; i < ssid.length() && i < sizeof(conf.sta.ssid); i++)
-              conf.sta.ssid[i] = ssid.charAt(i);
-
-          memset(conf.sta.password, 0, sizeof(conf.sta.password));
-          for (int i = 0; i < password.length() && i < sizeof(conf.sta.password); i++)
-              conf.sta.password[i] = password.charAt(i);
-
-          esp_wifi_set_config(WIFI_IF_STA, &conf);
+        esp_wifi_set_config(WIFI_IF_STA, &conf);
     }
-#endif
 }
 // EOF

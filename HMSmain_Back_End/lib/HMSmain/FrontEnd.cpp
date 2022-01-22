@@ -478,18 +478,18 @@ void FrontEnd::loadConfig()
 
 #ifdef ENABLE_MQTT_SUPPORT
   // fall back to default settings if hostname is invalid
-  if (!isValidHostname(cfg.MQTTHost, sizeof(cfg.MQTTHost)))
+  char *mqtt_host = (char *)cfg.MQTTBroker;
+  if (!isValidHostname(mqtt_host, sizeof(cfg.MQTTBroker)))
   {
     cfg.MQTTEnabled = MQTT_ENABLED;
     // Convert String data of global definitions into Char pointers for use in strncpy
-    char *MQTT_Host_Name = StringtoChar(MQTT_HOSTNAME);
+    char *MQTT_BROKER = StringtoChar(MQTT_HOSTNAME);
     char *mqtt_user = StringtoChar(MQTT_USER);
     char *mqtt_pass = StringtoChar(MQTT_PASS);
     char *mqtt_topic = StringtoChar(MQTT_TOPIC);
     char *mqtt_topic_set = StringtoChar(MQTT_HOMEASSISTANT_TOPIC_SET);
     char *mqtt_device_name = StringtoChar(MQTT_DEVICE_NAME);
 
-    strncpy(cfg.MQTTHost, MQTT_Host_Name, sizeof(cfg.MQTTHost));
     if (MQTT_SECURE_ENABLED != 0)
     {
       cfg.MQTTPort = uint16_t(MQTT_PORT_SECURE);
@@ -499,6 +499,7 @@ void FrontEnd::loadConfig()
       cfg.MQTTPort = uint16_t(MQTT_PORT);
     }
 
+    strncpy(mqtt_host, MQTT_BROKER, sizeof(cfg.MQTTBroker));
     strncpy(cfg.MQTTUser, mqtt_user, sizeof(cfg.MQTTUser));
     strncpy(cfg.MQTTPass, mqtt_pass, sizeof(cfg.MQTTPass));
     strncpy(cfg.MQTTTopic, mqtt_topic, sizeof(cfg.MQTTTopic));
@@ -511,7 +512,7 @@ void FrontEnd::loadConfig()
   SERIAL_DEBUG_LNF("Loaded config: hostname %s, MQTT enabled %s, MQTT host %s, MQTT port %d, MQTT user %s, MQTT pass %s, MQTT topic %s, MQTT set topic %s, MQTT device name %s",
                    cfg.hostname,
                    (cfg.MQTTEnabled == MQTT_ENABLED) ? "true" : "false",
-                   cfg.MQTTHost,
+                   cfg.MQTTBroker,
                    cfg.MQTTPort,
                    cfg.MQTTUser,
                    cfg.MQTTPass,
@@ -638,7 +639,7 @@ void FrontEnd::SetupServer()
 #endif
 #ifdef ENABLE_MQTT_SUPPORT
       json += ",\"mqttEnabled\":" + String(cfg.MQTTEnabled);
-      json += ",\"mqttHostname\":\"" + String(cfg.MQTTHost) + "\"";
+      json += ",\"MQTTBrokername\":\"" + String(cfg.MQTTBroker) + "\"";
       json += ",\"mqttPort\":\"" + String(cfg.MQTTPort) + "\"";
       json += ",\"mqttUsername\":\"" + String(cfg.MQTTUser) + "\"";
       json += ",\"mqttTopic\":\"" + String(cfg.MQTTTopic) + "\"";
@@ -686,8 +687,8 @@ void FrontEnd::SetupServer()
           cfg.MQTTPort = mqtt_port;
           force_restart = true;
       }
-      if (mqtt_hostname.length() > 0 && String(cfg.MQTTHost) != mqtt_hostname) {
-          mqtt_hostname.toCharArray(cfg.MQTTHost, sizeof(cfg.MQTTHost));
+      if (mqtt_hostname.length() > 0 && String(cfg.MQTTBroker) != mqtt_hostname) {
+          mqtt_hostname.toCharArray(cfg.MQTTBroker, sizeof(cfg.MQTTBroker));
           force_restart = true;
       }
       if (mqtt_username.length() > 0 && String(cfg.MQTTUser) != mqtt_username) {

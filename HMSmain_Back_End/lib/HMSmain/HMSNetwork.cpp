@@ -17,7 +17,7 @@ void HMSNetwork::HMSNetworkSetup()
 #if (USING_ESP32_S2 || USING_ESP32_C3)
   ESPAsync_WiFiManager ESPAsync_wifiManager(&webServer, NULL, "Async_AutoConnect");
 #else
-  ESPAsync_WiFiManager ESPAsync_wifiManager(&webServer, &dnsServer, "Async_AutoConnect");
+  ESPAsync_WiFiManager ESPAsync_wifiManager(&webServer, &dnsServer, "HBAT_HMS");
 #endif
 
   // ESPAsync_wifiManager.resetSettings();   //reset saved settings
@@ -35,7 +35,7 @@ void HMSNetwork::HMSNetworkSetup()
   }
 
   webServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-               { request->send(200, "text/plain", "Hi! I am MyESP32S."); });
+               { request->send(200, "text/plain", "Hi! I am MyESP32."); });
 
   AsyncElegantOTA.begin(&webServer); // Start ElegantOTA
   webServer.begin();
@@ -128,7 +128,7 @@ int HMSNetwork::DiscovermDNSBroker()
       Serial.println("[OK]");
       mqttServer = MDNS.IP(0);
       mqttPort = MDNS.port(0);
-      cfg.MQTTHost = mqttServer;
+      cfg.MQTTBroker = mqttServer;
       cfg.MQTTPort = mqttPort;
       Serial.print("MQTT broker found at: ");
       Serial.print(mqttServer);
@@ -227,6 +227,7 @@ void HMSNetwork::SetupmDNSLoop()
   }
 }
 
+//BACKUP LEGACY FUNCTION
 /******************************************************************************
  * Function: Connect to Wifi with fail to AP mode if no connection
  * Description: This connection will attempt to create a WiFi connection with the given SSID and password. If the connection fails, it will attempt to connect to a default Wifi AP.

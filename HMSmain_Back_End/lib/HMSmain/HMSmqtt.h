@@ -11,19 +11,20 @@ class HMSmqtt
 {
 public:
   // Constructor
-  HMSmqtt();
+  HMSmqtt(void);
   virtual ~HMSmqtt(void);
   // Initialize the library
-  void mqttSendStatus();
+  //void mqttSendStatus();
   void mqttCallback(char *topic, byte *payload, unsigned int length);
   void MQTTSetup();
   int MQTTLoop();
   void RunMqttService();
-  void MessageReceived(String &topic, String &payload);
-  void MQTTPublish(String topic, String payload);
+  void MessageReceived(char topic[], char payload[]);
+  void MQTTPublish(char topic[], char payload[]);
   int CheckWifiState();
   int MQTTConnect();
   int ReConnect();
+  //void callback(char *topic, byte *message, unsigned int length);
 
 private:
 };

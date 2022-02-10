@@ -124,7 +124,6 @@ bool wifiConnected;
 // IO
 
 // Globally available functions
-
 char *StringtoChar(String inputString);
 
 

@@ -56,9 +56,9 @@ IPAddress mqttServer;
 AsyncWebServer webServer(80);
 DNSServer dnsServer;
 
-// Tasks for the Task Scheduler
+/* // Tasks for the Task Scheduler
 TaskHandle_t runserver;
-TaskHandle_t accumulatedata;
+TaskHandle_t accumulatedata; */
 
 // Variables
 const char* mqtt_mDNS_clientId = StringtoChar(MQTT_HOSTNAME);

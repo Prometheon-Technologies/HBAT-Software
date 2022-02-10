@@ -454,13 +454,6 @@ String FrontEnd::json_return_data()
   return "";
 }
 
-char *FrontEnd::StringtoChar(String inputString)
-{
-  char *charString = new char[inputString.length() + 1];
-  strcpy(charString, inputString.c_str());
-  return charString;
-}
-
 // ############## functions to update current server settings ###################
 void FrontEnd::loadConfig()
 {
@@ -483,12 +476,12 @@ void FrontEnd::loadConfig()
   {
     cfg.MQTTEnabled = MQTT_ENABLED;
     // Convert String data of global definitions into Char pointers for use in strncpy
-    char *MQTT_BROKER = StringtoChar(MQTT_HOSTNAME);
-    char *mqtt_user = StringtoChar(MQTT_USER);
-    char *mqtt_pass = StringtoChar(MQTT_PASS);
-    char *mqtt_topic = StringtoChar(MQTT_TOPIC);
-    char *mqtt_topic_set = StringtoChar(MQTT_HOMEASSISTANT_TOPIC_SET);
-    char *mqtt_device_name = StringtoChar(MQTT_DEVICE_NAME);
+    char *MQTT_BROKER = HMSmain.StringtoChar(MQTT_HOSTNAME);
+    char *mqtt_user = HMSmain.StringtoChar(MQTT_USER);
+    char *mqtt_pass = HMSmain.StringtoChar(MQTT_PASS);
+    char *mqtt_topic = HMSmain.StringtoChar(MQTT_TOPIC);
+    char *mqtt_topic_set = HMSmain.StringtoChar(MQTT_HOMEASSISTANT_TOPIC_SET);
+    char *mqtt_device_name = HMSmain.StringtoChar(MQTT_DEVICE_NAME);
 
     if (MQTT_SECURE_ENABLED != 0)
     {

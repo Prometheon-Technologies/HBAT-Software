@@ -40,13 +40,13 @@ void AccumulateData::InitAccumulateDataJson()
   }
 
   // Stack Data to send
-  doc["HMS_Stack_Humidity"] = Hum.StackHumidity();
-  doc["HMS_Stack_Temp"] = Hum.AverageStackTemp();
-  doc["HMS_Stack_Current"] = HMSmain.readAmps();
-  doc["HMS_Stack_Voltage"] = HMSmain.StackVoltage();
+  Doc["HMS_Stack_Humidity"] = Hum.StackHumidity();
+  Doc["HMS_Stack_Temp"] = Hum.AverageStackTemp();
+  Doc["HMS_Stack_Current"] = HMSmain.readAmps();
+  Doc["HMS_Stack_Voltage"] = HMSmain.StackVoltage();
 
   // Relays
-  JsonArray Relays = doc.createNestedArray("HMS_Relays");
+  JsonArray Relays = Doc.createNestedArray("HMS_Relays");
   bool relays[5] = {1, 2, 3, 4, 5};
   for (int i = 0; i < 5; i++)
   {
@@ -54,26 +54,26 @@ void AccumulateData::InitAccumulateDataJson()
   }
 
   // Flow Rate dataTosend
-  doc["Flow_Rate_Sensor_Status"] = Hum.SFM3003();
+  Doc["Flow_Rate_Sensor_Status"] = Hum.SFM3003();
   int flow_rate_sensor_status = Hum.SFM3003();
   if (flow_rate_sensor_status == 0)
   {
     // SFM3003 flow rate dataTosend in slm
-    doc["HMS_Flow_Rate"] = Hum.flow;
+    Doc["HMS_Flow_Rate"] = Hum.flow;
     // SFM3003 mass temp dataTosend
-    doc["Flow_Rate_Sensor_Temp"] = Hum.temperature;
+    Doc["Flow_Rate_Sensor_Temp"] = Hum.temperature;
   }
   else
   {
     SERIAL_DEBUG_LN(("Flow Rate Sensor Could Not Be Read\n"));
     // SFM3003 flow rate dataTosend in slm
-    doc["HMS_Flow_Rate"] = 0;
+    Doc["HMS_Flow_Rate"] = 0;
     // SFM3003 mass temp dataTosend
-    doc["Flow_Rate_Sensor_Temp"] = 0;
+    Doc["Flow_Rate_Sensor_Temp"] = 0;
   }
 
   // Add arrays for Cell level Data.
-  JsonArray Cell_Voltage = doc.createNestedArray("HMS_Cell_Voltage"); // from 0 - 10 in increasing order
+  JsonArray Cell_Voltage = Doc.createNestedArray("HMS_Cell_Voltage"); // from 0 - 10 in increasing order
   float *cell_voltage = HMSmain.readSensAndCondition();
   // loop through and store per cell voltage
   for (int i = 0; i < numSensors; i++)
@@ -83,7 +83,7 @@ void AccumulateData::InitAccumulateDataJson()
 
   free(cell_voltage); // free the memory
 
-  JsonArray CellTemp = doc.createNestedArray("HMS_Cell_Temp");
+  JsonArray CellTemp = Doc.createNestedArray("HMS_Cell_Temp");
   float *cell_temp = Cell_Temp.ReadTempSensorData(); // returns a float array of cell temperatures
   // loop through and store per cell temp data
   for (int i = 0; i < numSensors; i++)
@@ -94,7 +94,7 @@ void AccumulateData::InitAccumulateDataJson()
   free(cell_temp); // free the memory
 
   // Individual Humidity sensor data
-  JsonArray Humidity_Sensor_Data = doc.createNestedArray("Humidity_Sensor_Data");
+  JsonArray Humidity_Sensor_Data = Doc.createNestedArray("Humidity_Sensor_Data");
   float stack_humidity[4];
   for (int i = 0; i < 4; i++)
   {
@@ -103,8 +103,8 @@ void AccumulateData::InitAccumulateDataJson()
     Humidity_Sensor_Data.add(stack_humidity[3]);
   }
 
-  SERIAL_DEBUG_EOL(serializeJson(doc, Serial));
-  json = doc.as<String>();
+  SERIAL_DEBUG_EOL(serializeJson(Doc, Serial));
+  json = Doc.as<String>();
   if (json.length() > 0)
   {
     SERIAL_DEBUG_LN(json);

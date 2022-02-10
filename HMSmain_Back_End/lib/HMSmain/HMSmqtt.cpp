@@ -229,7 +229,7 @@ void HMSmqtt::RunMqttService()
 void mqttSendStatus()
 {
   uint8_t JSONmessage[1000];
-  size_t n = serializeJson(doc, JSONmessage);
+  size_t n = serializeJson(Doc, JSONmessage);
   if (!mqttProcessing)
   {
     char *topic_data;
@@ -238,7 +238,7 @@ void mqttSendStatus()
     strcpy(topic_data, cfg.MQTTTopic);
     strcat(topic_data, json); // append string two to the result.
     mqttClient.publish(topic_data, JSONmessage, n, true);
-    SERIAL_DEBUG_LNF("Sending MQTT package: %s", doc.as<String>().c_str())
+    SERIAL_DEBUG_LNF("Sending MQTT package: %s", Doc.as<String>().c_str())
     free(topic_data);
   }
 }
@@ -258,12 +258,12 @@ void callback(char *topic, byte *message, unsigned int length)
   }
   Serial.println();
 
-  DynamicJsonDocument docdynamic(1024);
-  deserializeJson(docdynamic, messageTemp, length);
+  DynamicJsonDocument Docdynamic(1024);
+  deserializeJson(Docdynamic, messageTemp, length);
 
-  SERIAL_DEBUG_LNF("Received MQTT package: %s", docdynamic.as<String>().c_str())
+  SERIAL_DEBUG_LNF("Received MQTT package: %s", Docdynamic.as<String>().c_str())
 
-  JsonObject obj = docdynamic.as<JsonObject>();
+  JsonObject obj = Docdynamic.as<JsonObject>();
   for (JsonPair p : obj)
   {
     const char *key = p.key().c_str();

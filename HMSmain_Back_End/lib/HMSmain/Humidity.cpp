@@ -1,4 +1,4 @@
-#include <Humidity.h>
+#include <Humidity.hpp>
 
 //Global Variables
 // Setup an array of relays to control peripherals. Numbers represent pin numbers.
@@ -71,7 +71,7 @@ float Humidity::AverageStackTemp()
   {
     stack_temp[i] = *ReadSensor();
   }
-  return (stack_temp[0] + stack_temp[2]) / 2; // Read the temperature from the sensor and averge the two sensors.
+  return (stack_temp[0] + stack_temp[2]) / 2; // Read the temperature from the sensor and average the two sensors.
 }
 
 /******************************************************************************
@@ -173,7 +173,7 @@ float *Humidity::ReadSensor()
 void Humidity::SetupRelays()
 {
   // initialize the Relay pins and set them to off state
-  for (int i = 0; i < MAXNUMOFRELAYS; i++)
+  for (int i = 0; i <= 5; i++)
   {
     pinMode(relays[i], OUTPUT);
     digitalWrite(relays[i], LOW);

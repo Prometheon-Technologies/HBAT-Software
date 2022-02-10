@@ -1,9 +1,12 @@
 
-#include "HMSHMSetwork.hpp"
+#include "HMSnetwork.hpp"
 
 IPAddress mqttServer;
 AsyncWebServer server(80);
 IPAddress localIP;
+
+IPAddress mqttServer;
+DNSServer dnsServer;
 
 // Set your Gateway IP address
 IPAddress gateway(192, 168, 1, 1);
@@ -34,16 +37,16 @@ String ledState;
 unsigned long previousMillis = 0;
 const long interval = 10000; // interval to wait for Wi-Fi connection (milliseconds)
 
-HMSetwork::HMSetwork()
+HMSnetwork::HMSnetwork()
 {
 }
 
-HMSetwork::~HMSetwork()
+HMSnetwork::~HMSnetwork()
 {
 }
 
 // Read File from SPIFFS
-String HMSetwork::readFile(fs::FS &fs, const char *path)
+String HMSnetwork::readFile(fs::FS &fs, const char *path)
 {
   Serial.printf("Reading file: %s\r\n", path);
 
@@ -64,7 +67,7 @@ String HMSetwork::readFile(fs::FS &fs, const char *path)
 }
 
 // Write file to SPIFFS
-void HMSetwork::writeFile(fs::FS &fs, const char *path, const char *message)
+void HMSnetwork::writeFile(fs::FS &fs, const char *path, const char *message)
 {
   Serial.printf("Writing file: %s\r\n", path);
   delay(10);
@@ -103,7 +106,7 @@ String processor(const String &var)
   return String();
 }
 
-bool HMSetwork::SetupHMSetworkStack()
+bool HMSnetwork::SetupNetworkStack()
 {
   if (!cfg.loadConfig())
   {
@@ -174,9 +177,9 @@ bool HMSetwork::SetupHMSetworkStack()
   return false;
 }
 
-void HMSetwork::SetupWebServer()
+void HMSnetwork::SetupWebServer()
 {
-  if (SetupHMSetworkStack())
+  if (SetupNetworkStack())
   {
     // Route for root / web page
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -198,11 +201,10 @@ void HMSetwork::SetupWebServer()
   }
   else
   {
-
-    // TODO: Route for root to  "Please Scan QR code" - Route for Wifi Manager /purbrightwifi page 
+    // TODO: Route for root to  "Please Scan QR code" - Route for Wifi Manager /HBAThmswifi page 
     // TODO: There should be a reset mode that will reset the device to factory settings and restart the device.
     // TODO: Should be a physical reset button on the PCB itself - not a touch button - hold for 5 seconds to reset. Flash LED to indicate reset per second.
-    // Connect to Wi-Fi HMSetwork with SSID and password
+    // Connect to Wi-Fi HMSnetwork with SSID and password
     Serial.println("Setting Access Point...");
     // NULL sets an open Access Point
     WiFi.softAP("HMS-WIFI", "hbathbat"); //TODO: Change Password to Mac Address of device - This is the password that will be used to connect to the device.
@@ -252,7 +254,7 @@ void HMSetwork::SetupWebServer()
 }
 
 // ######################## server functions #########################
-int HMSetwork::CheckWifiState()
+int HMSnetwork::CheckWifiState()
 {
   // check if there is a WiFi connection
   int wifiStateCounter = 0;
@@ -275,12 +277,12 @@ int HMSetwork::CheckWifiState()
 }
 
 /******************************************************************************
- * Function: Check HMSetwork Connection Loop
- * Description: This function checks the HMSetwork connection and reconnects if necessary - is called in the loop() function every 5 seconds
+ * Function: Check HMSnetwork Connection Loop
+ * Description: This function checks the HMSnetwork connection and reconnects if necessary - is called in the loop() function every 5 seconds
  * Parameters: None
  * Return: None
  ******************************************************************************/
-void HMSetwork::CheckHMSetworkLoop()
+void HMSnetwork::CheckNetworkLoop()
 {
   // run current function every 5 seconds
   if (WiFi.status() != WL_CONNECTED)
@@ -298,7 +300,7 @@ void HMSetwork::CheckHMSetworkLoop()
   }
 }
 
-int HMSetwork::DiscovermDNSBroker()
+int HMSnetwork::DiscovermDNSBroker()
 {
   // check if there is a WiFi connection
   if (WiFi.status() == WL_CONNECTED)
@@ -350,7 +352,7 @@ int HMSetwork::DiscovermDNSBroker()
 }
 
 // ######################## Call this OR SetupWebServer - not both #########################
-void HMSetwork::SetupmDNSServer()
+void HMSnetwork::SetupmDNSServer()
 {
   // ######################## Multicast DNS #########################
   Serial.print("Setting up mDNS: ");
@@ -358,7 +360,7 @@ void HMSetwork::SetupmDNSServer()
   // - first argument is the domain name, in this example
   //   the fully-qualified domain name is "esp32.local"
   // - second argument is the IP address to advertise
-  //   we send our IP address on the WiFi HMSetwork
+  //   we send our IP address on the WiFi HMSnetwork
   if (!MDNS.begin(mdnsdotlocalurl.c_str()))
   {
     Serial.println("Error setting up MDNS responder!");
@@ -377,7 +379,7 @@ void HMSetwork::SetupmDNSServer()
   MDNS.addService("http", "tcp", 80);
 }
 
-bool HMSetwork::SetupmDNSLoop()
+bool HMSnetwork::SetupmDNSLoop()
 {
   // ######################## Multicast DNS #########################
   // Check if a new espClient has connected
@@ -440,7 +442,7 @@ bool HMSetwork::SetupmDNSLoop()
  * Parameters: None
  * Return: None
  ******************************************************************************/
-bool HMSetwork::connectToApWithFailToStation()
+bool HMSnetwork::connectToApWithFailToStation()
 {
   WiFi.persistent(true);
   SERIAL_DEBUG_LN("Configuring access point...");
@@ -484,7 +486,7 @@ bool HMSetwork::connectToApWithFailToStation()
 }
 
 // ############## functions to update current server settings ###################
-void HMSetwork::loadConfig()
+void HMSnetwork::loadConfig()
 {
   SERIAL_DEBUG_LN(F("Checking if hostname is set and valid"));
   size_t size = sizeof(cfg.config.hostname);
@@ -538,7 +540,7 @@ void broadcastString(String name, String value)
 }
  */
 
-void HMSetwork::SetupServer()
+void HMSnetwork::SetupServer()
 {
   SERIAL_DEBUG_EOL;
   SERIAL_DEBUG_LN(F("System Information:"));
@@ -578,4 +580,4 @@ void HMSetwork::SetupServer()
 #endif
 }
 
-HMSetwork HMSetwork;
+HMSnetwork network;

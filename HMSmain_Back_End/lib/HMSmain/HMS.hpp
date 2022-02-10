@@ -27,4 +27,7 @@ public:
 
 private:
 };
+#if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_SCANNER)
+extern HMS HMSmain;
+#endif
 #endif

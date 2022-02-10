@@ -1,4 +1,4 @@
-#include <HMS.h>
+#include <HMS.hpp>
 
 // ESP 32 (requires resistors to step down the logic voltage)
 // ACS712  ACS(25, 5.0, 4095, 185);
@@ -86,7 +86,7 @@ float HMS::StackVoltage()
 
 /******************************************************************************
  * Function: Setup the ACS712 sensor
- * Description: This function setups the ACS712 sensor by calculating the automidpoint and setting the sensitivty to the correct value
+ * Description: This function setups the ACS712 sensor by calculating the automidpoint and setting the sensitivity to the correct value
  * Parameters: None
  * Return: None
  * ACS712 5A  uses 185 mV per A
@@ -182,12 +182,6 @@ void HMS::calibrateAmps()
         }
     }
     delay(1000);
-}
-
-// a function to get the device ID by returning generateDeviceID()
-String HMS::getDeviceID()
-{
-    return generateDeviceID();
 }
 
 // a function to generate the device ID and called generateDeviceID()

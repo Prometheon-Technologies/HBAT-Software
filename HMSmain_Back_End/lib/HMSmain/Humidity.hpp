@@ -45,4 +45,7 @@ private:
           0b00000,
           0b00000};
 };
+#if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_HMSMQTT)
+extern Humidity Hum;
+#endif
 #endif

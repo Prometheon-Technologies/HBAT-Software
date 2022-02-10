@@ -17,4 +17,7 @@ public:
     void BeginScan();
     /* private: */
 };
+#if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_HMSMQTT)
+extern Scanner Scan;
+#endif
 #endif

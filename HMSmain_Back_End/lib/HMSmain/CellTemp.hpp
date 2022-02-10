@@ -23,4 +23,7 @@ public:
 private:
     int sensors_count;
 };
+#if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_HMSMQTT)
+extern CellTemp Cell_Temp;
+#endif
 #endif

@@ -33,10 +33,13 @@
 // Humidity Sensors
 //#include <sfm3003.hpp>
 #include <Adafruit_SHT31.h>
+
 // Temp Sensors
+
 #include <PID_v1.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+
 // wifi definition
 #include <AsyncElegantOTA.h>
 #include <Wifi.h>
@@ -83,7 +86,6 @@ static bool mqttProcessing;
 /*###################### MQTT Configuration END ######################*/
 
 // define externalized classes
-extern HMSmqtt MqttData;
 extern AccumulateData accumulatedData;
 
 extern Scanner scanner;
@@ -96,9 +98,6 @@ extern StaticJsonDocument<1000> Doc;
 extern Adafruit_SHT31 sht31;
 extern Adafruit_SHT31 sht31_2;
 extern FrontEnd Front_End;
-extern HMSnetwork Network;
-extern IPAddress mqttServer;
-extern AsyncWebServer webServer;
 extern DNSServer dnsServer;
 
 // Tasks for the Task Scheduler
@@ -125,6 +124,6 @@ bool wifiConnected;
 
 // Globally available functions
 char *StringtoChar(String inputString);
-
+char* MQTTCreateHostName(const char* hostname, const char* def_host);
 
 #endif

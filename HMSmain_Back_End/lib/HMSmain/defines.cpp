@@ -4,8 +4,11 @@
 // https://www.kriwanek.de/index.php/de/homeautomation/esp8266/364-eeprom-für-parameter-verwenden
 // define debugging MACROS
 #define DEFAULT_HOSTNAME "HBAT_HMS" // default hostname
+
 #define ENABLE_MQTT_SUPPORT 0      // allows integration in homeassistant/googlehome/mqtt
+
 #define maxCellCount 10             // max number of cells
+
 #include <config.hpp>   /* data Struct */
 
 /*######################## MQTT Configuration ########################*/
@@ -18,15 +21,17 @@
 #define MQTT_UNIQUE_IDENTIFIER HMSmain.getDeviceID() // A Unique Identifier for the device in Homeassistant (MAC Address used by default)
 #define MQTT_MAX_PACKET_SIZE 1024
 #define MQTT_MAX_TRANSFER_SIZE 1024
+
 // MQTT includes
 #include <PubSubClient.h>
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 
 // Variables for MQTT
+
 const char *MQTT_TOPIC = "hms/data/";
 const String HOMEASSISTANT_MQTT_HOSTNAME = "homeassistant.local";
-const String MQTT_HOSTNAME = "hbat.mqtt.local";
+const String MQTT_HOSTNAME = "hbat.mqtt";
 const String MQTT_USER = "MyUserName";
 const String MQTT_PASS = "";
 const String MQTT_HOMEASSISTANT_TOPIC_SET = "/set";                  // MQTT Topic to subscribe to for changes(Home Assistant)
@@ -38,23 +43,11 @@ static bool mqttProcessing = false;
 /*###################### MQTT Configuration END ######################*/
 
 // define externalized classes
-HMSmqtt MqttData;
-AccumulateData accumulatedData;
-
-Scanner scanner;
 
 //Custom Objects
-HMS HMSmain;
-Humidity Hum;
-CellTemp Cell_Temp;
 StaticJsonDocument<1000> Doc;
 Adafruit_SHT31 sht31;
 Adafruit_SHT31 sht31_2;
-FrontEnd Front_End;
-HMSnetwork Network;
-IPAddress mqttServer;
-AsyncWebServer webServer(80);
-DNSServer dnsServer;
 
 /* // Tasks for the Task Scheduler
 TaskHandle_t runserver;
@@ -88,4 +81,15 @@ char *StringtoChar(String inputString)
   resizeBuff(inputString.length() + 1, &outputString);
   strcpy(outputString, inputString.c_str());
   return outputString;
+}
+
+char* MQTTCreateHostName(const char* hostname, const char* def_host)
+{
+  // create hostname
+  int numBytes = strlen(hostname ) + strlen(def_host) + 1; // +1 for the null terminator | allocate a buffer of the required size
+  char* hostname_str = NULL;
+  resizeBuff(numBytes, &hostname_str);
+  strcpy(hostname_str, hostname);
+  strcat(hostname_str, def_host); // append default hostname to hostname
+  return hostname_str;
 }

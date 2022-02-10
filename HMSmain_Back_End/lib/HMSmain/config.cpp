@@ -66,25 +66,31 @@ bool Config::loadConfig()
         CreateDefaultConfig();
         return false;
     }
+
     size_t size = configFile.size();
     Serial.print("Config file size: ");
     Serial.println(size);
+
     if (size > 1024)
     {
         Serial.println("Config file size is too large");
         CreateDefaultConfig();
         return false;
     }
+
     // Allocate a buffer to store contents of the file.
     std::unique_ptr<char[]> buf(new char[size]);
 
     // We don't use String here because ArduinoJson library requires the input
     // to be mutable. If you don't use ArduinoJson, you may as well
     // use configFile.readString instead.
+
     configFile.readBytes(buf.get(), size);
     Serial.println("Config file content:");
     Serial.println(buf.get());
+
     // Parse the buffer into an object
+
     StaticJsonDocument<1024> jsonBuffer;
     // Deserialize the JSON document
     auto error = deserializeJson(jsonBuffer, buf.get());
@@ -98,7 +104,7 @@ bool Config::loadConfig()
     }
     
     heapStr(&config.hostname, jsonBuffer["hostname"]);
-    config.MQTTEnabled = jsonBuffer["MQTTEnabled"]; //
+    config.MQTTEnabled = jsonBuffer["MQTTEnabled"];
     heapStr(&config.MQTTPort, jsonBuffer["MQTTPort"]);
     config.MQTTPort_Secure = jsonBuffer["MQTTPort_Secure"];
     heapStr(&config.MQTTUser, jsonBuffer["MQTTUser"]);

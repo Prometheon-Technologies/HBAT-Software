@@ -18,8 +18,8 @@ class HMSnetwork
 {
 public:
     // constructors
-    Network();
-    virtual ~Network();
+    HMSnetwork();
+    virtual ~HMSnetwork();
     // Functions
     bool SetupNetworkStack();
     int CheckWifiState();
@@ -40,7 +40,7 @@ private:
 };
 
 #if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_NETWORK)
-extern Network network;
+extern HMSnetwork network;
 #endif
 
 #endif

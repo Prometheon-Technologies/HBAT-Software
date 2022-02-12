@@ -4,11 +4,11 @@ Custom Software Stack files are located in lib and src.
 
 main.cpp runs the control script, HMSmain library does the heavy lifting.
 
-## **LIB**
+## LIB
 
 [HMSmain Library](HMSmain_Back_End/lib/HMSmain)
 
-## **SRC**
+## SRC
 
 [HMSmain](HMSmain_Back_End/src)
 
@@ -38,7 +38,7 @@ def percentage_calc:
 
 An alternative approach is to correctly map the voltage readings. Such as the example below, however this must be done in real-time to present accurate data to the user, and for the software to take correct actions based on the data of this curve.
 
-## **Mapping Bezier curve to voltage readings**
+## Mapping Bezier curve to voltage readings
 
 According to this paper: [PEMFC Discharge Curve](https://github.com/Prometheon-Technologies/HBAT-Software/blob/main/sustainability-12-08127-v2.pdf)
 the discharge curve matches a very predictable Bezier curve.
@@ -51,7 +51,7 @@ Currently, i am not able to correctly implement this approach into the software 
 
 My current thoughts were to map the voltage readings to an array, and set that array equal to the results of a mapping function containing the formula for the curve we wish to fit our data to.
 
-## **Current Project Flow-Chart**
+## Current Project Flow-Chart
 
 ```mermaid
 graph TD
@@ -71,7 +71,7 @@ graph TD
 
 ```
 
-## **Current Network Flow-Chart**
+## Current Network Flow-Chart
 
 ```mermaid
 graph TD
@@ -118,5 +118,3 @@ For this to work, the MQTT service needs to be advertised. On a Linux host syste
   </service>
 </service-group>
 ```
-
-

@@ -27,30 +27,22 @@ void loop()
 {
     SERIAL_DEBUG_ADD("Webserver running on core ");
     SERIAL_DEBUG_LN(xPortGetCoreID());
-    Network.HMSNetworkSetup();
-    if (Network.CheckWifiState() == 1)
+    network.HMSnetworkSetup();
+    if (network.CheckWifiState() == 1)
     {
-        Network.SetupmDNSServer();
-        Network.DiscovermDNSBroker();
+        network.SetupmDNSServer();
+        network.DiscovermDNSBroker();
         SERIAL_DEBUG_LN("Webserver running on core ");
         SERIAL_DEBUG_LN(xPortGetCoreID());
-        Network.HMSNetworkSetup();
+        network.HMSnetworkSetup();
         for (;;) // Front_End.mqttFrontEndCondition == true)
         {
-            Network.CheckNetworkLoop();
-            Network.SetupmDNSLoop();
+            network.ChecknetworkLoop();
+            network.SetupmDNSLoop();
             vTaskDelay(100);
             MqttData.MQTTLoop();
         }
     }
-    else
-    {
-        SERIAL_DEBUG_LN("Webserver failed to start on core ");
-        SERIAL_DEBUG_LN(xPortGetCoreID());
-    }
-
-    SERIAL_DEBUG_ADD("Data Accumulation running on core ");
-    SERIAL_DEBUG_LN(xPortGetCoreID());
     for (;;)
     {
         if (ReadTimer.ding())

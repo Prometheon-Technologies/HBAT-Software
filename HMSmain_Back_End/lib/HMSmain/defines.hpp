@@ -13,7 +13,7 @@
 #include <Arduino.h>
 #include <stdio.h>  /* printf, NULL */
 #include <stdlib.h> /* strtoul */
-#include <timeObj.h>
+#include <timedtasks.hpp>
 
 // IO
 #include <Wire.h>

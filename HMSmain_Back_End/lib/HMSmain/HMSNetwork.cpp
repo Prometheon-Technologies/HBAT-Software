@@ -555,7 +555,7 @@ void HMSnetwork::SetupServer()
 
 // FS debug information
 // THIS NEEDS TO BE PAST THE WIFI SETUP!! OTHERWISE WIFI SETUP WILL BE DELAYED
-#if PURR_DEBUG != 0
+#if HMS_DEBUG != 0
   SERIAL_DEBUG_LN(F("SPIFFS contents:"));
 #ifdef ESP32
   File root = SPIFFS.open("/");

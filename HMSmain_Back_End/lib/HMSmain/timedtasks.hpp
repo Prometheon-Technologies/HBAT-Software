@@ -13,9 +13,6 @@ public:
   TimedTasks(void);
   virtual ~TimedTasks(void);
   virtual void Run_NetworkCheck_Background_every_10_Seconds();
-  // virtual void idle();
-  virtual void Run_mDNS_Background_every_10_Seconds();
-  virtual void checkTurnOffSettings();
   virtual void Run_Check_DataJSON_5();
   void setCallback(void (*funct)(void));
   void setSeconds(float seconds);

@@ -55,41 +55,39 @@ My current thoughts were to map the voltage readings to an array, and set that a
 
 ```mermaid
 graph TD;
-          A[Christmas] -->|Get money| B(Go shopping)
-          B --> C{Let me think}
-          B --> G[/Another/]
-          C ==>|One| D[Laptop]
-          C -->|Two| E[iPhone]
-          C -->|Three| F[fa:fa-car Car]
-          subgraph section
-            C
-            D
-            E
-            F
-            G
-          end
-
+          A[Christmas] -->|Get money| B(Go shopping);
+          B --> C{Let me think};
+          B --> G[/Another/];
+          C ==>|One| D[Laptop];
+          C -->|Two| E[iPhone];
+          C -->|Three| F[fa:fa-car Car];
+          subgraph section;
+            C;
+            D;
+            E;
+            F;
+            G;
+          end;
 ```
 
 ## Current Network Flow-Chart
 
 ```mermaid
 graph TD;
-          A[Device hosts local AP] -->|Local SSID and Pass embedded into a QR Code| B(User Scans QR Code)
-          B --> C{Web interface prompts user for local SSID and Pass}-->|User enters SSID and Pass| D(User clicks connect)
-          C --> G[/User does not have a local network/]
-          G --> H[/User Connects to AP to interface/]
-          D -->|Device writes new credentials to config file| E[config.h]
-          E -->|Device Reboots from Config| F[fa:fa-power-off Reboot]
-          subgraph section
-            C
-            D
-            E
-            F
-            G
-            H
-          end
-
+          A[Device hosts local AP] -->|Local SSID and Pass embedded into a QR Code| B(User Scans QR Code);
+          B --> C{Web interface prompts user for local SSID and Pass}-->|User enters SSID and Pass| D(User clicks connect);
+          C --> G[/User does not have a local network/];
+          G --> H[/User Connects to AP to interface/];
+          D -->|Device writes new credentials to config file| E[config.h];
+          E -->|Device Reboots from Config| F[fa:fa-power-off Reboot];
+          subgraph section;
+            C;
+            D;
+            E;
+            F;
+            G;
+            H;
+          end;
 ```
 
 ## MQTT Broker Configuration and Connection

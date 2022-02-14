@@ -54,7 +54,7 @@ My current thoughts were to map the voltage readings to an array, and set that a
 ## Current Project Flow-Chart
 
 ```mermaid
-graph TD
+graph TD;
           A[Christmas] -->|Get money| B(Go shopping)
           B --> C{Let me think}
           B --> G[/Another/]
@@ -74,7 +74,7 @@ graph TD
 ## Current Network Flow-Chart
 
 ```mermaid
-graph TD
+graph TD;
           A[Device hosts local AP] -->|Local SSID and Pass embedded into a QR Code| B(User Scans QR Code)
           B --> C{Web interface prompts user for local SSID and Pass}-->|User enters SSID and Pass| D(User clicks connect)
           C --> G[/User does not have a local network/]

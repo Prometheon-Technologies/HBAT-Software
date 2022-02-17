@@ -1,4 +1,4 @@
-#include <AccumulateData.h>
+#include <AccumulateData.hpp>
 
 AccumulateData::AccumulateData()
 {
@@ -20,7 +20,7 @@ AccumulateData::~AccumulateData(void)
 void AccumulateData::SetupMainLoop()
 {
   Hum.SetupSFM3003();
-  MqttData.MQTTSetup();
+  HMSmqtt.MQTTSetup();
   // debug("freeMemory()="+freeMemory());
 }
 

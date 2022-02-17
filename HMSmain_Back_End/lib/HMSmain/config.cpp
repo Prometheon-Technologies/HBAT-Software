@@ -1,11 +1,5 @@
 #include <config.hpp>
 
-/*
- config.h - Purbright library
- Copyright (c) 2021 Zacariah Austin Heim.
-*/
-#include "config.hpp"
-
 // save last "timestamp" the config has been saved
 auto last_config = 0;
 

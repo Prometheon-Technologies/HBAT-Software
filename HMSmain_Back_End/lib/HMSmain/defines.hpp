@@ -2,15 +2,15 @@
  defines.hpp - Purbright library
  Copyright (c) 2021 Zacariah Austin Heim.
  */
-#ifndef DEFINES_h
-#define DEFINES_h
+#ifndef DEFINES_hpp
+#define DEFINES_hpp
 #define VERSION "0.0.1"
 #define VERSION_DATE "2021-12-17"
 #if !(defined(ESP32))
 #error This code is intended to run on the ESP32 platform! Please check your Board setting.
 #endif
-#include <globaldebug.hpp>
 #include <Arduino.h>
+#include <globaldebug.hpp>
 #include <stdio.h>  /* printf, NULL */
 #include <stdlib.h> /* strtoul */
 #include <timedtasks.hpp>
@@ -52,9 +52,9 @@
 
 #define LED_BUILTIN 2
 #define DEFAULT_HOSTNAME "HBAT_HMS" // default hostname
-#define ENABLE_MQTT_SUPPORT 0      // allows integration in homeassistant/googlehome/mqtt
+#define ENABLE_MQTT_SUPPORT 0       // allows integration in homeassistant/googlehome/mqtt
 #define maxCellCount 10             // max number of cells
-#include <config.hpp>   /* data Struct */
+#include <config.hpp>               /* data Struct */
 
 /*######################## MQTT Configuration ########################*/
 #ifdef ENABLE_MQTT_SUPPORT
@@ -72,15 +72,15 @@ extern WiFiClient espClient;
 extern PubSubClient mqttClient;
 
 // Variables for MQTT
-const char *MQTT_TOPIC;
-const String HOMEASSISTANT_MQTT_HOSTNAME;
-const String MQTT_HOSTNAME;
-const String MQTT_USER;
-const String MQTT_PASS;
-const String MQTT_HOMEASSISTANT_TOPIC_SET;                  // MQTT Topic to subscribe to for changes(Home Assistant)
-const String MQTT_HOMEASSISTANT_TOPIC;   // MQTT Topic to Publish to for state and config (Home Assistant);
-String MQTT_DEVICE_NAME; // MQTT Topic to Publish to for state and config (Any MQTT Broker)
-static bool mqttProcessing;
+extern const char *MQTT_TOPIC;
+extern const String HOMEASSISTANT_MQTT_HOSTNAME;
+extern const String MQTT_HOSTNAME;
+extern const String MQTT_USER;
+extern const String MQTT_PASS;
+extern const String MQTT_HOMEASSISTANT_TOPIC_SET; // MQTT Topic to subscribe to for changes(Home Assistant)
+extern const String MQTT_HOMEASSISTANT_TOPIC;     // MQTT Topic to Publish to for state and config (Home Assistant);
+extern String MQTT_DEVICE_NAME;                   // MQTT Topic to Publish to for state and config (Any MQTT Broker)
+extern bool mqttProcessing;
 
 #endif
 /*###################### MQTT Configuration END ######################*/
@@ -90,7 +90,7 @@ extern AccumulateData accumulatedData;
 
 extern Scanner scanner;
 
-//Custom Objects
+// Custom Objects
 extern HMS HMSmain;
 extern Humidity Hum;
 extern CellTemp Cell_Temp;
@@ -105,25 +105,25 @@ extern DNSServer dnsServer;
 extern TaskHandle_t accumulatedata; */
 
 // Variables
-const char* mqtt_mDNS_clientId;
-char mDNS_hostname[4];
+extern const char *mqtt_mDNS_clientId;
+extern char mDNS_hostname[4];
 
-int mqttPort;
+extern int mqttPort;
 
-int period;
-unsigned long time_now;
-bool Charge_State;
-//Wifi Variables
-// Set these to your desired credentials.
-char *ssid;
-char *password;
-bool wifiMangerPortalRunning;
-bool wifiConnected;
+extern int period;
+extern unsigned long time_now;
+extern bool Charge_State;
+// Wifi Variables
+//  Set these to your desired credentials.
+extern char *ssid;
+extern char *password;
+extern bool wifiMangerPortalRunning;
+extern bool wifiConnected;
 
 // IO
 
 // Globally available functions
 char *StringtoChar(String inputString);
-char* MQTTCreateHostName(const char* hostname, const char* def_host);
+char *MQTTCreateHostName(const char *hostname, const char *def_host);
 
 #endif

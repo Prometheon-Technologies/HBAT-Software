@@ -1,29 +1,6 @@
 #include <defines.hpp>
 
-// define EEPROM settings
-// https://www.kriwanek.de/index.php/de/homeautomation/esp8266/364-eeprom-für-parameter-verwenden
-// define debugging MACROS
-#define DEFAULT_HOSTNAME "HBAT_HMS" // default hostname
-
-#define ENABLE_MQTT_SUPPORT 0      // allows integration in homeassistant/googlehome/mqtt
-
-#define maxCellCount 10             // max number of cells
-
-#include <config.hpp>   /* data Struct */
-
-/*######################## MQTT Configuration ########################*/
-#ifdef ENABLE_MQTT_SUPPORT
-// these are deafault settings which can be changed in the web interface "settings" page
-#define MQTT_ENABLED 1
-#define MQTT_SECURE_ENABLED 0
-#define MQTT_PORT 1883
-#define MQTT_PORT_SECURE 8883
-#define MQTT_UNIQUE_IDENTIFIER HMSmain.getDeviceID() // A Unique Identifier for the device in Homeassistant (MAC Address used by default)
-#define MQTT_MAX_PACKET_SIZE 1024
-#define MQTT_MAX_TRANSFER_SIZE 1024
-
 // MQTT includes
-#include <PubSubClient.h>
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 
@@ -39,7 +16,6 @@ const String MQTT_HOMEASSISTANT_TOPIC = "homeassistant/HBAT/data";   // MQTT Top
 String MQTT_DEVICE_NAME = "HBAT_HMS" + MQTT_UNIQUE_IDENTIFIER; // MQTT Topic to Publish to for state and config (Any MQTT Broker)
 static bool mqttProcessing = false;
 
-#endif
 /*###################### MQTT Configuration END ######################*/
 
 // define externalized classes
@@ -70,7 +46,6 @@ bool wifiMangerPortalRunning = false;
 bool wifiConnected = false;
 
 // IO
-#define LED_BUILTIN 2
 
 // Globally available functions
 

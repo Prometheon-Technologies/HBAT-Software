@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\zacar\Documents\GitHub\HBAT-Software\HMSmain_Back_End\build\CMakeFiles\6096208cbc0070573f2bfac54423c9bc\Experimental.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\zacar\Documents\GitHub\HBAT-Software\HMSmain_Back_End\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\zacar\Documents\GitHub\HBAT-Software\HMSmain_Back_End\build\CMakeFiles\Experimental" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{71B5A66B-C356-3459-A3EB-7855209F050A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

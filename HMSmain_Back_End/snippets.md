@@ -229,7 +229,22 @@ graph TD
             F
             G
           end
+```
 
+## Calculate the range of Wifi signal strength
+
+´´´txt
+Signal transmission in ft^2 = ((dBm + 4,000) - 2,000) / 42.7
+
+4,000 = nominal base dB of average consumer grade WIFI antenna
+2,000 = Nominal base dB of peak signal interference
+42.7 = a constant for conversion to square feet
+´´´
+
+```cpp
+int signal_strength = ((dBm + 4,000) - 2,000) / 42.7;
+
+WiFi.setOutputPower(signal_strength);
 ```
 
 ## USEFUL LINKS

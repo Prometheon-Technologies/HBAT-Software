@@ -242,9 +242,9 @@ Signal transmission in ft^2 = ((dBm + 4,000) - 2,000) / 42.7
 ´´´
 
 ```cpp
-int signal_strength = ((dBm + 4,000) - 2,000) / 42.7;
+int signal_range = ((dBm + 4,000) - 2,000) / 42.7;
 
-WiFi.setOutputPower(signal_strength);
+WiFi.setOutputPower(dBm);
 ```
 
 ## USEFUL LINKS

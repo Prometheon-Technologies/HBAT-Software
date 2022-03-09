@@ -36,6 +36,10 @@ void Config::CreateDefaultConfig()
     config.WIFIPASS = NULL;
     config.MQTTConnectedState = false;
     config.configData = "";
+    config.NTPTIME = NULL;
+    config.NTPTIMEOFFSET = NULL;
+    config.MDNS = NULL;
+    config.DHCPCHECK = NULL;
 }
 
 // Initialize SPIFFS

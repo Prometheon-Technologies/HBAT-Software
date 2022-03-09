@@ -14,6 +14,7 @@
 #include <stdio.h>  /* printf, NULL */
 #include <stdlib.h> /* strtoul */
 #include <timedtasks.hpp>
+#include <MD5.h>
 
 // IO
 #include <Wire.h>

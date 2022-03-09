@@ -20,7 +20,7 @@ const char *ssidPath = "/ssid.txt";
 const char *passPath = "/pass.txt";
 const char *ntptimePath = "/ntptime.txt";
 const char *ntptimeoffsetPath = "/ntptimeoffset.txt";
-String mdnsdotlocalurl = "Purbright";
+String mdnsdotlocalurl = "HMSBAT";
 
 // char* create_mDNS_hostname = StringtoChar(MQTTCreateHostName(MQTT_HOSTNAME, ".local"));
 
@@ -39,21 +39,27 @@ const long interval = 10000; // interval to wait for Wi-Fi connection (milliseco
 
 HMSnetwork::HMSnetwork()
 {
+  // constructor
+  SERIAL_DEBUG_LN("[INFO]: HMSnetwork::HMSnetwork()");
+  SERIAL_DEBUG_LN("[INFO]: Creating network object");
 }
 
 HMSnetwork::~HMSnetwork()
 {
+  // destructor
+  SERIAL_DEBUG_LN("[INFO]: HMSnetwork::~HMSnetwork()");
+  SERIAL_DEBUG_LN("[INFO]: Destroying network object");
 }
 
 // Read File from SPIFFS
 String HMSnetwork::readFile(fs::FS &fs, const char *path)
 {
-  Serial.printf("Reading file: %s\r\n", path);
+  SERIAL_DEBUG_ADDF("Reading file: %s\r\n", path);
 
   File file = fs.open(path);
   if (!file || file.isDirectory())
   {
-    Serial.println("- failed to open file for reading");
+    SERIAL_DEBUG_LN("[INFO]: [INFO]: failed to open file for reading");
     return String();
   }
 
@@ -69,22 +75,22 @@ String HMSnetwork::readFile(fs::FS &fs, const char *path)
 // Write file to SPIFFS
 void HMSnetwork::writeFile(fs::FS &fs, const char *path, const char *message)
 {
-  Serial.printf("Writing file: %s\r\n", path);
+  SERIAL_DEBUG_ADDF("Writing file: %s\r\n", path);
   delay(10);
 
   File file = fs.open(path, FILE_WRITE);
   if (!file)
   {
-    Serial.println("- failed to open file for writing");
+    SERIAL_DEBUG_LN("[INFO]: failed to open file for writing");
     return;
   }
   if (file.print(message))
   {
-    Serial.println("- file written");
+    SERIAL_DEBUG_LN("[INFO]: file written");
   }
   else
   {
-    Serial.println("- file write failed");
+    SERIAL_DEBUG_LN("[INFO]: file write failed");
   }
 }
 
@@ -110,46 +116,60 @@ bool HMSnetwork::SetupNetworkStack()
 {
   if (!cfg.loadConfig())
   {
-    Serial.println("Failed to load config");
+    SERIAL_DEBUG_LN("[INFO]: Failed to load config");
   }
   else
   {
-    Serial.println("Config loaded");
+    SERIAL_DEBUG_LN("[INFO]: Config loaded");
   }
 
   // Load values saved in SPIFFS
 
   SSID = readFile(SPIFFS, ssidPath);
-  Serial.println(SSID);
+  SERIAL_DEBUG_LN(SSID);
   PASS = readFile(SPIFFS, passPath);
-  Serial.println(PASS);
+  SERIAL_DEBUG_LN(PASS); //FIXME: REMOVE BEFORE FINAL BUILD
 
+  ntptime = readFile(SPIFFS, ntptimePath);
+  ntptimeoffset = readFile(SPIFFS, ntptimeoffsetPath);
+
+  mdns = readFile(SPIFFS, mdnsPath);
+  dhcpcheck = readFile(SPIFFS, dhcpcheckPath);
+
+  SERIAL_DEBUG_LN(mdns);
+  SERIAL_DEBUG_LN(dhcpcheck);
+  
   // Save loaded values to config struct
-
   heapStr(&cfg.config.WIFISSID, StringtoChar(SSID));
   heapStr(&cfg.config.WIFIPASS, StringtoChar(PASS));
+  heapStr(&cfg.config.NTPTIME, StringtoChar(ntptime));
+  heapStr(&cfg.config.NTPTIMEOFFSET, StringtoChar(ntptimeoffset));
+  heapStr(&cfg.config.MDNS, StringtoChar(mdns));
+  heapStr(&cfg.config.DHCPCHECK, StringtoChar(dhcpcheck));
+  
 
   if (cfg.config.WIFISSID[0] == '\0' || cfg.config.WIFIPASS[0] == '\0')
   {
-    Serial.println("No SSID or password has been set.");
-    Serial.println("Please configure the Wifi Manager by scanning the QR code on your device.");
-    Serial.println("");
+    SERIAL_DEBUG_LN("[INFO]: No SSID or password has been set.");
+    SERIAL_DEBUG_LN("[INFO]: Please configure the Wifi Manager by scanning the QR code on your device.");
+    SERIAL_DEBUG_LN("[INFO]: ");
     return false;
   }
   else
   {
-    Serial.println("Configured SSID: ");
-    Serial.println(cfg.config.WIFISSID);
-    Serial.println("");
+    SERIAL_DEBUG_LN("[INFO]: Configured SSID: ");
+    SERIAL_DEBUG_LN(cfg.config.WIFISSID);
+    SERIAL_DEBUG_LN("[INFO]: ");
     WiFi.mode(WIFI_STA);
+    WiFi.disconnect(); // Disconnect from WiFi AP if connected
     if (dhcpcheck == "on")
     {
-      Serial.println("DHCP Check is on");
+      SERIAL_DEBUG_LN("[INFO]: DHCP Check is on");
       localIP.fromString(cfg.config.clientIP);
 
       if (!WiFi.config(localIP, gateway, subnet))
       {
-        Serial.println("STA Failed to configure");
+        SERIAL_DEBUG_LN("[INFO]: STA Failed to configure");
         return false;
       }
 
@@ -163,14 +183,14 @@ bool HMSnetwork::SetupNetworkStack()
         currentMillis = millis();
         if (currentMillis - previousMillis >= interval)
         {
-          Serial.println("WiFi connection timed out.");
+          SERIAL_DEBUG_LN("[INFO]: WiFi connection timed out.");
           return false;
         }
       }
 
-      Serial.println("Connected to WiFi.");
-      Serial.print("IP address: ");
-      Serial.println(WiFi.localIP());
+      SERIAL_DEBUG_LN("[INFO]: Connected to WiFi.");
+      SERIAL_DEBUG_ADD("IP address: ");
+      SERIAL_DEBUG_LN(WiFi.localIP());
       return true;
     }
   }
@@ -201,17 +221,35 @@ void HMSnetwork::SetupWebServer()
   }
   else
   {
-    // TODO: Route for root to  "Please Scan QR code" - Route for Wifi Manager /HBAThmswifi page 
+    // TODO: Route for root to  "Please Scan QR code" - Route for Wifi Manager /HBAThmswifi page
     // TODO: There should be a reset mode that will reset the device to factory settings and restart the device.
     // TODO: Should be a physical reset button on the PCB itself - not a touch button - hold for 5 seconds to reset. Flash LED to indicate reset per second.
     // Connect to Wi-Fi HMSnetwork with SSID and password
-    Serial.println("Setting Access Point...");
+    SERIAL_DEBUG_LN("[INFO]: Setting Access Point...");
+
+    char* macAddr = StringtoChar(WiFi.macAddress());
+
+    unsigned char *hash = MD5::make_hash(macAddr);
+
+    // generate the digest (hex encoding) of our hash
+
+    char *md5str = MD5::make_digest(hash, 16);
+
+    // print it on our serial monitor
+    SERIAL_DEBUG_ADD("[INFO]: MD5 HASH of MAC ADDRESS: ");
+    SERIAL_DEBUG_LN(md5str);
+    
     // NULL sets an open Access Point
-    WiFi.softAP("HMS-WIFI", "hbathbat"); //TODO: Change Password to Mac Address of device - This is the password that will be used to connect to the device.
+    WiFi.softAP("HMS-WIFI", md5str); //MAC address is used as password for the AP - Unique to each device - MD5 hash of MAC address
+
+    // Give the Memory back to the System if you run the md5 Hash generation in a loop
+    free(md5str);
+    // free dynamically allocated 16 byte hash from make_hash()
+    free(hash);
 
     IPAddress IP = WiFi.softAPIP();
-    Serial.print("AP IP address: ");
-    Serial.println(IP);
+    SERIAL_DEBUG_ADD("[INFO]: AP IP address: ");
+    SERIAL_DEBUG_LN(IP);
 
     // Web Server Root URL
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -229,8 +267,8 @@ void HMSnetwork::SetupWebServer()
           if (p->name() == PARAM_INPUT_1) {
             String ssID; 
             ssID = p->value().c_str();
-            Serial.print("SSID set to: ");
-            Serial.println(ssID);
+            SERIAL_DEBUG_ADD("SSID set to: ");
+            SERIAL_DEBUG_LN(ssID);
             // Write file to save value
             writeFile(SPIFFS, ssidPath, ssID.c_str());
           }
@@ -238,12 +276,12 @@ void HMSnetwork::SetupWebServer()
           if (p->name() == PARAM_INPUT_2) {
             String passWord; 
             passWord = p->value().c_str();
-            Serial.print("Password set to: ");
-            Serial.println(passWord);
+            SERIAL_DEBUG_ADD("Password set to: ");
+            SERIAL_DEBUG_LN(passWord);
             // Write file to save value
             writeFile(SPIFFS, passPath, passWord.c_str());
           }
-          Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+          SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
         }
       }
       request->send(200, "text/plain", "Done. ESP will restart, connect to your router and go to IP address: " + String(cfg.config.clientIP));
@@ -264,13 +302,13 @@ int HMSnetwork::CheckWifiState()
     SERIAL_DEBUG_ADD(". ");
     wifiStateCounter++;
     if (wifiStateCounter > 100)
-      SERIAL_DEBUG_LN("WiFi not connected");
+      SERIAL_DEBUG_LN("[INFO]: WiFi not connected");
     return 0;
   }
 
   if (WiFi.status() == WL_CONNECTED)
   {
-    SERIAL_DEBUG_LN("\nconnected!");
+    SERIAL_DEBUG_LN("[INFO]: \nconnected!");
     return 1;
   }
   return 0;
@@ -294,9 +332,9 @@ void HMSnetwork::CheckNetworkLoop()
   {
     wifiConnected = true;
     SERIAL_DEBUG_LN(F("Wifi is connected"));
-    Serial.print("[INFO]: WiFi Connected! Open http://");
-    Serial.print(WiFi.localIP());
-    SERIAL_DEBUG_LN(" in your browser");
+    SERIAL_DEBUG_ADD("[INFO]: WiFi Connected! Open http://");
+    SERIAL_DEBUG_ADD(WiFi.localIP());
+    SERIAL_DEBUG_LN("[INFO]:  in your browser");
   }
 }
 
@@ -305,44 +343,44 @@ int HMSnetwork::DiscovermDNSBroker()
   // check if there is a WiFi connection
   if (WiFi.status() == WL_CONNECTED)
   {
-    SERIAL_DEBUG_LN("\nconnected!");
+    SERIAL_DEBUG_LN("[INFO]: \nconnected!");
 
     // ######################## Multicast DNS #########################
 
-    Serial.print("Setting up mDNS: ");
+    SERIAL_DEBUG_ADD("Setting up mDNS: ");
     if (!MDNS.begin(mqtt_mDNS_clientId))
     {
-      Serial.println("[Fail]");
+      SERIAL_DEBUG_LN("[INFO]: [Fail]");
     }
     else
     {
-      Serial.println("[OK]");
-      Serial.print("Querying MQTT broker: ");
+      SERIAL_DEBUG_LN("[INFO]: [OK]");
+      SERIAL_DEBUG_ADD("Querying MQTT broker: ");
 
       int n = MDNS.queryService("mqtt", "tcp");
 
       if (n == 0)
       {
         // No service found
-        Serial.println("[Fail]");
+        SERIAL_DEBUG_LN("[INFO]: [Fail]");
         return 0;
       }
       else
       {
         // Found one or more MQTT service - use the first one.
-        Serial.println("[OK]");
+        SERIAL_DEBUG_LN("[INFO]: [OK]");
         mqttServer = MDNS.IP(0);
         mqttPort = MDNS.port(0);
         heapStr(&(cfg.config.MQTTBroker), mqttServer.toString().c_str());
         int number = mqttPort;
         char charValue = number + '0';
-        Serial.printf("The port is:%c", charValue);
+        SERIAL_DEBUG_ADDF("The port is:%c", charValue);
         heapStr(&(cfg.config.MQTTPort), &charValue);
-        Serial.print("MQTT broker found at: ");
-        Serial.print(mqttServer);
-        Serial.print(cfg.config.MQTTBroker);
-        Serial.print(":");
-        Serial.println(mqttPort);
+        SERIAL_DEBUG_ADD("MQTT broker found at: ");
+        SERIAL_DEBUG_ADD(mqttServer);
+        SERIAL_DEBUG_ADD(cfg.config.MQTTBroker);
+        SERIAL_DEBUG_ADD(":");
+        SERIAL_DEBUG_LN(mqttPort);
         return 1;
       }
     }
@@ -355,7 +393,7 @@ int HMSnetwork::DiscovermDNSBroker()
 void HMSnetwork::SetupmDNSServer()
 {
   // ######################## Multicast DNS #########################
-  Serial.print("Setting up mDNS: ");
+  SERIAL_DEBUG_ADD("Setting up mDNS: ");
   // Set up mDNS responder:
   // - first argument is the domain name, in this example
   //   the fully-qualified domain name is "esp32.local"
@@ -363,17 +401,17 @@ void HMSnetwork::SetupmDNSServer()
   //   we send our IP address on the WiFi HMSnetwork
   if (!MDNS.begin(mdnsdotlocalurl.c_str()))
   {
-    Serial.println("Error setting up MDNS responder!");
+    SERIAL_DEBUG_LN("[INFO]: Error setting up MDNS responder!");
     while (1)
     {
       delay(1000);
     }
   }
-  Serial.println("mDNS responder started");
+  SERIAL_DEBUG_LN("[INFO]: mDNS responder started");
 
   // Start TCP (HTTP) server
   SetupWebServer();
-  Serial.println("TCP server started");
+  SERIAL_DEBUG_LN("[INFO]: TCP server started");
 
   // Add service to MDNS-SD
   MDNS.addService("http", "tcp", 80);
@@ -404,13 +442,13 @@ bool HMSnetwork::SetupmDNSLoop()
     int addr_end = req.indexOf(' ', addr_start + 1);
     if (addr_start == -1 || addr_end == -1)
     {
-      Serial.print("Invalid request: ");
-      Serial.println(req);
+      SERIAL_DEBUG_ADD("Invalid request: ");
+      SERIAL_DEBUG_LN(req);
       return false;
     }
     req = req.substring(addr_start + 1, addr_end);
-    Serial.print("Request: ");
-    Serial.println(req);
+    SERIAL_DEBUG_ADD("Request: ");
+    SERIAL_DEBUG_LN(req);
 
     String s;
     if (req == "/")
@@ -420,17 +458,17 @@ bool HMSnetwork::SetupmDNSLoop()
       s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>Hello from ESP32 at ";
       s += ipStr;
       s += "</html>\r\n\r\n";
-      Serial.println("Sending 200");
+      SERIAL_DEBUG_LN("[INFO]: Sending 200");
     }
     else
     {
       s = "HTTP/1.1 404 Not Found\r\n\r\n";
-      Serial.println("Sending 404");
+      SERIAL_DEBUG_LN("[INFO]: Sending 404");
     }
     espClient.print(s);
 
     espClient.stop();
-    Serial.println("Done with espClient");
+    SERIAL_DEBUG_LN("[INFO]: Done with espClient");
   }
   return false;
 }
@@ -445,7 +483,7 @@ bool HMSnetwork::SetupmDNSLoop()
 bool HMSnetwork::connectToApWithFailToStation()
 {
   WiFi.persistent(true);
-  SERIAL_DEBUG_LN("Configuring access point...");
+  SERIAL_DEBUG_LN("[INFO]: Configuring access point...");
   SERIAL_DEBUG_ADD("SSID:");
   SERIAL_DEBUG_LN(cfg.config.WIFISSID);
   SERIAL_DEBUG_ADD("PASS:");
@@ -473,28 +511,36 @@ bool HMSnetwork::connectToApWithFailToStation()
       WiFi.mode(WIFI_AP);
       // You can remove the password parameter if you want the AP to be open.
       SERIAL_DEBUG_ADD("Wifi Connect Failed. \r\nStarting AP. \r\nAP IP address: ");
-      WiFi.softAP("Purbright", "purpur");
+      WiFi.softAP("HMS-BAT", "hbathbat");
       SERIAL_DEBUG_LN(WiFi.softAPIP());
       return false;
       break;
     }
   }
-  SERIAL_DEBUG_LN("");
-  Serial.print("Connected! IP address: ");
-  Serial.println(WiFi.localIP());
+  SERIAL_DEBUG_LN("[INFO]: ");
+  SERIAL_DEBUG_ADD("Connected! IP address: ");
+  SERIAL_DEBUG_LN(WiFi.localIP());
   return true;
 }
 
 // ############## functions to update current server settings ###################
+/**
+ * @brief Check if the current hostname is the same as the one in the config file
+ * Call in the Setup BEFORE the WiFi.begin()
+ * @param None
+ * @return None
+ */
 void HMSnetwork::loadConfig()
 {
   SERIAL_DEBUG_LN(F("Checking if hostname is set and valid"));
+  WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
   size_t size = sizeof(cfg.config.hostname);
   if (!cfg.isValidHostname(cfg.config.hostname, size - 1))
   {
     strncpy(cfg.config.hostname, DEFAULT_HOSTNAME, size - 1);
     cfg.setConfigChanged();
   }
+  WiFi.setHostname(cfg.config.hostname); // define hostname
 
   if (cfg.config.MQTTEnabled)
   {
@@ -550,7 +596,7 @@ void HMSnetwork::SetupServer()
   SERIAL_DEBUG_LNF("MAC address: %s", WiFi.macAddress().c_str());
   SERIAL_DEBUG_LNF("CPU Speed: %d MHz", ESP.getCpuFreqMHz());
   SERIAL_DEBUG_LNF("Flash Size: %dKB", ESP.getFlashChipSize());
-  SERIAL_DEBUG_LN("System Information Sent");
+  SERIAL_DEBUG_LN("[INFO]: System Information Sent");
   SERIAL_DEBUG_EOL;
 
 // FS debug information
@@ -578,6 +624,53 @@ void HMSnetwork::SetupServer()
                    (float)100 / totalBytes * usedBytes);
   SERIAL_DEBUG_EOL;
 #endif
+}
+
+void HMSnetwork::SetupWifiScan()
+{
+  // Set WiFi to station mode and disconnect from an AP if it was previously connected
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect(); // Disconnect from the access point if connected before
+  delay(100);
+
+  SERIAL_DEBUG_LN("[INFO]: Setup done");
+}
+
+bool HMSnetwork::LoopWifiScan()
+{
+  SERIAL_DEBUG_LN("[INFO]: [INFO]: Beginning WIFI Network");
+
+  // WiFi.scanNetworks will return the number of networks found
+  int n = WiFi.scanNetworks();
+  SERIAL_DEBUG_LN("[INFO]: [INFO]: scan done");
+  if (n == 0)
+  {
+    SERIAL_DEBUG_LN("[INFO]: [INFO]: no networks found");
+    return false;
+  }
+  else
+  {
+    SERIAL_DEBUG_ADD(n);
+    SERIAL_DEBUG_LN("[INFO]:  networks found");
+    for (int i = 0; i < n; ++i)
+    {
+      // Print SSID and RSSI for each network found
+      SERIAL_DEBUG_ADD(i + 1);
+      SERIAL_DEBUG_ADD(": ");
+      SERIAL_DEBUG_ADD(WiFi.SSID(i));
+      SERIAL_DEBUG_ADD(" (");
+      SERIAL_DEBUG_ADD(WiFi.RSSI(i));
+      SERIAL_DEBUG_ADD(")");
+      SERIAL_DEBUG_LN((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
+      delay(10);
+      return true;
+    }
+  }
+  SERIAL_DEBUG_LN("[INFO]: ");
+
+  // Wait a bit before scanning again
+  delay(5000);
+  return true;
 }
 
 HMSnetwork network;

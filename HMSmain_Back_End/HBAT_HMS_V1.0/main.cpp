@@ -2,6 +2,7 @@
 
 void setup()
 {
+    Serial.begin(115200);
     cfg.CreateDefaultConfig();
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW);

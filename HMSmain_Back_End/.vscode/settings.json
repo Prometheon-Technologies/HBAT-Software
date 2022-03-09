@@ -45,7 +45,14 @@
         "typeinfo": "cpp",
         "random": "cpp",
         "cmake.mingwSearchDirs": "C:\\mingw-w64\\mingw64\\bin",
-        "cmake.generator": "MinGW Makefiles"
+        "cmake.generator": "MinGW Makefiles",
+        "atomic": "cpp",
+        "bitset": "cpp",
+        "chrono": "cpp",
+        "ratio": "cpp",
+        "string_view": "cpp",
+        "mutex": "cpp",
+        "regex": "cpp"
     },
     "cSpell.words": [
         "ADDF",
@@ -59,6 +66,7 @@
         "Discoverm",
         "EEPROM",
         "Efuse",
+        "GPIO",
         "GPIOs",
         "HBAT",
         "Heim",
@@ -77,6 +85,7 @@
         "println",
         "Purbright",
         "relaypin",
+        "RSSI",
         "sbnet",
         "Sensorjson",
         "setm",

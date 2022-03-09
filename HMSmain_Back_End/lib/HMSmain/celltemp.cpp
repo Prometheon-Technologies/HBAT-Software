@@ -1,19 +1,7 @@
-#include <CellTemp.h>
+#include <CellTemp.hpp>
 
 // Data wire is plugged into port 42 on the ESP32
 #define ONE_WIRE_BUS 42
-#define DEBUG 1
-
-#if DEBUG == 1
-#define debug(x) Serial.print(x)
-#define debugln(x) Serial.println(x)
-#define debugf(x) Serial.printf(x)
-
-#else
-#define debug(x)
-#define debugln(x)
-#define debugf(x)
-#endif
 
 CellTemp::CellTemp(void)
 {

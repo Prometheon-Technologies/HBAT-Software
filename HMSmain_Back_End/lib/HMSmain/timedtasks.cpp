@@ -17,6 +17,7 @@ void TimedTasks::SetupTimers() // TODO: CALL IN THE MAIN SETUP
   ReadTimer3_10.setTime(10000);
   ReadTimer2.setTime(5000);
   ReadTimer3.setTime(5000);
+  ReadTimer_10_2.setTime(10000);
 }
 
 // Timer delay Settings
@@ -55,6 +56,17 @@ void TimedTasks::Run_Check_DataJSON_5()
     Accumulate_Data.InitAccumulateDataJson();
     Hum.SFM3003();
     ReadTimer2.start();
+  }
+}
+
+void TimedTasks::updateCurrentData()// check to see if the data has changed
+{
+  if (ReadTimer_10_2.ding())
+  {
+    // call to save config if config has changed
+    cfg.saveConfig();
+    SERIAL_DEBUG_LNF("Heap: %d", system_get_free_heap_size())
+    ReadTimer_10_2.start();
   }
 }
 

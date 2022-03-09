@@ -196,7 +196,7 @@ bool Config::saveConfig()
     if (!last_config_change)
     {
         Serial.println("Config has not changed");
-        return true;
+        return false;
     }
     Serial.println("Saving Config");
     // create a json file from the config struct and save it using SPIFFs

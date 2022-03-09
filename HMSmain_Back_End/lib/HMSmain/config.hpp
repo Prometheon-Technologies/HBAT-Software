@@ -1,5 +1,5 @@
 /*
- config.h - Purbright library
+ config.h - HBAT library
  Copyright (c) 2021 Zacariah Austin Heim.
 */
 
@@ -66,8 +66,6 @@ public:
     // save last "timestamp" the config has been saved
     bool last_config_change;
 };
-#if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_CONFIG)
 extern Config cfg;
-#endif
 #endif
 // EOF

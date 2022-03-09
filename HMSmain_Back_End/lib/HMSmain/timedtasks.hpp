@@ -17,6 +17,7 @@ public:
   void setCallback(void (*funct)(void));
   void setSeconds(float seconds);
   virtual void idle(void);
+  void updateCurrentData();
 
   void (*callback)(void);
   void SetupTimers();
@@ -26,6 +27,7 @@ public:
   timeObj ReadTimer3_10;
   timeObj ReadTimer2;
   timeObj ReadTimer3;
+  timeObj ReadTimer_10_2;
 };
 
 #if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_TIMEDTASKS)

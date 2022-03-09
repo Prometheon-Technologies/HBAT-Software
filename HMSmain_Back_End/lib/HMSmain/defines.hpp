@@ -1,5 +1,5 @@
 /*
- defines.hpp - Purbright library
+ defines.hpp - HBAT library
  Copyright (c) 2021 Zacariah Austin Heim.
  */
 #ifndef DEFINES_hpp
@@ -47,9 +47,6 @@
 #include <ESPAsync_WiFiManager.h>
 #include <HMSnetwork.hpp>
 #include <ESPmDNS.h>
-
-// define EEPROM settings
-// https://www.kriwanek.de/index.php/de/homeautomation/esp8266/364-eeprom-für-parameter-verwenden
 
 #define LED_BUILTIN 2
 #define DEFAULT_HOSTNAME "HBAT_HMS" // default hostname

@@ -357,12 +357,13 @@ uint8_t crc8(const uint8_t data, uint8_t crc)
 
 void Humidity::loopSFM3003()
 {
+  auto device = 0x28;
   delay(500);
-  Wire.beginTransmission(byte(0x40)); // transmit to device #064 (0x40)
+  Wire.beginTransmission(byte(device)); // transmit to device (0x28)
   Wire.write(byte(0x10));             //
   Wire.write(byte(0x00));             //
   Wire.endTransmission();
-  Wire.requestFrom(0x40, 3); // read 3 bytes from device with address 0x40
+  Wire.requestFrom(device, 3); // read 3 bytes from device with address 0x28
   while (Wire.available())
   {                            // slave may send less than requested
     uint16_t a = Wire.read();  // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later

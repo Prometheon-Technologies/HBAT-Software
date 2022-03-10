@@ -22,8 +22,8 @@ Humidity::Humidity(void)
   _relays[2] = 36;
   _relays[3] = 35;
   _relays[4] = 48;
-  _offset = 32000;  // _Offset for the sensor
-  _scale = 140.0; // _Scale factor for Air and N2 is 140.0, O2 is 142.8
+  _offset = 32000; // _Offset for the sensor
+  _scale = 140.0;  // _Scale factor for Air and N2 is 140.0, O2 is 142.8
 }
 
 Humidity::~Humidity(void)
@@ -358,33 +358,40 @@ uint8_t crc8(const uint8_t data, uint8_t crc)
 void Humidity::loopSFM3003()
 {
   auto device = 0x28;
-  delay(500);
-  Wire.beginTransmission(byte(device)); // transmit to device (0x28)
-  Wire.write(byte(0x10));             //
-  Wire.write(byte(0x00));             //
-  Wire.endTransmission();
-  Wire.requestFrom(device, 3); // read 3 bytes from device with address 0x28
-  while (Wire.available())
-  {                            // slave may send less than requested
-    uint16_t a = Wire.read();  // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
-    uint8_t b = Wire.read();   // second received byte stored here
-    uint8_t crc = Wire.read(); // crc value stored here
-    uint8_t mycrc = 0xFF;      // initialize crc variable
-    mycrc = crc8(a, mycrc);    // let first byte through CRC calculation
-    mycrc = crc8(b, mycrc);    // and the second byte too
-    if (mycrc != crc)
-    { // check if the calculated and the received CRC byte matches
-      SERIAL_DEBUG_LN("Error: wrong CRC");
+  unsigned long timed_event = 500;
+  unsigned long current_time = millis(); // millis() function
+  unsigned long start_time = current_time;
+  // delay(500); // blocking delay, not needed
+  if (current_time - start_time >= timed_event)
+  {
+    Wire.beginTransmission(byte(device)); // transmit to device (0x28)
+    Wire.write(byte(0x10));               //
+    Wire.write(byte(0x00));               //
+    Wire.endTransmission();
+    Wire.requestFrom(device, 3); // read 3 bytes from device with address 0x28
+    while (Wire.available())
+    {                            // slave may send less than requested
+      uint16_t a = Wire.read();  // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
+      uint8_t b = Wire.read();   // second received byte stored here
+      uint8_t crc = Wire.read(); // crc value stored here
+      uint8_t mycrc = 0xFF;      // initialize crc variable
+      mycrc = crc8(a, mycrc);    // let first byte through CRC calculation
+      mycrc = crc8(b, mycrc);    // and the second byte too
+      if (mycrc != crc)
+      { // check if the calculated and the received CRC byte matches
+        SERIAL_DEBUG_LN("Error: wrong CRC");
+      }
+      SERIAL_DEBUG_LN('p');
+      SERIAL_DEBUG_LN(a);
+      SERIAL_DEBUG_LN(b);
+      SERIAL_DEBUG_LN(crc);
+      SERIAL_DEBUG_LN('h');
+      a = (a << 8) | b; // combine the two received bytes to a 16bit integer value
+      // a >>= 2; // remove the two least significant bits
+      int _Flow = (a - _offset) / _scale;
+      // SERIAL_DEBUG_LN(a); // print the raw data from the sensor to the serial interface
+      SERIAL_DEBUG_LN(_Flow); // print the calculated _flow to the serial interface
+      start_time = current_time;
     }
-    SERIAL_DEBUG_LN('p');
-    SERIAL_DEBUG_LN(a);
-    SERIAL_DEBUG_LN(b);
-    SERIAL_DEBUG_LN(crc);
-    SERIAL_DEBUG_LN('h');
-    a = (a << 8) | b; // combine the two received bytes to a 16bit integer value
-    // a >>= 2; // remove the two least significant bits
-    int _Flow = (a - _offset) / _scale;
-    // SERIAL_DEBUG_LN(a); // print the raw data from the sensor to the serial interface
-    SERIAL_DEBUG_LN(_Flow); // print the calculated _flow to the serial interface
   }
 }

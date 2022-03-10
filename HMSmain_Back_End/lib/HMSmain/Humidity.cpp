@@ -1,7 +1,7 @@
 #include <Humidity.hpp>
 
-//Global Variables
-// Setup an array of relays to control peripherals. Numbers represent pin numbers.
+// Global Variables
+//  Setup an array of _relays to control peripherals. Numbers represent pin numbers.
 
 bool enableHeater = false;
 int WindowSize = 5000;
@@ -13,16 +13,17 @@ PID myPID(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT); // Specify the links and
 
 Humidity::Humidity(void)
 {
-  flow = returnData[0];
-  temperature = returnData[1];
+  _flow = _returnData[0];
+  _temperature = _returnData[1];
   sht31 = Adafruit_SHT31();
   sht31_2 = Adafruit_SHT31();
-  relays[0] = 45;
-  relays[1] = 38;
-  relays[2] = 36;
-  relays[3] = 35;
-  relays[4] = 48;
-  //relays[] = {45, 38, 36, 35, 48};
+  _relays[0] = 45;
+  _relays[1] = 38;
+  _relays[2] = 36;
+  _relays[3] = 35;
+  _relays[4] = 48;
+  _offset = 32000;  // _Offset for the sensor
+  _scale = 140.0; // _Scale factor for Air and N2 is 140.0, O2 is 142.8
 }
 
 Humidity::~Humidity(void)
@@ -37,24 +38,24 @@ Humidity::~Humidity(void)
  ******************************************************************************/
 void Humidity::SetupSensor()
 {
-  Serial.println("SHT31 Sensors Setup Beginning");
+  SERIAL_DEBUG_LN("SHT31 Sensors Setup Beginning");
   // Set to 0x45 for alternate i2c address
   if (!sht31.begin(0x44) ^ !sht31_2.begin(0x45))
   {
-    Serial.println("Couldn't find SHT31 sensors");
+    SERIAL_DEBUG_LN("Couldn't find SHT31 sensors");
     while (1)
       delay(1);
   }
-  Serial.println("SHT31 Sensors Setup Complete");
+  SERIAL_DEBUG_LN("SHT31 Sensors Setup Complete");
   delay(1); // delay in between reads for stability
 
-  if (sensor1 ^ sensor2)
+  if (_sensor1 ^ _sensor2)
   {
-    Serial.println("Sensors have Heater ENABLED");
+    SERIAL_DEBUG_LN("Sensors have Heater ENABLED");
   }
   else
   {
-    Serial.println("Sensor 1 Heater Disabled");
+    SERIAL_DEBUG_LN("Sensor 1 Heater Disabled");
   }
 }
 
@@ -71,7 +72,7 @@ float Humidity::AverageStackTemp()
   {
     stack_temp[i] = *ReadSensor();
   }
-  return (stack_temp[0] + stack_temp[2]) / 2; // Read the temperature from the sensor and average the two sensors.
+  return (stack_temp[0] + stack_temp[2]) / 2; // Read the _temperature from the sensor and average the two sensors.
 }
 
 /******************************************************************************
@@ -106,14 +107,14 @@ float *Humidity::ReadSensor()
   {
     climatedata[0] = sht31.readTemperature();
     climatedata[1] = sht31_2.readTemperature();
-    Serial.println("Sensor 1 Temp *C = ");
+    SERIAL_DEBUG_LN("Sensor 1 Temp *C = ");
     Serial.print(climatedata[0]);
-    Serial.println("Sensor 2 Temp *C = ");
+    SERIAL_DEBUG_LN("Sensor 2 Temp *C = ");
     Serial.print(climatedata[1]);
   }
   else
   {
-    Serial.println("Failed to read temperature");
+    SERIAL_DEBUG_LN("Failed to read _temperature");
   }
 
   // check if 'is not a number'
@@ -121,20 +122,20 @@ float *Humidity::ReadSensor()
   {
     climatedata[2] = sht31.readHumidity();
     climatedata[3] = sht31_2.readHumidity();
-    Serial.println("Sensor 1 Humidity %% = ");
+    SERIAL_DEBUG_LN("Sensor 1 Humidity %% = ");
     Serial.print(climatedata[2]);
-    Serial.println("Sensor 2 Humidity %% = ");
+    SERIAL_DEBUG_LN("Sensor 2 Humidity %% = ");
     Serial.print(climatedata[3]);
   }
   else
   {
-    Serial.println("Failed to read humidity");
+    SERIAL_DEBUG_LN("Failed to read humidity");
   }
 
   delay(1000);
 
   // Toggle heater enabled state every 30 seconds
-  // An ~3.0 degC temperature increase can be noted when heater is enabled
+  // An ~3.0 degC _temperature increase can be noted when heater is enabled
   // This is needed due to the high operating humidity of the system
   if (++loopCnt == 30)
   {
@@ -143,13 +144,13 @@ float *Humidity::ReadSensor()
     sht31_2.heater(enableHeater);
     Serial.print("Heater Enabled State: ");
 
-    if (sensor1 ^ sensor2)
+    if (_sensor1 ^ _sensor2)
     {
       Serial.print("Sensors have Heater ENABLED");
     }
     else
     {
-      Serial.println("Sensor 1 Heater Disabled");
+      SERIAL_DEBUG_LN("Sensor 1 Heater Disabled");
     }
 
     loopCnt = 0;
@@ -165,8 +166,8 @@ float *Humidity::ReadSensor()
  ******************************************************************************/
 
 /******************************************************************************
- * Function: Setup relays
- * Description: Loop through and set all relays to output and off state
+ * Function: Setup _relays
+ * Description: Loop through and set all _relays to output and off state
  * Parameters: None
  * Return: None
  ******************************************************************************/
@@ -175,8 +176,8 @@ void Humidity::SetupRelays()
   // initialize the Relay pins and set them to off state
   for (int i = 0; i <= 5; i++)
   {
-    pinMode(relays[i], OUTPUT);
-    digitalWrite(relays[i], LOW);
+    pinMode(_relays[i], OUTPUT);
+    digitalWrite(_relays[i], LOW);
   }
 }
 
@@ -208,7 +209,7 @@ void Humidity::SetupPID()
  * Description: Initialise a PID controller to control a relay based on humidity sensor readings
  * Parameters: None
  * Return: None
- * SFM3003 Mass Air Flow Sensor code to be integrated
+ * SFM3003 Mass Air _Flow Sensor code to be integrated
  * Below PID Relay code is an example of how to use the PID controller
  * This code should only be used during the Charging phase. Integrate State Machine to use this code
  ******************************************************************************/
@@ -225,12 +226,12 @@ void Humidity::HumRelayOnOff()
     windowStartTime += WindowSize;
   }
   if (Output > now - windowStartTime)
-    digitalWrite(relays[0], HIGH);
+    digitalWrite(_relays[0], HIGH);
   else
-    digitalWrite(relays[0], LOW);
+    digitalWrite(_relays[0], LOW);
 }
 
-int Humidity::SetupSFM3003()
+/* int Humidity::SetupSFM3003()
 {
   const char *driver_version = sfm_common_get_driver_version();
   if (driver_version)
@@ -243,16 +244,14 @@ int Humidity::SetupSFM3003()
     return -1;
   }
 
-  /* Initialize I2C bus */
   sensirion_i2c_init();
 
-  /* Reset all I2C devices */
   int16_t error = sensirion_i2c_general_call_reset();
   if (error)
   {
     printf("General call reset failed\n");
   }
-  /* Wait for the SFM3003 to initialize */
+
   sensirion_sleep_usec(SFM3003_SOFT_RESET_TIME_US);
 
   while (sfm3003_probe())
@@ -291,16 +290,14 @@ int Humidity::SFM3003()
     printf("Failed to start measurement\n");
   }
 
-  /* Wait for the first measurement to be available. Wait for
-   * SFM3003_MEASUREMENT_WARM_UP_TIME_US instead for more reliable results */
   sensirion_sleep_usec(SFM3003_MEASUREMENT_INITIALIZATION_TIME_US);
 
   for (;;)
   {
-    int16_t flow_raw;
-    int16_t temperature_raw;
-    error = sfm_common_read_measurement_raw(&sfm3003, &flow_raw,
-                                            &temperature_raw, &status);
+    int16_t _flow_raw;
+    int16_t _temperature_raw;
+    error = sfm_common_read_measurement_raw(&sfm3003, &_flow_raw,
+                                            &_temperature_raw, &status);
     if (error)
     {
       printf("Error while reading measurement\n");
@@ -308,16 +305,85 @@ int Humidity::SFM3003()
     else
     {
       // Convert the raw values to physical values in Standard Liter/Minute
-      error = sfm_common_convert_flow_float(&sfm3003, flow_raw, &flow);
+      error = sfm_common_convert__flow_float(&sfm3003, _flow_raw, &_flow);
       if (error)
       {
-        printf("Error while converting flow\n");
+        printf("Error while converting _flow\n");
       }
-      temperature = sfm_common_convert_temperature_float(temperature_raw);
-      printf(" Flow: %.3f (%4i) Temperature: %.2f (%4i) Status: %04x\n",
-             flow, flow_raw, temperature, temperature_raw, status);
+      _temperature = sfm_common_convert__temperature_float(_temperature_raw);
+      printf(" _Flow: %.3f (%4i) _Temperature: %.2f (%4i) Status: %04x\n",
+             _flow, _flow_raw, _temperature, _temperature_raw, status);
     }
   }
   sensirion_i2c_release();
   return 0;
+} */
+
+void Humidity::setupSfm3003()
+{
+  Wire.begin();
+  Serial.begin(9600);
+  int a = 0;
+  int b = 0;
+  int c = 0;
+
+  /*Wire.requestFrom(0x40, 3); //
+   a = Wire.read(); // first received byte stored here
+   b = Wire.read(); // second received byte stored here
+   c = Wire.read(); // third received byte stored here
+   Wire.endTransmission();
+   delay(5);
+
+   Wire.requestFrom(0x40, 3); //
+   a = Wire.read(); // first received byte stored here
+   b = Wire.read(); // second received byte stored here
+   c = Wire.read(); // third received byte stored here
+   Wire.endTransmission();
+   delay(5);*/
+}
+
+uint8_t crc8(const uint8_t data, uint8_t crc)
+{
+  crc ^= data;
+
+  for (uint8_t i = 8; i; --i)
+  {
+    crc = (crc & 0x80)
+              ? (crc << 1) ^ 0x31
+              : (crc << 1);
+  }
+  return crc;
+}
+
+void Humidity::loopSFM3003()
+{
+  delay(500);
+  Wire.beginTransmission(byte(0x40)); // transmit to device #064 (0x40)
+  Wire.write(byte(0x10));             //
+  Wire.write(byte(0x00));             //
+  Wire.endTransmission();
+  Wire.requestFrom(0x40, 3); // read 3 bytes from device with address 0x40
+  while (Wire.available())
+  {                            // slave may send less than requested
+    uint16_t a = Wire.read();  // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
+    uint8_t b = Wire.read();   // second received byte stored here
+    uint8_t crc = Wire.read(); // crc value stored here
+    uint8_t mycrc = 0xFF;      // initialize crc variable
+    mycrc = crc8(a, mycrc);    // let first byte through CRC calculation
+    mycrc = crc8(b, mycrc);    // and the second byte too
+    if (mycrc != crc)
+    { // check if the calculated and the received CRC byte matches
+      SERIAL_DEBUG_LN("Error: wrong CRC");
+    }
+    SERIAL_DEBUG_LN('p');
+    SERIAL_DEBUG_LN(a);
+    SERIAL_DEBUG_LN(b);
+    SERIAL_DEBUG_LN(crc);
+    SERIAL_DEBUG_LN('h');
+    a = (a << 8) | b; // combine the two received bytes to a 16bit integer value
+    // a >>= 2; // remove the two least significant bits
+    int _Flow = (a - _offset) / _scale;
+    // SERIAL_DEBUG_LN(a); // print the raw data from the sensor to the serial interface
+    SERIAL_DEBUG_LN(_Flow); // print the calculated _flow to the serial interface
+  }
 }

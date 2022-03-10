@@ -11,10 +11,13 @@ uint8_t loopCnt = 0;
 double Setpoint, Input, Output;
 PID myPID(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT); // Specify the links and initial tuning parameters
 
+Adafruit_SHT31 sht31;
+Adafruit_SHT31 sht31_2;
+
 Humidity::Humidity(void)
 {
-  _flow = _returnData[0];
-  _temperature = _returnData[1];
+  flow = returnData[0];
+  temperature = returnData[1];
   sht31 = Adafruit_SHT31();
   sht31_2 = Adafruit_SHT31();
   _relays[0] = 45;
@@ -355,7 +358,7 @@ uint8_t crc8(const uint8_t data, uint8_t crc)
   return crc;
 }
 
-void Humidity::loopSFM3003()
+int Humidity::loopSFM3003()
 {
   auto device = 0x28;
   unsigned long timed_event = 500;
@@ -388,10 +391,12 @@ void Humidity::loopSFM3003()
       SERIAL_DEBUG_LN('h');
       a = (a << 8) | b; // combine the two received bytes to a 16bit integer value
       // a >>= 2; // remove the two least significant bits
-      int _Flow = (a - _offset) / _scale;
+      int Flow = (a - _offset) / _scale;
       // SERIAL_DEBUG_LN(a); // print the raw data from the sensor to the serial interface
-      SERIAL_DEBUG_LN(_Flow); // print the calculated _flow to the serial interface
+      SERIAL_DEBUG_LN(Flow); // print the calculated _flow to the serial interface
       start_time = current_time;
+      returnData[0] = Flow;
     }
   }
+  return flow;
 }

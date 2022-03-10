@@ -33,7 +33,6 @@
 #include <ArduinoJson.h>
 // Humidity Sensors
 //#include <sfm3003.hpp>
-#include <Adafruit_SHT31.h>
 
 // Temp Sensors
 
@@ -93,8 +92,6 @@ extern HMS HMSmain;
 extern Humidity Hum;
 extern CellTemp Cell_Temp;
 extern StaticJsonDocument<1000> Doc;
-extern Adafruit_SHT31 sht31;
-extern Adafruit_SHT31 sht31_2;
 extern FrontEnd Front_End;
 extern DNSServer dnsServer;
 

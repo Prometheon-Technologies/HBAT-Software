@@ -19,7 +19,7 @@ AccumulateData::~AccumulateData(void)
  ******************************************************************************/
 void AccumulateData::SetupMainLoop()
 {
-  Hum.SetupSFM3003();
+  Hum.setupSfm3003();
   HMSmqtt.MQTTSetup();
   // debug("freeMemory()="+freeMemory());
 }
@@ -54,8 +54,8 @@ void AccumulateData::InitAccumulateDataJson()
   }
 
   // Flow Rate dataTosend
-  Doc["Flow_Rate_Sensor_Status"] = Hum.SFM3003();
-  int flow_rate_sensor_status = Hum.SFM3003();
+  Doc["Flow_Rate_Sensor_Status"] = Hum.loopSFM3003();
+  int flow_rate_sensor_status = Hum.loopSFM3003();
   if (flow_rate_sensor_status == 0)
   {
     // SFM3003 flow rate dataTosend in slm

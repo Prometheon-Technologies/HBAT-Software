@@ -6,6 +6,10 @@
 #ifndef HUMIDITY_h
 #define HUMIDITY_h
 #include <defines.hpp>
+#include <Adafruit_SHT31.h>
+
+extern Adafruit_SHT31 sht31;
+extern Adafruit_SHT31 sht31_2;
 
 class Humidity
 {
@@ -22,9 +26,12 @@ public:
   void SetupPID();
   void SetupRelays();
   void setupSfm3003();
-  void loopSFM3003();
+  int loopSFM3003();
 
   // Variables
+  float returnData[2];
+  float flow;
+  float temperature;
 private:
   int _received;
   bool _sensor1 = sht31.isHeaterEnabled();
@@ -41,9 +48,6 @@ private:
           0b00000};
   int _offset;  // Offset for the sensor
   float _scale; // Scale factor for Air and N2 is 140.0, O2 is 142.8
-  float _returnData[2];
-  float _flow;
-  float _temperature;
   int _relays[5];
 };
 extern Humidity Hum;

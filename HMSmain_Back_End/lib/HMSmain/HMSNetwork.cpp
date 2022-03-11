@@ -245,27 +245,12 @@ void HMSnetwork::SetupWebServer()
       for(int i=0;i<params;i++){
         AsyncWebParameter* p = request->getParam(i);
         if(p->isPost()){
-          // HTTP POST ssid value
-          if (p->name() == "apName") {
-            int pinToToggle = request->arg("pin").toInt();
+          // HTTP POST Relay Value
+          if (p->name() == "pin") {
+            String relay = p->value().c_str();
             Serial.print("switching state of pin :");
-            Serial.println(pinToToggle);
-            cfg.config.relays[pinToToggle] = (cfg.config.relays[pinToToggle] == true) ? false : true;
-            String ssID; 
-            ssID = p->value().c_str();
-            SERIAL_DEBUG_ADD("SSID set to: ");
-            SERIAL_DEBUG_LN(ssID);
-            // Write file to save value
-            writeFile(SPIFFS, ssidPath, ssID.c_str());
-          }
-          // HTTP POST pass value
-          if (p->name() == "apPass") {
-            String passWord; 
-            passWord = p->value().c_str();
-            SERIAL_DEBUG_ADD("Password set to: ");
-            SERIAL_DEBUG_LN(passWord);
-            // Write file to save value
-            writeFile(SPIFFS, passPath, passWord.c_str());
+            Serial.println(relay);
+            cfg.config.relays[relay.toInt()] = (cfg.config.relays[relay.toInt()] == true) ? false : true;
           }
           SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
         }

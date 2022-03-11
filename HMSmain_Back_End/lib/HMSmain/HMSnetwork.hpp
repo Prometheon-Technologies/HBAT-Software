@@ -40,6 +40,8 @@ public:
     //String processor(const String& var);
 
     // variables
+    int maxVoltage;
+    int maxTemp;
 private:
 };
 

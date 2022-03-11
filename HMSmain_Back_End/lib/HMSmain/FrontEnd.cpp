@@ -3,8 +3,6 @@
 FrontEnd::FrontEnd(void)
 {
   /* AccumulateSensorjson = AccumulateData().json; */
-  maxVoltage = 24;
-  maxTemp = 100;
   /* NewMQTTIP = webServer.arg("mqttIP");
   NewMQTTPass = server.arg("mqttPass");
   NewMQTTUser = server.arg("mqttUser"); */
@@ -12,56 +10,6 @@ FrontEnd::FrontEnd(void)
 
 FrontEnd::~FrontEnd(void)
 {
-}
-
-void FrontEnd::setupFrontEnd()
-{
-  server.on(F("/data.json"), [&]()
-            {
-    String json = "";
-    json += R"====({)====";
-
-    json += R"====("stack_humidity":)====";
-    json += (String)dataTosend.stack_humidity + ",\n";
-
-    json += R"====("stack_temp":)====";
-    json += (String)dataTosend.stack_temp + ",\n";
-
-    json += R"====("relays":[)====";
-    json += (String) dataTosend.relays[0] + "," + (String) dataTosend.relays[1] + "," +  (String) dataTosend.relays[2] + "," +  (String) dataTosend.relays[3] + "," +  (String) dataTosend.relays[4] + "],\n";
-
-    json += R"====("stack_voltage":)====";
-    json += (String)dataTosend.stack_voltage + ",\n";
-
-    json += R"====("fakeGraphData":[)====";
-    json +=  "\n";
-    for (int i = 0; i < 10; i++) {
-
-      delay(0);
-      json += R"====({"label": "🌡 )====" + (String)i + "\",\n";
-      json += R"====("type": "temp",)====" + (String)"\n";
-      json += R"====("value": )====" + (String)dataTosend.cell_temp[i] + (String)",\n";
-      json += R"====("maxValue": )====" + (String) maxTemp;
-      json += R"====(})====" + (String)"\n";
-      json += R"====(,)====";
-
-      json += R"====({"label": "⚡ )====" + (String)i + "\",\n";
-      json += R"====("type": "volt",)====" + (String)"\n";
-      json += R"====("value": )====" + (String)dataTosend.cell_voltage[i] + (String)",\n";
-      json += R"====("maxValue": )====" + (String) maxVoltage;
-      json += R"====(})====" + (String)"\n";
-
-      if (i < 9) {
-        json += R"====(,)====";
-      };
-    }
-    json += R"====(])====";
-    json += R"====(})====";
-    server.send(200, "application/json", json);
-    json = ""; });
-
-  server.begin();
-  Serial.println("HTTP server started");
 }
 
 String FrontEnd::json_return_data()

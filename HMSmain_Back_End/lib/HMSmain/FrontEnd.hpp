@@ -25,9 +25,6 @@ public:
 
     // Variables
 
-    int maxVoltage;
-    int maxTemp;
-
     String NewMQTTIP;
     String NewMQTTPass;
     String NewMQTTUser;

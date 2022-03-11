@@ -7,6 +7,7 @@
 #define HMSMQTT_hpp
 #include "defines.hpp"
 
+extern PubSubClient mqttClient(espClient);
 class HMSMqtt
 {
 public:

@@ -1,9 +1,5 @@
 #include <defines.hpp>
 
-// MQTT includes
-WiFiClient espClient;
-PubSubClient mqttClient(espClient);
-
 // Variables for MQTT
 
 const char *MQTT_TOPIC = "hms/data/";

@@ -27,6 +27,7 @@ public:
   void SetupRelays();
   void setupSfm3003();
   int loopSFM3003();
+  uint8_t crc8(const uint8_t data, uint8_t crc);
 
   // Variables
   float returnData[2];

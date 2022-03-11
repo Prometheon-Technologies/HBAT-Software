@@ -110,3 +110,5 @@ void AccumulateData::InitAccumulateDataJson()
     SERIAL_DEBUG_LN(json);
   }
 }
+
+AccumulateData Accumulate_Data;

@@ -167,7 +167,7 @@ float *Humidity::ReadSensor()
  * Parameters: None
  * Return: None
  ******************************************************************************/
-
+// FIXME: ADD IN CODE TO READ PRESSURE SENSORS
 /******************************************************************************
  * Function: Setup _relays
  * Description: Loop through and set all _relays to output and off state
@@ -325,7 +325,6 @@ int Humidity::SFM3003()
 void Humidity::setupSfm3003()
 {
   Wire.begin();
-  Serial.begin(9600);
   int a = 0;
   int b = 0;
   int c = 0;
@@ -345,7 +344,7 @@ void Humidity::setupSfm3003()
    delay(5);*/
 }
 
-uint8_t crc8(const uint8_t data, uint8_t crc)
+uint8_t Humidity::crc8(const uint8_t data, uint8_t crc)
 {
   crc ^= data;
 
@@ -400,3 +399,5 @@ int Humidity::loopSFM3003()
   }
   return flow;
 }
+
+Humidity Hum;

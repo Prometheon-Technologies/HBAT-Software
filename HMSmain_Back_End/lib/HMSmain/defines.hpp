@@ -31,21 +31,17 @@
 #include <celltemp.hpp>
 #include <HMSmqtt.hpp>
 #include <ArduinoJson.h>
+#include <strTools.h>
 // Humidity Sensors
 //#include <sfm3003.hpp>
 
 // Temp Sensors
-
 #include <PID_v1.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-// wifi definition
-#include <AsyncElegantOTA.h>
-#include <Wifi.h>
-#include <ESPAsync_WiFiManager.h>
+// wifi definitions
 #include <HMSnetwork.hpp>
-#include <ESPmDNS.h>
 
 #define LED_BUILTIN 2
 #define DEFAULT_HOSTNAME "HBAT_HMS" // default hostname
@@ -93,7 +89,7 @@ extern Humidity Hum;
 extern CellTemp Cell_Temp;
 extern StaticJsonDocument<1000> Doc;
 extern FrontEnd Front_End;
-extern DNSServer dnsServer;
+
 
 // Tasks for the Task Scheduler
 /* extern TaskHandle_t runserver;

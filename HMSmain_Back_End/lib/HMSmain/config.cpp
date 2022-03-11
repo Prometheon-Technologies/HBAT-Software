@@ -6,6 +6,8 @@ auto last_config = 0;
 Config::Config(void)
 {
     last_config_change = false;
+    maxVoltage = 24;
+    maxTemp = 100;
 }
 
 Config::~Config(void)

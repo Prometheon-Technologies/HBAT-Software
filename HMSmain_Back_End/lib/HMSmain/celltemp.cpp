@@ -141,3 +141,5 @@ float *CellTemp::ReadTempSensorData()
     }
     return cell_temp_sensor_results;
 }
+
+CellTemp Cell_Temp;

@@ -27,7 +27,5 @@ public:
 
 private:
 };
-#if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_HMSMQTT)
 extern AccumulateData Accumulate_Data;
-#endif
 #endif

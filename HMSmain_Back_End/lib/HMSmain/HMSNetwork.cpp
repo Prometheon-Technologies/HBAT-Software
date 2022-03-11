@@ -6,7 +6,8 @@ AsyncWebServer server(80);
 IPAddress localIP;
 
 IPAddress mqttServer;
-DNSServer dnsServer;
+
+WiFiClient espClient;
 
 // Set your Gateway IP address
 IPAddress gateway(192, 168, 1, 1);
@@ -59,7 +60,7 @@ String HMSnetwork::readFile(fs::FS &fs, const char *path)
   File file = fs.open(path);
   if (!file || file.isDirectory())
   {
-    SERIAL_DEBUG_LN("[INFO]: [INFO]: failed to open file for reading");
+    SERIAL_DEBUG_LN("[INFO]: Failed to open file for reading");
     return String();
   }
 
@@ -128,7 +129,7 @@ bool HMSnetwork::SetupNetworkStack()
   SSID = readFile(SPIFFS, ssidPath);
   SERIAL_DEBUG_LN(SSID);
   PASS = readFile(SPIFFS, passPath);
-  SERIAL_DEBUG_LN(PASS); //FIXME: REMOVE BEFORE FINAL BUILD
+  SERIAL_DEBUG_LN(PASS); // FIXME: REMOVE BEFORE FINAL BUILD
 
   ntptime = readFile(SPIFFS, ntptimePath);
   ntptimeoffset = readFile(SPIFFS, ntptimeoffsetPath);
@@ -138,7 +139,7 @@ bool HMSnetwork::SetupNetworkStack()
 
   SERIAL_DEBUG_LN(mdns);
   SERIAL_DEBUG_LN(dhcpcheck);
-  
+
   // Save loaded values to config struct
   heapStr(&cfg.config.WIFISSID, StringtoChar(SSID));
   heapStr(&cfg.config.WIFIPASS, StringtoChar(PASS));
@@ -146,7 +147,6 @@ bool HMSnetwork::SetupNetworkStack()
   heapStr(&cfg.config.NTPTIMEOFFSET, StringtoChar(ntptimeoffset));
   heapStr(&cfg.config.MDNS, StringtoChar(mdns));
   heapStr(&cfg.config.DHCPCHECK, StringtoChar(dhcpcheck));
-  
 
   if (cfg.config.WIFISSID[0] == '\0' || cfg.config.WIFIPASS[0] == '\0')
   {
@@ -201,22 +201,76 @@ void HMSnetwork::SetupWebServer()
 {
   if (SetupNetworkStack())
   {
-    // Route for root / web page
+    // Web Server Root URL
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-              { request->send(SPIFFS, "/index.html", "text/html", false, processor); });
+              { request->send(SPIFFS, "/frontend.html", "text/html"); });
+
     server.serveStatic("/", SPIFFS, "/");
 
-    // Route to set GPIO state to HIGH
-    server.on("/on", HTTP_GET, [](AsyncWebServerRequest *request)
+    server.on("/wifiupdate", HTTP_POST, [&](AsyncWebServerRequest *request)
               {
-      digitalWrite(LED_BUILTIN, HIGH);
-      request->send(SPIFFS, "/index.html", "text/html", false, processor); });
+      int params = request->params();
+      for(int i=0;i<params;i++){
+        AsyncWebParameter* p = request->getParam(i);
+        if(p->isPost()){
+          // HTTP POST ssid value
+          if (p->name() == "apName") {
+            String ssID; 
+            ssID = p->value().c_str();
+            SERIAL_DEBUG_ADD("SSID set to: ");
+            SERIAL_DEBUG_LN(ssID);
+            // Write file to save value
+            writeFile(SPIFFS, ssidPath, ssID.c_str());
+          }
+          // HTTP POST pass value
+          if (p->name() == "apPass") {
+            String passWord; 
+            passWord = p->value().c_str();
+            SERIAL_DEBUG_ADD("Password set to: ");
+            SERIAL_DEBUG_LN(passWord);
+            // Write file to save value
+            writeFile(SPIFFS, passPath, passWord.c_str());
+          }
+          SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+        }
+      }
+      request->send(200, "text/plain", "Done. ESP will restart and connect to your router. To access it go to IP address: " + String(cfg.config.clientIP));
+      delay(3000);
+      ESP.restart(); });
 
     // Route to set GPIO state to LOW
-    server.on("/off", HTTP_GET, [](AsyncWebServerRequest *request)
+    server.on("/toggle", HTTP_GET, [&](AsyncWebServerRequest *request)
               {
-      digitalWrite(LED_BUILTIN, LOW);
-      request->send(SPIFFS, "/index.html", "text/html", false, processor); });
+      int params = request->params();
+      for(int i=0;i<params;i++){
+        AsyncWebParameter* p = request->getParam(i);
+        if(p->isPost()){
+          // HTTP POST ssid value
+          if (p->name() == "apName") {
+            int pinToToggle = request->arg("pin").toInt();
+            Serial.print("switching state of pin :");
+            Serial.println(pinToToggle);
+            cfg.config.relays[pinToToggle] = (cfg.config.relays[pinToToggle] == true) ? false : true;
+            String ssID; 
+            ssID = p->value().c_str();
+            SERIAL_DEBUG_ADD("SSID set to: ");
+            SERIAL_DEBUG_LN(ssID);
+            // Write file to save value
+            writeFile(SPIFFS, ssidPath, ssID.c_str());
+          }
+          // HTTP POST pass value
+          if (p->name() == "apPass") {
+            String passWord; 
+            passWord = p->value().c_str();
+            SERIAL_DEBUG_ADD("Password set to: ");
+            SERIAL_DEBUG_LN(passWord);
+            // Write file to save value
+            writeFile(SPIFFS, passPath, passWord.c_str());
+          }
+          SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+        }
+      }
+      request->send(200, "application/json", "toggled"); });
     server.begin();
   }
   else
@@ -227,7 +281,7 @@ void HMSnetwork::SetupWebServer()
     // Connect to Wi-Fi HMSnetwork with SSID and password
     SERIAL_DEBUG_LN("[INFO]: Setting Access Point...");
 
-    char* macAddr = StringtoChar(WiFi.macAddress());
+    char *macAddr = StringtoChar(WiFi.macAddress());
 
     unsigned char *hash = MD5::make_hash(macAddr);
 
@@ -238,9 +292,9 @@ void HMSnetwork::SetupWebServer()
     // print it on our serial monitor
     SERIAL_DEBUG_ADD("[INFO]: MD5 HASH of MAC ADDRESS: ");
     SERIAL_DEBUG_LN(md5str);
-    
+
     // NULL sets an open Access Point
-    WiFi.softAP("HMS-WIFI", md5str); //MAC address is used as password for the AP - Unique to each device - MD5 hash of MAC address
+    WiFi.softAP("HMS-WIFI", md5str); // MAC address is used as password for the AP - Unique to each device - MD5 hash of MAC address
 
     // Give the Memory back to the System if you run the md5 Hash generation in a loop
     free(md5str);
@@ -638,14 +692,14 @@ void HMSnetwork::SetupWifiScan()
 
 bool HMSnetwork::LoopWifiScan()
 {
-  SERIAL_DEBUG_LN("[INFO]: [INFO]: Beginning WIFI Network");
+  SERIAL_DEBUG_LN("[INFO]: Beginning WIFI Network");
 
   // WiFi.scanNetworks will return the number of networks found
   int n = WiFi.scanNetworks();
-  SERIAL_DEBUG_LN("[INFO]: [INFO]: scan done");
+  SERIAL_DEBUG_LN("[INFO]: scan done");
   if (n == 0)
   {
-    SERIAL_DEBUG_LN("[INFO]: [INFO]: no networks found");
+    SERIAL_DEBUG_LN("[INFO]: no networks found");
     return false;
   }
   else

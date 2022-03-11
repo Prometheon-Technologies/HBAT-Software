@@ -1,6 +1,8 @@
 
 #include "HMSmqtt.hpp"
 
+PubSubClient mqttClient(espClient);
+
 HMSMqtt::HMSMqtt(void)
 {
 }

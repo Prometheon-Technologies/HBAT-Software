@@ -11,8 +11,10 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncTCP.h>
-#include <strTools.h>
+#include <AsyncElegantOTA.h>
 
+extern AsyncWebServer server;
+extern WiFiClient espClient;
 
 class HMSnetwork
 {
@@ -41,8 +43,5 @@ public:
 private:
 };
 
-#if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_NETWORK)
 extern HMSnetwork network;
-#endif
-
 #endif

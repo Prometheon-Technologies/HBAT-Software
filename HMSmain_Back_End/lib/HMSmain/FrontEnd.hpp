@@ -21,6 +21,7 @@ public:
     void updateCurrentData();
     uint8_t GetChipID();
     void loadConfig();
+    void setupFrontEnd();
 
     // Variables
 
@@ -40,7 +41,6 @@ public:
 
 private:
 };
-#if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_HMSMQTT)
+
 extern FrontEnd Front_End;
-#endif
 #endif

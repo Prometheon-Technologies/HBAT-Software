@@ -259,7 +259,7 @@ void HMSnetwork::SetupWebServer()
       }
       request->send(200, "application/json", "toggled"); });
 
-    server.on("/data.json", HTTP_POST, [&](AsyncWebServerRequest *request)
+    server.on("/data.json", HTTP_GET, [&](AsyncWebServerRequest *request)
               {
       String json = "";
       json += R"====({)====";

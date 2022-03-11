@@ -12,7 +12,7 @@ class CellTemp
 public:
     CellTemp(void);
     virtual ~CellTemp(void);
-    int freeRam();
+    uint32_t getfreeRam();
     void SetupSensors();
     void readAddresses(DeviceAddress deviceAddress);
     void printAddress(DeviceAddress deviceAddress);

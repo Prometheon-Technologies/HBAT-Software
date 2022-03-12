@@ -36,6 +36,8 @@ public:
     void CheckNetworkLoop();
     void SetupWifiScan();
     bool LoopWifiScan();
+    void setupOTA();
+    void loopOTA();
 
     // variables
     int maxVoltage;

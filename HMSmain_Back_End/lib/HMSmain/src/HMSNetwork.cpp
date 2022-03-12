@@ -689,4 +689,31 @@ bool HMSnetwork::LoopWifiScan()
   return true;
 }
 
+const uint16_t OTA_CHECK_INTERVAL = 3000; // ms
+uint32_t _lastOTACheck = 0;
+
+void HMSnetwork::setupOTA()
+{
+  Serial.print("Device version: v.");
+  Serial.println(VERSION);
+  Serial.print("Connecting to " + String(cfg.config.WIFISSID) + "...");
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(500);
+  }
+
+  Serial.println(" connected!");
+  _lastOTACheck = millis();
+}
+
+void HMSnetwork::loopOTA()
+{
+  if ((millis() - OTA_CHECK_INTERVAL) > _lastOTACheck) {
+    _lastOTACheck = millis();
+    checkFirmwareUpdates();
+  }
+}
+
 HMSnetwork network;

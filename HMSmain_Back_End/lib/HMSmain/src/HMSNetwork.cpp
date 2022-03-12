@@ -602,7 +602,11 @@ void HMSnetwork::SetupServer()
 {
   SERIAL_DEBUG_EOL;
   SERIAL_DEBUG_LN(F("System Information:"));
-  SERIAL_DEBUG_LNF("Version: %s (%s)", VERSION, VERSION_DATE);
+  SERIAL_DEBUG_EOL;
+  SERIAL_DEBUG_LNF("PLatformI0 compile time: %s (%s)", __DATE__, __TIME__);
+  SERIAL_DEBUG_LNF("PLatformI0 Unix compile time: %s", COMPILE_UNIX_TIME);
+  SERIAL_DEBUG_LNF("Project directory: %s", PROJECT_PATH);
+  SERIAL_DEBUG_LNF("Version: %s (%s)", VERSION, __DATE__);
   SERIAL_DEBUG_LNF("Heap: %d", Cell_Temp.getfreeRam());
   SERIAL_DEBUG_LNF("SDK: %s", system_get_sdk_version());
   SERIAL_DEBUG_LNF("MAC address: %s", WiFi.macAddress().c_str());

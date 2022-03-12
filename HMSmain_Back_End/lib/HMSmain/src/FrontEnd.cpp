@@ -80,26 +80,6 @@ void FrontEnd::SetupServer()
   // start the server
 
   SERIAL_DEBUG_LN("Booting up...");
-
-  SERIAL_DEBUG_LN("Starting server...");
-  // starting file system
-  if (!SPIFFS.begin())
-  {
-    SERIAL_DEBUG_LN(F("An Error has occurred while mounting SPIFFS"));
-    return;
-  }
-  loadConfig();
-
-  SERIAL_DEBUG_EOL("");
-  SERIAL_DEBUG_LN(F("System Information:"));
-  SERIAL_DEBUG_LNF("Version: %s (%s)", VERSION, VERSION_DATE);
-  SERIAL_DEBUG_LNF("Heap: %d", system_get_free_heap_size());
-  SERIAL_DEBUG_LNF("SDK: %s", system_get_sdk_version());
-  SERIAL_DEBUG_LNF("MAC address: %s", WiFi.macAddress().c_str());
-  SERIAL_DEBUG_LNF("CPU Speed: %d MHz", ESP.getCpuFreqMHz());
-  SERIAL_DEBUG_LNF("Flash Size: %dKB", ESP.getFlashChipSize());
-  SERIAL_DEBUG_EOL("System Information Sent");
-  SERIAL_DEBUG_EOL("");
 // FS debug information
 // THIS NEEDS TO BE PAST THE WIFI SETUP!! OTHERWISE WIFI SETUP WILL BE DELAYED
 #if HMS_DEBUG != 0

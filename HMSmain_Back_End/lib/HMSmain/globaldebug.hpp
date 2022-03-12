@@ -1,5 +1,6 @@
 // define Debug MACROs
-
+#ifndef GLOBALDEBUG_h
+#define GLOBALDEBUG_h
 #define HMS_DEBUG 1
 #if HMS_DEBUG != 0
 #define SERIAL_DEBUG_ADD(s) Serial.print(s);
@@ -33,4 +34,5 @@
     do                                \
     {                                 \
     } while (0);
+#endif
 #endif

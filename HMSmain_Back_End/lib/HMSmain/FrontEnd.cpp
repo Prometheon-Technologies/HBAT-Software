@@ -2,10 +2,6 @@
 
 FrontEnd::FrontEnd(void)
 {
-  /* AccumulateSensorjson = AccumulateData().json; */
-  /* NewMQTTIP = webServer.arg("mqttIP");
-  NewMQTTPass = server.arg("mqttPass");
-  NewMQTTUser = server.arg("mqttUser"); */
 }
 
 FrontEnd::~FrontEnd(void)

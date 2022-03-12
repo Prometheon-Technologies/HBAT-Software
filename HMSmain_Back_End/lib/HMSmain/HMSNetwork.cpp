@@ -280,7 +280,6 @@ void HMSnetwork::SetupWebServer()
       json += "\n";
       for (int i = 0; i < 10; i++)
       {
-
         delay(0);
         json += R"====({"label": "🌡 )====" + (String)i + "\",\n";
         json += R"====("type": "temp",)====" + (String) "\n";
@@ -654,25 +653,6 @@ void HMSnetwork::loadConfig()
   }
   SERIAL_DEBUG_LNF("Loaded config: hostname %s", cfg.config.hostname);
 }
-
-// These are old functions from previous websocket implementation
-// but we keep then as this could be still used in the future
-/* void broadcastInt(String name, uint8_t value)
-{
-// String json = "{\"name\":\"" + name + "\",\"value\":" + String(value) + "}";
-#ifdef ENABLE_MQTT_SUPPORT
-  MqttData.mqttSendStatus();
-#endif
-}
-
-void broadcastString(String name, String value)
-{
-// String json = "{\"name\":\"" + name + "\",\"value\":\"" + String(value) + "\"}";
-#ifdef ENABLE_MQTT_SUPPORT
-  MqttData.mqttSendStatus();
-#endif
-}
- */
 
 void HMSnetwork::SetupServer()
 {

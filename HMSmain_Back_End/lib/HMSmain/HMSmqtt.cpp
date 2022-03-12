@@ -21,7 +21,7 @@ void mqttSendStatus()
   {
     char *topic_data;
     const char *json = "/json_data";
-    topic_data = MQTTCreateHostName(cfg.config.MQTTTopic, json); // append string two to the result.
+    topic_data = appendChartoChar(cfg.config.MQTTTopic, json); // append string two to the result.
     mqttClient.publish(topic_data, JSONmessage, n, true);
     SERIAL_DEBUG_LNF("Sending MQTT package: %s", Doc.as<String>().c_str());
   }
@@ -107,13 +107,13 @@ int HMSMqtt::ReConnect() // TODO:Call this in the Loop pinned to task for core 0
         // Subscribe
         char *topic_sub;
         const char *led = "/LED";
-        topic_sub = MQTTCreateHostName(cfg.config.MQTTTopic, led); // append string two to the result.
+        topic_sub = appendChartoChar(cfg.config.MQTTTopic, led); // append string two to the result.
         mqttClient.subscribe(topic_sub);
 
         // Publish
         char *topic_pub;
         const char *test = "/test";
-        topic_pub = MQTTCreateHostName(cfg.config.MQTTTopic, test); // append string two to the result.
+        topic_pub = appendChartoChar(cfg.config.MQTTTopic, test); // append string two to the result.
         mqttClient.publish(topic_pub, "hello world");
         return 1;
       }
@@ -230,7 +230,7 @@ void HMSMqtt::RunMqttService()
       char *mqttSetTopicS = NULL;
       heapStr(&mqttSetTopicS, "~");
       char *setTopic = NULL;
-      heapStr(&setTopic, MQTTCreateHostName(mqttSetTopicS, cfg.config.MQTTTopic));
+      heapStr(&setTopic, appendChartoChar(mqttSetTopicS, cfg.config.MQTTTopic));
       DynamicJsonDocument JSONencoder(4096);
       JSONencoder["~"] = cfg.config.MQTTTopic,
       JSONencoder["name"] = cfg.config.MQTTDeviceName,
@@ -254,7 +254,7 @@ void HMSMqtt::RunMqttService()
 
       size_t n = measureJson(JSONencoder);
       char *mqttConfigTopic = NULL;
-      heapStr(&mqttConfigTopic, MQTTCreateHostName("/config", cfg.config.MQTTTopic));
+      heapStr(&mqttConfigTopic, appendChartoChar("/config", cfg.config.MQTTTopic));
       bool publish = mqttClient.beginPublish(mqttConfigTopic, n, true);
       if (publish == true)
       {

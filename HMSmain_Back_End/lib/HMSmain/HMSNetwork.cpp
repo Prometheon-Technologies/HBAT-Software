@@ -67,7 +67,11 @@ bool HMSnetwork::SetupNetworkStack()
     SSID = cfg.readFile(SPIFFS, ssidPath);
     SERIAL_DEBUG_LN(SSID);
     PASS = cfg.readFile(SPIFFS, passPath);
-    SERIAL_DEBUG_LN(PASS); // FIXME: REMOVE BEFORE FINAL BUILD
+    if (!PRODUCTION)
+    {
+      // print it on the serial monitor
+      SERIAL_DEBUG_LN(PASS);
+    }
 
     ntptime = cfg.readFile(SPIFFS, ntptimePath);
     ntptimeoffset = cfg.readFile(SPIFFS, ntptimeoffsetPath);
@@ -257,13 +261,14 @@ void HMSnetwork::SetupWebServer()
     // generate the digest (hex encoding) of our hash
     char *md5str = MD5::make_digest(hash, 16);
 
-    // print it on the serial monitor
     if (!PRODUCTION)
     {
-      // do development stuff
+      // print it on the serial monitor
       SERIAL_DEBUG_LN("[INFO]: MD5 HASH of MAC ADDRESS: ");
       SERIAL_DEBUG_ADD(md5str);
+      SERIAL_DEBUG_LN("");
     }
+    
     // NULL sets an open Access Point
     WiFi.softAP("HMS-WIFI", md5str); // MAC address is used as password for the AP - Unique to each device - MD5 hash of MAC address
 

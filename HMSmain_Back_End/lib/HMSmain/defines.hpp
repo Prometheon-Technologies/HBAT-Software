@@ -29,7 +29,6 @@
 #include <HMS.hpp>
 #include <Humidity.hpp>
 #include <celltemp.hpp>
-#include <HMSmqtt.hpp>
 #include <ArduinoJson.h>
 #include <strTools.h>
 // Humidity Sensors
@@ -44,7 +43,10 @@
 #include <HMSnetwork.hpp>
 
 #define LED_BUILTIN 2
-#define DEFAULT_HOSTNAME "HBAT_HMS" // default hostname
+
+#ifdef DEFAULT_HOSTNAME
+#pragma message STR(DEFAULT_HOSTNAME)
+#endif
 
 #ifdef PRODUCTION
 #pragma message STR(PRODUCTION)
@@ -55,6 +57,7 @@
 
 /*######################## MQTT Configuration ########################*/
 #ifdef ENABLE_MQTT_SUPPORT
+#pragma message STR(ENABLE_MQTT_SUPPORT)
 // these are deafault settings which can be changed in the web interface "settings" page
 #define MQTT_ENABLED 1
 #define MQTT_SECURE_ENABLED 0
@@ -65,6 +68,7 @@
 #define MQTT_MAX_TRANSFER_SIZE 1024
 // MQTT includes
 #include <PubSubClient.h>
+#include <HMSmqtt.hpp>
 
 extern PubSubClient mqttClient;
 
@@ -93,11 +97,6 @@ extern CellTemp Cell_Temp;
 extern StaticJsonDocument<1000> Doc;
 extern FrontEnd Front_End;
 extern WiFiClient espClient;
-
-
-// Tasks for the Task Scheduler
-/* extern TaskHandle_t runserver;
-extern TaskHandle_t accumulatedata; */
 
 // Variables
 extern const char *mqtt_mDNS_clientId;

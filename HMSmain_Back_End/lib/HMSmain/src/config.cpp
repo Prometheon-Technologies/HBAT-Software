@@ -1,4 +1,4 @@
-#include <config.hpp>
+#include "config.hpp"
 
 // save last "timestamp" the config has been saved
 auto last_config = 0;

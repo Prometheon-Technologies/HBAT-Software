@@ -5,7 +5,7 @@
 
 #ifndef HUMIDITY_h
 #define HUMIDITY_h
-#include <defines.hpp>
+#include "defines.hpp"
 #include <Adafruit_SHT31.h>
 
 extern Adafruit_SHT31 sht31;

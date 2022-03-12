@@ -1,5 +1,5 @@
 /*
- config.h - HBAT library
+ config.hpp - HBAT library
  Copyright (c) 2021 Zacariah Austin Heim.
 */
 

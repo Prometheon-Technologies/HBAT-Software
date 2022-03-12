@@ -5,7 +5,7 @@
 
 #ifndef HMS_h
 #define HMS_h
-#include <defines.hpp>
+#include "defines.hpp"
 
 class HMS
 {

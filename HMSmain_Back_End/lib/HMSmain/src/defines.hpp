@@ -4,33 +4,32 @@
  */
 #ifndef DEFINES_hpp
 #define DEFINES_hpp
-#define VERSION "0.0.1"
-#define VERSION_DATE "2021-12-17"
 #if !(defined(ESP32))
 #error This code is intended to run on the ESP32 platform! Please check your Board setting.
 #endif
 #include <Arduino.h>
-#include <globaldebug.hpp>
+#include "globaldebug.hpp"
 #include <stdio.h>  /* printf, NULL */
 #include <stdlib.h> /* strtoul */
-#include <timedtasks.hpp>
+#include "timedtasks.hpp"
 #include <MD5.h>
 
 // IO
 #include <Wire.h>
-#include <i2cscan.hpp>
+#include "i2cscan.hpp"
 // FrontEnd
-#include <FrontEnd.hpp>
+#include "FrontEnd.hpp"
 // File System
 #include <SPIFFS.h>
 // Data stack
-#include <AccumulateData.hpp>
+#include "AccumulateData.hpp"
 #include <ACS712.h>
-#include <HMS.hpp>
-#include <Humidity.hpp>
-#include <celltemp.hpp>
+#include "HMS.hpp"
+#include "Humidity.hpp"
+#include "celltemp.hpp"
 #include <ArduinoJson.h>
 #include <strTools.h>
+#include "config.hpp"               /* data Struct */
 // Humidity Sensors
 //#include <sfm3003.hpp>
 
@@ -40,7 +39,7 @@
 #include <DallasTemperature.h>
 
 // wifi definitions
-#include <HMSnetwork.hpp>
+#include "HMSnetwork.hpp"
 
 #define LED_BUILTIN 2
 
@@ -53,7 +52,6 @@
 #endif
 
 #define maxCellCount 10             // max number of cells
-#include <config.hpp>               /* data Struct */
 
 /*######################## MQTT Configuration ########################*/
 #ifdef ENABLE_MQTT_SUPPORT
@@ -68,7 +66,7 @@
 #define MQTT_MAX_TRANSFER_SIZE 1024
 // MQTT includes
 #include <PubSubClient.h>
-#include <HMSmqtt.hpp>
+#include "HMSmqtt.hpp"
 
 extern PubSubClient mqttClient;
 

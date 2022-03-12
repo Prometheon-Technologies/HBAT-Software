@@ -5,7 +5,7 @@
 
 #ifndef CELLTEMP_h
 #define CELLTEMP_h
-#include <defines.hpp>
+#include "defines.hpp"
 
 class CellTemp
 {

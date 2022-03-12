@@ -4,7 +4,7 @@
 #include <blinker.h>
 /* #include <iostream>     // std::cout
 #include <functional>   // std::bind */
-#include <defines.hpp> // std::thread
+#include "defines.hpp" // std::thread
 
 class TimedTasks : public timeObj,
                    public idler

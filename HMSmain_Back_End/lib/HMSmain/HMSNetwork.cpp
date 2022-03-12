@@ -54,67 +54,6 @@ HMSnetwork::~HMSnetwork()
   SERIAL_DEBUG_LN("[INFO]: Destroying network object");
 }
 
-// Read File from SPIFFS
-String HMSnetwork::readFile(fs::FS &fs, const char *path)
-{
-  SERIAL_DEBUG_ADDF("Reading file: %s\r\n", path);
-
-  File file = fs.open(path);
-  if (!file || file.isDirectory())
-  {
-    SERIAL_DEBUG_LN("[INFO]: Failed to open file for reading");
-    return String();
-  }
-
-  String fileContent;
-  while (file.available())
-  {
-    fileContent = file.readStringUntil('\n');
-    break;
-  }
-  return fileContent;
-}
-
-// Write file to SPIFFS
-void HMSnetwork::writeFile(fs::FS &fs, const char *path, const char *message)
-{
-  SERIAL_DEBUG_ADDF("Writing file: %s\r\n", path);
-  delay(10);
-
-  File file = fs.open(path, FILE_WRITE);
-  if (!file)
-  {
-    SERIAL_DEBUG_LN("[INFO]: failed to open file for writing");
-    return;
-  }
-  if (file.print(message))
-  {
-    SERIAL_DEBUG_LN("[INFO]: file written");
-  }
-  else
-  {
-    SERIAL_DEBUG_LN("[INFO]: file write failed");
-  }
-}
-
-// Replaces placeholder with LED state value
-String processor(const String &var)
-{
-  if (var == "STATE")
-  {
-    if (digitalRead(LED_BUILTIN == HIGH))
-    {
-      ledState = "ON";
-    }
-    else
-    {
-      ledState = "OFF";
-    }
-    return ledState;
-  }
-  return String();
-}
-
 bool HMSnetwork::SetupNetworkStack()
 {
   if (!cfg.loadConfig())
@@ -123,45 +62,43 @@ bool HMSnetwork::SetupNetworkStack()
   }
   else
   {
-    SERIAL_DEBUG_LN("[INFO]: Config loaded");
+    SERIAL_DEBUG_LN("[INFO]: Loaded config");
+    // Load values saved in SPIFFS
+    SSID = cfg.readFile(SPIFFS, ssidPath);
+    SERIAL_DEBUG_LN(SSID);
+    PASS = cfg.readFile(SPIFFS, passPath);
+    SERIAL_DEBUG_LN(PASS); // FIXME: REMOVE BEFORE FINAL BUILD
+
+    ntptime = cfg.readFile(SPIFFS, ntptimePath);
+    ntptimeoffset = cfg.readFile(SPIFFS, ntptimeoffsetPath);
+
+    mdns = cfg.readFile(SPIFFS, mdnsPath);
+    dhcpcheck = cfg.readFile(SPIFFS, dhcpcheckPath);
+
+    SERIAL_DEBUG_LN(mdns);
+    SERIAL_DEBUG_LN(dhcpcheck);
+
+    // Save loaded values to config struct
+    heapStr(&cfg.config.WIFISSID, StringtoChar(SSID));
+    heapStr(&cfg.config.WIFIPASS, StringtoChar(PASS));
+    heapStr(&cfg.config.NTPTIME, StringtoChar(ntptime));
+    heapStr(&cfg.config.NTPTIMEOFFSET, StringtoChar(ntptimeoffset));
+    heapStr(&cfg.config.MDNS, StringtoChar(mdns));
+    heapStr(&cfg.config.DHCPCHECK, StringtoChar(dhcpcheck));
   }
-
-  // Load values saved in SPIFFS
-
-  SSID = readFile(SPIFFS, ssidPath);
-  SERIAL_DEBUG_LN(SSID);
-  PASS = readFile(SPIFFS, passPath);
-  SERIAL_DEBUG_LN(PASS); // FIXME: REMOVE BEFORE FINAL BUILD
-
-  ntptime = readFile(SPIFFS, ntptimePath);
-  ntptimeoffset = readFile(SPIFFS, ntptimeoffsetPath);
-
-  mdns = readFile(SPIFFS, mdnsPath);
-  dhcpcheck = readFile(SPIFFS, dhcpcheckPath);
-
-  SERIAL_DEBUG_LN(mdns);
-  SERIAL_DEBUG_LN(dhcpcheck);
-
-  // Save loaded values to config struct
-  heapStr(&cfg.config.WIFISSID, StringtoChar(SSID));
-  heapStr(&cfg.config.WIFIPASS, StringtoChar(PASS));
-  heapStr(&cfg.config.NTPTIME, StringtoChar(ntptime));
-  heapStr(&cfg.config.NTPTIMEOFFSET, StringtoChar(ntptimeoffset));
-  heapStr(&cfg.config.MDNS, StringtoChar(mdns));
-  heapStr(&cfg.config.DHCPCHECK, StringtoChar(dhcpcheck));
 
   if (cfg.config.WIFISSID[0] == '\0' || cfg.config.WIFIPASS[0] == '\0')
   {
     SERIAL_DEBUG_LN("[INFO]: No SSID or password has been set.");
     SERIAL_DEBUG_LN("[INFO]: Please configure the Wifi Manager by scanning the QR code on your device.");
-    SERIAL_DEBUG_LN("[INFO]: ");
+    SERIAL_DEBUG_LN("");
     return false;
   }
   else
   {
     SERIAL_DEBUG_LN("[INFO]: Configured SSID: ");
-    SERIAL_DEBUG_LN(cfg.config.WIFISSID);
-    SERIAL_DEBUG_LN("[INFO]: ");
+    SERIAL_DEBUG_ADD(cfg.config.WIFISSID);
+    SERIAL_DEBUG_LN("");
     WiFi.mode(WIFI_STA);
     WiFi.disconnect(); // Disconnect from WiFi AP if connected
     if (dhcpcheck == "on")
@@ -196,7 +133,6 @@ bool HMSnetwork::SetupNetworkStack()
       return true;
     }
   }
-  return false;
 }
 
 void HMSnetwork::SetupWebServer()
@@ -222,7 +158,7 @@ void HMSnetwork::SetupWebServer()
             SERIAL_DEBUG_ADD("SSID set to: ");
             SERIAL_DEBUG_LN(ssID);
             // Write file to save value
-            writeFile(SPIFFS, ssidPath, ssID.c_str());
+            cfg.writeFile(SPIFFS, ssidPath, ssID.c_str());
           }
           // HTTP POST pass value
           if (p->name() == "apPass") {
@@ -231,13 +167,13 @@ void HMSnetwork::SetupWebServer()
             SERIAL_DEBUG_ADD("Password set to: ");
             SERIAL_DEBUG_LN(passWord);
             // Write file to save value
-            writeFile(SPIFFS, passPath, passWord.c_str());
+            cfg.writeFile(SPIFFS, passPath, passWord.c_str());
           }
           SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
         }
       }
       request->send(200, "text/plain", "Done. ESP will restart and connect to your router. To access it go to IP address: " + String(cfg.config.clientIP));
-      delay(3000);
+      delay(30000);
       ESP.restart(); });
 
     // Route to set GPIO state to LOW
@@ -319,13 +255,15 @@ void HMSnetwork::SetupWebServer()
     unsigned char *hash = MD5::make_hash(macAddr);
 
     // generate the digest (hex encoding) of our hash
-
     char *md5str = MD5::make_digest(hash, 16);
 
-    // print it on our serial monitor
-    SERIAL_DEBUG_ADD("[INFO]: MD5 HASH of MAC ADDRESS: ");
-    SERIAL_DEBUG_LN(md5str);
-
+    // print it on the serial monitor
+    if (!PRODUCTION)
+    {
+      // do development stuff
+      SERIAL_DEBUG_LN("[INFO]: MD5 HASH of MAC ADDRESS: ");
+      SERIAL_DEBUG_ADD(md5str);
+    }
     // NULL sets an open Access Point
     WiFi.softAP("HMS-WIFI", md5str); // MAC address is used as password for the AP - Unique to each device - MD5 hash of MAC address
 
@@ -357,7 +295,7 @@ void HMSnetwork::SetupWebServer()
             SERIAL_DEBUG_ADD("SSID set to: ");
             SERIAL_DEBUG_LN(ssID);
             // Write file to save value
-            writeFile(SPIFFS, ssidPath, ssID.c_str());
+            cfg.writeFile(SPIFFS, ssidPath, ssID.c_str());
           }
           // HTTP POST pass value
           if (p->name() == PARAM_INPUT_2) {
@@ -366,7 +304,7 @@ void HMSnetwork::SetupWebServer()
             SERIAL_DEBUG_ADD("Password set to: ");
             SERIAL_DEBUG_LN(passWord);
             // Write file to save value
-            writeFile(SPIFFS, passPath, passWord.c_str());
+            cfg.writeFile(SPIFFS, passPath, passWord.c_str());
           }
           SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
         }
@@ -454,6 +392,7 @@ int HMSnetwork::DiscovermDNSBroker()
       }
       else
       {
+        int mqttPort;
         // Found one or more MQTT service - use the first one.
         SERIAL_DEBUG_LN("[INFO]: [OK]");
         mqttServer = MDNS.IP(0);
@@ -577,7 +516,7 @@ bool HMSnetwork::connectToApWithFailToStation()
   SERIAL_DEBUG_LN(cfg.config.WIFIPASS);
 
   WiFi.mode(WIFI_STA);
-  if (cfg.config.WIFISSID == "")
+  if (cfg.config.WIFISSID[0] == '\0')
   {
     WiFi.reconnect();
   }

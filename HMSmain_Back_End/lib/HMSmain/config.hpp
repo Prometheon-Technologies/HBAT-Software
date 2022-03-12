@@ -64,7 +64,9 @@ public:
     void setWiFiConf(String ssid, String password);
     void InitDataStruct();
     void CreateDefaultConfig();
-    void initSPIFFS();
+    bool initSPIFFS();
+    String readFile(fs::FS &fs, const char *path);
+    void writeFile(fs::FS &fs, const char *path, const char *message);
     configData_t config;
     configData_t default_cfg;
 

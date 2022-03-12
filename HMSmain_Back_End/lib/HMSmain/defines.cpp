@@ -2,6 +2,7 @@
 
 // Variables for MQTT
 
+#ifdef ENABLE_MQTT_SUPPORT
 const char *MQTT_TOPIC = "hms/data/";
 const String HOMEASSISTANT_MQTT_HOSTNAME = "homeassistant.local";
 const String MQTT_HOSTNAME = "hbat.mqtt";
@@ -11,7 +12,7 @@ const String MQTT_HOMEASSISTANT_TOPIC_SET = "/set";                  // MQTT Top
 const String MQTT_HOMEASSISTANT_TOPIC = "homeassistant/HBAT/data";   // MQTT Topic to Publish to for state and config (Home Assistant);
 String MQTT_DEVICE_NAME = "HBAT_HMS" + MQTT_UNIQUE_IDENTIFIER; // MQTT Topic to Publish to for state and config (Any MQTT Broker)
 static bool mqttProcessing = false;
-
+#endif
 /*###################### MQTT Configuration END ######################*/
 
 // define externalized classes
@@ -26,25 +27,17 @@ TaskHandle_t runserver;
 TaskHandle_t accumulatedata; */
 
 // Variables
-const char* mqtt_mDNS_clientId = StringtoChar(MQTT_HOSTNAME);
+const char* mqtt_mDNS_clientId = StringtoChar(DEFAULT_HOSTNAME);
 char mDNS_hostname[4] = {'h','b' ,'a' ,'t'};
-
-int mqttPort;
 
 int period = 500;
 unsigned long time_now = 0;
 bool Charge_State;
 //Wifi Variables
-// Set these to your desired credentials.
-char *ssid = "HBAT_HMS";
-char *password = "hbathbat";
 bool wifiMangerPortalRunning = false;
 bool wifiConnected = false;
 
-// IO
-
 // Globally available functions
-
 char *StringtoChar(String inputString)
 {
   char *outputString;
@@ -54,7 +47,7 @@ char *StringtoChar(String inputString)
   return outputString;
 }
 
-char* MQTTCreateHostName(const char* hostname, const char* def_host)
+char* appendChartoChar(const char* hostname, const char* def_host)
 {
   // create hostname
   int numBytes = strlen(hostname ) + strlen(def_host) + 1; // +1 for the null terminator | allocate a buffer of the required size

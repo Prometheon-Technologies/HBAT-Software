@@ -99,17 +99,75 @@ void Config::CreateDefaultConfig()
     config.NTPTIMEOFFSET = NULL;
     config.MDNS = NULL;
     config.DHCPCHECK = NULL;
+    for (int i = 0; i < 5; i++)
+    {
+        config.relays[i] = false;
+    }
+    config.stack_humidity = 0;
+    config.stack_temp = 0;
+    config.stack_voltage = 0;
+    for (int i = 0; i < 10; i++)
+    {
+        config.cell_temp[i] = 0;
+        config.cell_voltage[i] = 0;
+    }
 }
 
 // Initialize SPIFFS
-void Config::initSPIFFS()
+bool Config::initSPIFFS()
 {
-  if (!SPIFFS.begin(true))
+  if (!SPIFFS.begin(false))
   {
     Serial.println("An error has occurred while mounting SPIFFS");
+    return false;
   }
   Serial.println("SPIFFS mounted successfully");
+  return true;
 }
+
+// Read File from SPIFFS
+String Config::readFile(fs::FS &fs, const char *path)
+{
+  SERIAL_DEBUG_ADDF("Reading file: %s\r\n", path);
+
+  File file = fs.open(path);
+  if (!file || file.isDirectory())
+  {
+    SERIAL_DEBUG_LN("[INFO]: Failed to open file for reading");
+    return String();
+  }
+
+  String fileContent;
+  while (file.available())
+  {
+    fileContent = file.readStringUntil('\n');
+    break;
+  }
+  return fileContent;
+}
+
+// Write file to SPIFFS
+void Config::writeFile(fs::FS &fs, const char *path, const char *message)
+{
+  SERIAL_DEBUG_ADDF("Writing file: %s\r\n", path);
+  delay(10);
+
+  File file = fs.open(path, FILE_WRITE);
+  if (!file)
+  {
+    SERIAL_DEBUG_LN("[INFO]: failed to open file for writing");
+    return;
+  }
+  if (file.print(message))
+  {
+    SERIAL_DEBUG_LN("[INFO]: file written");
+  }
+  else
+  {
+    SERIAL_DEBUG_LN("[INFO]: file write failed");
+  }
+}
+
 
 bool Config::loadConfig()
 {

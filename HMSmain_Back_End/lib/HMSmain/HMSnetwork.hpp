@@ -33,11 +33,8 @@ public:
     void loadConfig();
     void SetupServer();
     void CheckNetworkLoop();
-    void writeFile(fs::FS &fs, const char * path, const char * message);
     void SetupWifiScan();
     bool LoopWifiScan();
-    String readFile(fs::FS &fs, const char *path);
-    //String processor(const String& var);
 
     // variables
     int maxVoltage;

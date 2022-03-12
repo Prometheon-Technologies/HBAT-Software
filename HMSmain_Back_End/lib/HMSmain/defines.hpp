@@ -45,7 +45,11 @@
 
 #define LED_BUILTIN 2
 #define DEFAULT_HOSTNAME "HBAT_HMS" // default hostname
-#define ENABLE_MQTT_SUPPORT 0       // allows integration in homeassistant/googlehome/mqtt
+
+#ifdef PRODUCTION
+#pragma message STR(PRODUCTION)
+#endif
+
 #define maxCellCount 10             // max number of cells
 #include <config.hpp>               /* data Struct */
 
@@ -61,7 +65,7 @@
 #define MQTT_MAX_TRANSFER_SIZE 1024
 // MQTT includes
 #include <PubSubClient.h>
-extern WiFiClient espClient;
+
 extern PubSubClient mqttClient;
 
 // Variables for MQTT
@@ -74,7 +78,6 @@ extern const String MQTT_HOMEASSISTANT_TOPIC_SET; // MQTT Topic to subscribe to 
 extern const String MQTT_HOMEASSISTANT_TOPIC;     // MQTT Topic to Publish to for state and config (Home Assistant);
 extern String MQTT_DEVICE_NAME;                   // MQTT Topic to Publish to for state and config (Any MQTT Broker)
 extern bool mqttProcessing;
-
 #endif
 /*###################### MQTT Configuration END ######################*/
 
@@ -89,6 +92,7 @@ extern Humidity Hum;
 extern CellTemp Cell_Temp;
 extern StaticJsonDocument<1000> Doc;
 extern FrontEnd Front_End;
+extern WiFiClient espClient;
 
 
 // Tasks for the Task Scheduler
@@ -99,22 +103,15 @@ extern TaskHandle_t accumulatedata; */
 extern const char *mqtt_mDNS_clientId;
 extern char mDNS_hostname[4];
 
-extern int mqttPort;
-
 extern int period;
 extern unsigned long time_now;
 extern bool Charge_State;
 // Wifi Variables
-//  Set these to your desired credentials.
-extern char *ssid;
-extern char *password;
 extern bool wifiMangerPortalRunning;
 extern bool wifiConnected;
 
-// IO
-
 // Globally available functions
 char *StringtoChar(String inputString);
-char *MQTTCreateHostName(const char *hostname, const char *def_host);
+char *appendChartoChar(const char *hostname, const char *def_host);
 
 #endif

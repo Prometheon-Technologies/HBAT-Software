@@ -1,6 +1,6 @@
 #include <WiFiClientSecure.h>
 #include <Update.h>
-#include <BintrayClient.h>
+#include <BintrayClient.hpp>
 #include "SecureOTA.hpp"
 
 const BintrayClient bintray(BINTRAY_USER, BINTRAY_REPO, BINTRAY_PACKAGE);
@@ -56,7 +56,7 @@ void processOTAUpdate(const String &version)
     String prevHost = currentHost;
 
     WiFiClientSecure client;
-    client.setCACert(bintray.getCertificate(currentHost));
+    client.setCACert(bintray.getUserCertificate(currentHost));
 
     if (!client.connect(currentHost.c_str(), port))
     {
@@ -70,7 +70,7 @@ void processOTAUpdate(const String &version)
         if (currentHost != prevHost)
         {
             client.stop();
-            client.setCACert(bintray.getCertificate(currentHost));
+            client.setCACert(bintray.getUserCertificate(currentHost));
             if (!client.connect(currentHost.c_str(), port))
             {
                 Serial.println("Redirect detected! Cannot connect to " + currentHost + " for some reason!");

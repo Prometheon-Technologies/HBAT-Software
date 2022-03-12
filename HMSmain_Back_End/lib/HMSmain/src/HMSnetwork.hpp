@@ -7,6 +7,7 @@
 #define HMSNETWORK_hpp
 
 #include "defines.hpp"
+#include "SecureOTA.hpp"
 #include <ESPmDNS.h>
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>

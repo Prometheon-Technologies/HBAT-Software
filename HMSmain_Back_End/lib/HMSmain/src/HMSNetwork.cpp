@@ -23,6 +23,9 @@ const char *ntptimePath = "/ntptime.txt";
 const char *ntptimeoffsetPath = "/ntptimeoffset.txt";
 String mdnsdotlocalurl = "HMSBAT";
 
+const uint16_t OTA_CHECK_INTERVAL = 3000; // ms
+uint32_t _lastOTACheck = 0;
+
 // char* create_mDNS_hostname = StringtoChar(MQTTCreateHostName(MQTT_HOSTNAME, ".local"));
 
 String SSID;
@@ -542,7 +545,7 @@ bool HMSnetwork::connectToApWithFailToStation()
       WiFi.mode(WIFI_AP);
       // You can remove the password parameter if you want the AP to be open.
       SERIAL_DEBUG_ADD("Wifi Connect Failed. \r\nStarting AP. \r\nAP IP address: ");
-      WiFi.softAP("HMS-BAT", "hbathbat");
+      WiFi.softAP(WIFI_SSID, WIFI_PASS);
       SERIAL_DEBUG_LN(WiFi.softAPIP());
       return false;
       break;
@@ -688,9 +691,6 @@ bool HMSnetwork::LoopWifiScan()
   delay(5000);
   return true;
 }
-
-const uint16_t OTA_CHECK_INTERVAL = 3000; // ms
-uint32_t _lastOTACheck = 0;
 
 void HMSnetwork::setupOTA()
 {

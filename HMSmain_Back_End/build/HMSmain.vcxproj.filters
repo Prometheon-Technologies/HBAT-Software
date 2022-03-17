@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\zacar\Documents\GitHub\HBAT-Software\HMSmain_Back_End\HMSmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\zacar\Documents\GitHub\HBAT-Software\HMSmain_Back_End\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{357635F3-4FA9-3969-98CE-B2AACC948998}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

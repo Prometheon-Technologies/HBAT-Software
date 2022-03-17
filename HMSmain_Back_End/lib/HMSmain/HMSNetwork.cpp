@@ -521,25 +521,6 @@ void HMSnetwork::loadConfig()
   SERIAL_DEBUG_LNF("Loaded config: hostname %s", cfg.config.hostname);
 }
 
-// These are old functions from previous websocket implementation
-// but we keep then as this could be still used in the future
-/* void broadcastInt(String name, uint8_t value)
-{
-// String json = "{\"name\":\"" + name + "\",\"value\":" + String(value) + "}";
-#ifdef ENABLE_MQTT_SUPPORT
-  MqttData.mqttSendStatus();
-#endif
-}
-
-void broadcastString(String name, String value)
-{
-// String json = "{\"name\":\"" + name + "\",\"value\":\"" + String(value) + "\"}";
-#ifdef ENABLE_MQTT_SUPPORT
-  MqttData.mqttSendStatus();
-#endif
-}
- */
-
 void HMSnetwork::SetupServer()
 {
   SERIAL_DEBUG_EOL;

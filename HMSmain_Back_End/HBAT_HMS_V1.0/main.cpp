@@ -47,9 +47,9 @@ void loop()
   delay(100);
   if (WiFi.status() == WL_CONNECTED)
   {
-      network.SetupmDNSLoop();
-      HMSmqtt.MQTTLoop();
-      //Front_End.Loop();
-      HMSmqtt.RunMqttService();
+    network.SetupmDNSLoop();
+    HMSmqtt.MQTTLoop();
+    // Front_End.Loop();
+    HMSmqtt.RunMqttService();
   }
 }

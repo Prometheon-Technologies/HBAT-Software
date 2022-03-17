@@ -1,11 +1,9 @@
 /*
- defines.hpp - Purbright library
+ defines.hpp - HBAT library
  Copyright (c) 2021 Zacariah Austin Heim.
  */
 #ifndef DEFINES_hpp
 #define DEFINES_hpp
-#define VERSION "0.0.1"
-#define VERSION_DATE "2021-12-17"
 #if !(defined(ESP32))
 #error This code is intended to run on the ESP32 platform! Please check your Board setting.
 #endif
@@ -43,7 +41,6 @@
 // wifi definition
 #include <AsyncElegantOTA.h>
 #include <Wifi.h>
-#include <ESPAsync_WiFiManager.h>
 #include <HMSnetwork.hpp>
 #include <ESPmDNS.h>
 
@@ -98,7 +95,6 @@ extern StaticJsonDocument<1000> Doc;
 extern Adafruit_SHT31 sht31;
 extern Adafruit_SHT31 sht31_2;
 extern FrontEnd Front_End;
-extern DNSServer dnsServer;
 
 // Tasks for the Task Scheduler
 /* extern TaskHandle_t runserver;

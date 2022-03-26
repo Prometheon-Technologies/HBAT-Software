@@ -144,6 +144,13 @@ struct data_arrays
 };
 ```
 
+```cpp
+#define LARGE_NUMBER 12333
+void my_delay(void) {
+    for (volatile long count = LARGE_NUMBER ; count > 0; count--) ;
+}
+```
+
 ### C
 
 ```c

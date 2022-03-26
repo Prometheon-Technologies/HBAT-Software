@@ -271,7 +271,7 @@ void HMSnetwork::SetupWebServer()
       SERIAL_DEBUG_ADD(md5str);
       SERIAL_DEBUG_LN("");
     }
-    
+
     // NULL sets an open Access Point
     WiFi.softAP("HMS-WIFI", md5str); // MAC address is used as password for the AP - Unique to each device - MD5 hash of MAC address
 
@@ -710,7 +710,8 @@ void HMSnetwork::setupOTA()
 
 void HMSnetwork::loopOTA()
 {
-  if ((millis() - OTA_CHECK_INTERVAL) > _lastOTACheck) {
+  if ((millis() - OTA_CHECK_INTERVAL) > _lastOTACheck)
+  {
     _lastOTACheck = millis();
     checkFirmwareUpdates();
   }

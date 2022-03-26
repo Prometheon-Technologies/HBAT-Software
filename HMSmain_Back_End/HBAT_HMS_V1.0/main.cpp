@@ -12,7 +12,7 @@ void setup()
     Cell_Temp.SetupSensors();
     Hum.SetupPID();
     SERIAL_DEBUG_LN("HMS booting - please wait");
-    Serial.println("Version: " + String(VERSION) + " " + String(VERSION_DATE));
+    Serial.println("Version: " + String(VERSION) + " " + String(__DATE__) + " " + String(__TIME__));
     Serial.println("");
     Serial.println("Starting...");
     // Setup the network stack
@@ -49,7 +49,7 @@ void loop()
     {
         network.SetupmDNSLoop();
         HMSmqtt.MQTTLoop();
-        //Front_End.Loop();
+        // Front_End.Loop();
         HMSmqtt.RunMqttService();
     }
 }

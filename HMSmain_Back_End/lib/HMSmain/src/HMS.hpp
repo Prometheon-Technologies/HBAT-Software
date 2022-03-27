@@ -21,13 +21,12 @@ public:
   float readVoltage(int pinnumber);
   float StackVoltage();
   float *readSensAndCondition();
-  String getDeviceID();
   String generateDeviceID();
   char *StringtoChar(String inputString);
 
 private:
 };
-#if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_SCANNER)
+
 extern HMS HMSmain;
-#endif
+
 #endif

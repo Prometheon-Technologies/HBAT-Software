@@ -12,7 +12,6 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncTCP.h>
-#include <AsyncElegantOTA.h>
 
 extern AsyncWebServer server;
 extern WiFiClient espClient;
@@ -40,9 +39,9 @@ public:
     void loopOTA();
 
     // variables
+private:
     int maxVoltage;
     int maxTemp;
-private:
 };
 
 extern HMSnetwork network;

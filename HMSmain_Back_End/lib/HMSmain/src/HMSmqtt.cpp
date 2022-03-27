@@ -280,5 +280,6 @@ void HMSMqtt::RunMqttService()
       SERIAL_DEBUG_ADDF("failed with state %s\n", mqttClient.state());
     }
   }
+}
 
-  HMSMqtt HMSMqtt;
+HMSMqtt HMSmqtt;

@@ -11,7 +11,7 @@ const String MQTT_PASS = "";
 const String MQTT_HOMEASSISTANT_TOPIC_SET = "/set";                  // MQTT Topic to subscribe to for changes(Home Assistant)
 const String MQTT_HOMEASSISTANT_TOPIC = "homeassistant/HBAT/data";   // MQTT Topic to Publish to for state and config (Home Assistant);
 String MQTT_DEVICE_NAME = "HBAT_HMS" + MQTT_UNIQUE_IDENTIFIER; // MQTT Topic to Publish to for state and config (Any MQTT Broker)
-static bool mqttProcessing = false;
+bool mqttProcessing = false;
 #endif
 /*###################### MQTT Configuration END ######################*/
 
@@ -19,8 +19,6 @@ static bool mqttProcessing = false;
 
 //Custom Objects
 StaticJsonDocument<1000> Doc;
-Adafruit_SHT31 sht31;
-Adafruit_SHT31 sht31_2;
 
 /* // Tasks for the Task Scheduler
 TaskHandle_t runserver;

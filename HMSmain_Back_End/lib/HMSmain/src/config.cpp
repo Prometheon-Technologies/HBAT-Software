@@ -7,7 +7,7 @@ Config::Config(void)
 {
     last_config_change = false;
     maxVoltage = 24;
-    maxTemp = 100;
+    maxTemp = 120;
 }
 
 Config::~Config(void)
@@ -116,58 +116,57 @@ void Config::CreateDefaultConfig()
 // Initialize SPIFFS
 bool Config::initSPIFFS()
 {
-  if (!SPIFFS.begin(false))
-  {
-    Serial.println("An error has occurred while mounting SPIFFS");
-    return false;
-  }
-  Serial.println("SPIFFS mounted successfully");
-  return true;
+    if (!SPIFFS.begin(false))
+    {
+        Serial.println("An error has occurred while mounting SPIFFS");
+        return false;
+    }
+    Serial.println("SPIFFS mounted successfully");
+    return true;
 }
 
 // Read File from SPIFFS
 String Config::readFile(fs::FS &fs, const char *path)
 {
-  SERIAL_DEBUG_ADDF("Reading file: %s\r\n", path);
+    SERIAL_DEBUG_ADDF("Reading file: %s\r\n", path);
 
-  File file = fs.open(path);
-  if (!file || file.isDirectory())
-  {
-    SERIAL_DEBUG_LN("[INFO]: Failed to open file for reading");
-    return String();
-  }
+    File file = fs.open(path);
+    if (!file || file.isDirectory())
+    {
+        SERIAL_DEBUG_LN("[INFO]: Failed to open file for reading");
+        return String();
+    }
 
-  String fileContent;
-  while (file.available())
-  {
-    fileContent = file.readStringUntil('\n');
-    break;
-  }
-  return fileContent;
+    String fileContent;
+    while (file.available())
+    {
+        fileContent = file.readStringUntil('\n');
+        break;
+    }
+    return fileContent;
 }
 
 // Write file to SPIFFS
 void Config::writeFile(fs::FS &fs, const char *path, const char *message)
 {
-  SERIAL_DEBUG_ADDF("Writing file: %s\r\n", path);
-  delay(10);
+    SERIAL_DEBUG_ADDF("Writing file: %s\r\n", path);
+    delay(10);
 
-  File file = fs.open(path, FILE_WRITE);
-  if (!file)
-  {
-    SERIAL_DEBUG_LN("[INFO]: failed to open file for writing");
-    return;
-  }
-  if (file.print(message))
-  {
-    SERIAL_DEBUG_LN("[INFO]: file written");
-  }
-  else
-  {
-    SERIAL_DEBUG_LN("[INFO]: file write failed");
-  }
+    File file = fs.open(path, FILE_WRITE);
+    if (!file)
+    {
+        SERIAL_DEBUG_LN("[INFO]: failed to open file for writing");
+        return;
+    }
+    if (file.print(message))
+    {
+        SERIAL_DEBUG_LN("[INFO]: file written");
+    }
+    else
+    {
+        SERIAL_DEBUG_LN("[INFO]: file write failed");
+    }
 }
-
 
 bool Config::loadConfig()
 {
@@ -201,7 +200,7 @@ bool Config::loadConfig()
     // use configFile.readString instead.
 
     configFile.readBytes(buf.get(), size);
-    Serial.println("Config file content:");
+    Serial.println(F("Config file content:"));
     Serial.println(buf.get());
 
     // Parse the buffer into an object
@@ -211,13 +210,13 @@ bool Config::loadConfig()
     auto error = deserializeJson(jsonBuffer, buf.get());
     if (error)
     {
-        Serial.println("Failed to parse config file");
+        Serial.println(F("Failed to parse config file"));
         Serial.print(F("deserializeJson() failed with code "));
         Serial.println(error.c_str());
         CreateDefaultConfig();
         return false;
     }
-    
+
     heapStr(&config.hostname, jsonBuffer["hostname"]);
     config.MQTTEnabled = jsonBuffer["MQTTEnabled"];
     heapStr(&config.MQTTPort, jsonBuffer["MQTTPort"]);
@@ -245,7 +244,7 @@ bool Config::loadConfig()
 // trigger a config write/commit
 bool Config::setConfigChanged()
 {
-    Serial.println("Should save config");
+    Serial.println(F("Should save config"));
     last_config_change = true;
     return true;
 }
@@ -255,12 +254,12 @@ bool Config::saveConfig()
     // check if the data in config is different from the data in the file
     if (!last_config_change)
     {
-        Serial.println("Config has not changed");
+        Serial.println(F("Config has not changed"));
         return false;
     }
-    Serial.println("Saving Config");
+    Serial.println(F("Saving Config"));
     // create a json file from the config struct and save it using SPIFFs
-    Serial.println("Writing config");
+    Serial.println(F("Writing config"));
     // create a json file from the config struct
     StaticJsonDocument<1024> jsonConfig;
     JsonObject json = jsonConfig.to<JsonObject>();
@@ -293,7 +292,7 @@ bool Config::saveConfig()
     File configFile = SPIFFS.open("/config.json", "w");
     if (!configFile)
     {
-        Serial.println("Failed to open config file for writing");
+        Serial.println(F("Failed to open config file for writing"));
         return false;
     }
     if (serializeJson(json, configFile) == 0)
@@ -304,7 +303,7 @@ bool Config::saveConfig()
     configFile.print("\r\n");
     configFile.close();
     // end save
-    Serial.println("Config written");
+    Serial.println(F("Config written"));
 
     return true;
 }
@@ -313,8 +312,8 @@ bool Config::updateCurrentData()
 {
     // call to save config if config has changed
     saveConfig();
-    SERIAL_DEBUG_LNF("Heap: %d", system_get_free_heap_size());
-    SERIAL_DEBUG_LN("Updating current data");
+    SERIAL_DEBUG_LNF("Heap: %d", ESP.getFreeHeap());
+    SERIAL_DEBUG_LN(F("Updating current data"));
     return true;
     // update current data
 }
@@ -322,6 +321,8 @@ bool Config::updateCurrentData()
 // overwrite all config settings with "0"
 void Config::resetConfig()
 {
+    CreateDefaultConfig();
+    saveConfig();
 }
 
 bool Config::isValidHostname(char *hostname_to_check, long size)

@@ -7,6 +7,7 @@
 #if !(defined(ESP32))
 #error This code is intended to run on the ESP32 platform! Please check your Board setting.
 #endif
+
 #include <Arduino.h>
 #include "globaldebug.hpp"
 #include <stdio.h>  /* printf, NULL */
@@ -18,9 +19,12 @@
 #include <Wire.h>
 #include "i2cscan.hpp"
 // FrontEnd
+
 #include "FrontEnd.hpp"
+
 // File System
 #include <SPIFFS.h>
+
 // Data stack
 #include "AccumulateData.hpp"
 #include <ACS712.h>
@@ -29,14 +33,12 @@
 #include "celltemp.hpp"
 #include <ArduinoJson.h>
 #include <strTools.h>
-#include "config.hpp"               /* data Struct */
+#include "config.hpp" /* data Struct */
 // Humidity Sensors
 //#include <sfm3003.hpp>
 
 // Temp Sensors
 #include <PID_v1.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
 
 // wifi definitions
 #include "HMSnetwork.hpp"
@@ -51,7 +53,7 @@
 #pragma message STR(PRODUCTION)
 #endif
 
-#define maxCellCount 10             // max number of cells
+#define maxCellCount 10 // max number of cells
 
 /*######################## MQTT Configuration ########################*/
 #ifdef ENABLE_MQTT_SUPPORT
@@ -61,14 +63,11 @@
 #define MQTT_SECURE_ENABLED 0
 #define MQTT_PORT 1883
 #define MQTT_PORT_SECURE 8883
-#define MQTT_UNIQUE_IDENTIFIER HMSmain.getDeviceID() // A Unique Identifier for the device in Homeassistant (MAC Address used by default)
+#define MQTT_UNIQUE_IDENTIFIER HMSmain.generateDeviceID() // A Unique Identifier for the device in Homeassistant (MAC Address used by default)
 #define MQTT_MAX_PACKET_SIZE 1024
 #define MQTT_MAX_TRANSFER_SIZE 1024
 // MQTT includes
-#include <PubSubClient.h>
 #include "HMSmqtt.hpp"
-
-extern PubSubClient mqttClient;
 
 // Variables for MQTT
 extern const char *MQTT_TOPIC;
@@ -84,17 +83,10 @@ extern bool mqttProcessing;
 /*###################### MQTT Configuration END ######################*/
 
 // define externalized classes
-extern AccumulateData accumulatedData;
-
 extern Scanner scanner;
 
 // Custom Objects
-extern HMS HMSmain;
-extern Humidity Hum;
-extern CellTemp Cell_Temp;
 extern StaticJsonDocument<1000> Doc;
-extern FrontEnd Front_End;
-extern WiFiClient espClient;
 
 // Variables
 extern const char *mqtt_mDNS_clientId;

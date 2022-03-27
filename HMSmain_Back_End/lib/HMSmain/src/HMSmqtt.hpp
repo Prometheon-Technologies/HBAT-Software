@@ -3,11 +3,12 @@
  Copyright (c) 2021 Zacariah Austin Heim.
  */
 #pragma once
-#ifndef HMSMQTT_hpp
-#define HMSMQTT_hpp
+#ifndef HMSMQTT_HPP
+#define HMSMQTT_HPP
+#include <PubSubClient.h>
 #include "defines.hpp"
 
-extern PubSubClient mqttClient(espClient);
+extern PubSubClient mqttClient;
 class HMSMqtt
 {
 public:
@@ -30,7 +31,5 @@ public:
 private:
 };
 
-#if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_HMSMQTT)
 extern HMSMqtt HMSmqtt;
-#endif
 #endif

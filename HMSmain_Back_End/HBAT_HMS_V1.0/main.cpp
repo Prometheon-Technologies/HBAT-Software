@@ -1,5 +1,11 @@
 #include <defines.hpp>
 
+/******************************************************************************
+ * Function: Setup Main Loop
+ * Description: This is the setup function for the main loop of the whole program. Use this to setup the main loop.
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
 void setup()
 {
     Serial.begin(115200);
@@ -7,6 +13,8 @@ void setup()
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW);
     timedTasks.SetupTimers();
+    Hum.setupSfm3003();
+    HMSmqtt.MQTTSetup();
     Hum.SetupSensor();
     HMSmain.setupSensor();
     Cell_Temp.SetupSensors();

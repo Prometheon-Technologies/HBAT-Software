@@ -1,7 +1,6 @@
 
 #include "HMSnetwork.hpp"
 
-IPAddress mqttServer;
 AsyncWebServer server(80);
 IPAddress localIP;
 
@@ -610,8 +609,8 @@ void HMSnetwork::SetupServer()
   SERIAL_DEBUG_LNF("PLatformI0 Unix compile time: %s", COMPILE_UNIX_TIME);
   SERIAL_DEBUG_LNF("Project directory: %s", PROJECT_PATH);
   SERIAL_DEBUG_LNF("Version: %s (%s)", VERSION, __DATE__);
-  SERIAL_DEBUG_LNF("Heap: %d", Cell_Temp.getfreeRam());
-  SERIAL_DEBUG_LNF("SDK: %s", system_get_sdk_version());
+  SERIAL_DEBUG_LNF("Heap: %d", ESP.getFreeHeap());
+  SERIAL_DEBUG_LNF("SDK: %s", ESP.getSdkVersion());
   SERIAL_DEBUG_LNF("MAC address: %s", WiFi.macAddress().c_str());
   SERIAL_DEBUG_LNF("CPU Speed: %d MHz", ESP.getCpuFreqMHz());
   SERIAL_DEBUG_LNF("Flash Size: %dKB", ESP.getFlashChipSize());

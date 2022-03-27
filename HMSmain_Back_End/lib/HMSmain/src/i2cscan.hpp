@@ -3,8 +3,8 @@
  Copyright (c) 2021 Zacariah Austin Heim.
  */
 
-#ifndef I2CSCAN_h
-#define I2CSCAN_h
+#ifndef I2CSCAN_HPP
+#define I2CSCAN_HPP
 #include <Arduino.h>
 #include <Wire.h>
 
@@ -17,7 +17,6 @@ public:
     void BeginScan();
     /* private: */
 };
-#if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_HMSMQTT)
+
 extern Scanner Scan;
-#endif
 #endif

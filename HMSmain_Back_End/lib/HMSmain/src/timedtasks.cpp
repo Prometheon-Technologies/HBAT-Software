@@ -54,7 +54,7 @@ void TimedTasks::Run_Check_DataJSON_5()
   if (ReadTimer2.ding())
   {
     Accumulate_Data.InitAccumulateDataJson();
-    Hum.SFM3003();
+    Hum.loopSFM3003();
     ReadTimer2.start();
   }
 }

@@ -1,4 +1,4 @@
-#include "i2cscan.h"
+#include "i2cscan.hpp"
 
 Scanner::Scanner(void)
 {

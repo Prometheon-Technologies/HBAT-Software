@@ -200,3 +200,5 @@ String HMS::generateDeviceID()
     String deviceID = String(chipId);
     return deviceID;
 }
+
+HMS HMSmain;

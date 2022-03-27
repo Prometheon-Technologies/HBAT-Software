@@ -84,17 +84,6 @@ void CellTemp::SetupSensors()
 }
 
 /******************************************************************************
- * Function: Display Free Heap
- * Description: Get and return the free heap space
- * Parameters: None
- * Return: int - Free heap space
- ******************************************************************************/
-uint32_t CellTemp::getfreeRam()
-{
-    return system_get_free_heap_size();
-}
-
-/******************************************************************************
  * Function: Print Address
  * Description: Print the addresses of the sensors
  * Parameters: DeviceAddress - Address of the sensor
@@ -119,7 +108,7 @@ void CellTemp::printAddress(DeviceAddress deviceAddress)
  ******************************************************************************/
 float *CellTemp::ReadTempSensorData()
 {
-    float *cell_temp_sensor_results = (float *)malloc(sizeof(float) * sensors_count);
+    float *cell_temp_sensor_results = (float *)malloc(sizeof(sensors_count));
     for (int i = 0; i < sensors_count; i++)
     {
         // Search the wire for address

@@ -3,8 +3,10 @@
  Copyright (c) 2021 Zacariah Austin Heim.
  */
 
-#ifndef CELLTEMP_h
-#define CELLTEMP_h
+#ifndef CELLTEMP_HPP
+#define CELLTEMP_HPP
+#include <OneWire.h>
+#include <DallasTemperature.h>
 #include "defines.hpp"
 
 class CellTemp
@@ -12,7 +14,6 @@ class CellTemp
 public:
     CellTemp(void);
     virtual ~CellTemp(void);
-    uint32_t getfreeRam();
     void SetupSensors();
     void readAddresses(DeviceAddress deviceAddress);
     void printAddress(DeviceAddress deviceAddress);

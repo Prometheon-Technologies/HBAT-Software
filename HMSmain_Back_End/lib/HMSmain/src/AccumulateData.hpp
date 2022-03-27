@@ -17,7 +17,6 @@ public:
     // Functions
     AccumulateData();
     virtual ~AccumulateData(void);
-    void SetupMainLoop();
     void InitAccumulateDataJson();
     /* data_arrays AccumulateDataMainLoop(); */
     // Variables

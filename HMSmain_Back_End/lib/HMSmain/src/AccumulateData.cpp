@@ -12,19 +12,6 @@ AccumulateData::~AccumulateData(void)
 }
 
 /******************************************************************************
- * Function: Setup Main Loop
- * Description: This is the setup function for the main loop of the whole program. Use this to setup the main loop.
- * Parameters: None
- * Return: None
- ******************************************************************************/
-void AccumulateData::SetupMainLoop()
-{
-  Hum.setupSfm3003();
-  HMSmqtt.MQTTSetup();
-  // debug("freeMemory()="+freeMemory());
-}
-
-/******************************************************************************
  * Function: Accumulate Data to send from sensors and store in json
  * Description: This function accumulates all sensor data and stores it in the main json data structure.
  * Parameters: None

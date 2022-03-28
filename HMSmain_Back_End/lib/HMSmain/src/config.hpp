@@ -13,7 +13,7 @@ class Config
 public:
     Config();
     virtual ~Config();
-    typedef struct Config_t
+    struct Config_t
     {
         // Variables
         char *hostname;
@@ -54,7 +54,7 @@ public:
         int cell_count_max;
         int flow_rate;
         int flow_rate_sensor_temp;
-    } configData_t;
+    };
 
     void InitAccumulateDataJson();
     bool loadConfig();
@@ -65,7 +65,6 @@ public:
     void resetConfig();
     bool saveConfig();
     bool isValidHostname(char *hostname_to_check, long size);
-    void SetupRelays();
     // parse and set a new hostname to config
     void setHostname(String new_hostname);
     // we can't assing wifiManager.resetSettings(); to reset, somehow it gets called straight away.
@@ -75,10 +74,10 @@ public:
     bool initSPIFFS();
     String readFile(fs::FS &fs, const char *path);
     void writeFile(fs::FS &fs, const char *path, const char *message);
-    configData_t config;
-    configData_t default_cfg;
+    Config_t config;
 
 private:
+    Config_t default_cfg;
     int last_config;
     // save last "timestamp" the config has been saved
     bool last_config_change;

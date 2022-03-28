@@ -16,8 +16,22 @@ void setup()
 
     timedTasks.SetupTimers();
     // Initialize the relay pins
-    cfg.SetupRelays();
-    /* Hum.setupSfm3003();
+    /* int temp[5] = {45, 38, 36, 35, 48};
+    // initialize the Relay pins and set them to off state
+    std::copy(temp, temp + sizeof(temp) / sizeof(temp[0]), cfg.config.relays_pin);
+
+    config.relays_pin[0] = 45;
+    config.relays_pin[1] = 38;
+    config.relays_pin[2] = 36;
+    config.relays_pin[3] = 35;
+    config.relays_pin[4] = 48;
+
+    for (int i = 0; i < sizeof(cfg.config.relays_pin); i++)
+    {
+        pinMode(cfg.config.relays_pin[i], OUTPUT);
+        digitalWrite(cfg.config.relays_pin[i], LOW);
+    }
+    Hum.setupSfm3003();
     Hum.SetupSensor();
     HMSmain.setupSensor();
     Cell_Temp.SetupSensors();

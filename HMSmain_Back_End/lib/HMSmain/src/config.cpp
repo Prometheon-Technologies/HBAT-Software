@@ -181,31 +181,6 @@ void Config::writeFile(fs::FS &fs, const char *path, const char *message)
 }
 
 /******************************************************************************
- * Function: Setup _relays
- * Description: Loop through and set all relays to output and off state
- * Parameters: None
- * Return: None
- ******************************************************************************/
-void Config::SetupRelays()
-{
-    int temp[5] = {45, 38, 36, 35, 48};
-    // initialize the Relay pins and set them to off state
-    std::copy(temp, temp+sizeof(temp)/sizeof(temp[0]), config.relays_pin);
-
-    /* config.relays_pin[0] = 45;
-    config.relays_pin[1] = 38;
-    config.relays_pin[2] = 36;
-    config.relays_pin[3] = 35;
-    config.relays_pin[4] = 48; */
-
-    for (int i = 0; i < sizeof(config.relays_pin); i++)
-    {
-        pinMode(config.relays_pin[i], OUTPUT);
-        digitalWrite(config.relays_pin[i], LOW);
-    }
-}
-
-/******************************************************************************
  * Function: Accumulate Data to send from sensors and store in json
  * Description: This function accumulates all sensor data and stores it in the main json data structure.
  * Parameters: None

@@ -1,3 +1,6 @@
+# C++ Array Examples
+
+```cpp
 #include <Arduino.h>
 
 // Pointer and struct example
@@ -6,7 +9,7 @@ struct data_arrays
 {
   int a;  // address 1
   int b;  // address 2
-  int *c; // address 3 storess: address 1
+  int *c; // address 3 stores: address 1
   int *d; // address 4 stores: address 1
 
   int &e; // address 1
@@ -63,7 +66,7 @@ void test()
 {
   data.a = 10; // address 1
   data.b = data.a;       // address 2
-  *data.c = &data.a;     // address 3 storess: address 1
+  *data.c = &data.a;     // address 3 stores: address 1
   *data.d = data.c;      // address 4 stores: address 1
 
   int &e = data.a; // address 1
@@ -79,3 +82,4 @@ void test()
   fillArrayRef(array);
   fillArrayRef(array1);
 }
+```

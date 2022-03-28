@@ -4,15 +4,15 @@
 */
 
 #pragma once
-#ifndef CONFIG_hpp
-#define CONFIG_hpp
+#ifndef CONFIG_HPP
+#define CONFIG_HPP
 #include "defines.hpp"
 
 class Config
 {
 public:
-    Config(void);
-    virtual ~Config(void);
+    Config();
+    virtual ~Config();
     typedef struct Config_t
     {
         // Variables
@@ -41,15 +41,22 @@ public:
         char *NTPTIMEOFFSET;
         char *MDNS;
         char *DHCPCHECK;
-        String configData;
+        char *configData;
         boolean relays[5];
+        int relays_pin[5];
         float stack_humidity;
         float stack_temp;
         float stack_voltage;
+        float stack_current;
         float cell_temp[10];
         float cell_voltage[10];
+        int numSensors;
+        int cell_count_max;
+        int flow_rate;
+        int flow_rate_sensor_temp;
     } configData_t;
 
+    void InitAccumulateDataJson();
     bool loadConfig();
     // trigger a config write/commit
     bool setConfigChanged();
@@ -58,6 +65,7 @@ public:
     void resetConfig();
     bool saveConfig();
     bool isValidHostname(char *hostname_to_check, long size);
+    void SetupRelays();
     // parse and set a new hostname to config
     void setHostname(String new_hostname);
     // we can't assing wifiManager.resetSettings(); to reset, somehow it gets called straight away.
@@ -70,12 +78,18 @@ public:
     configData_t config;
     configData_t default_cfg;
 
+private:
+    int last_config;
     // save last "timestamp" the config has been saved
     bool last_config_change;
     // Variables
     int maxVoltage;
     int maxTemp;
+    String doc_string;
+    // Temporary function to ensure that the correct number of cells are being read - this will be removed when the cell count is dynamically allocated
+    int numSensors;
 };
+
 extern Config cfg;
 #endif
 // EOF

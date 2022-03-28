@@ -20,7 +20,7 @@ void FrontEnd::loadConfig()
 
   if (!cfg.isValidHostname(cfg.config.hostname, sizeof(cfg.config.hostname)))
   {
-    strncpy(cfg.config.hostname, DEFAULT_HOSTNAME, sizeof(cfg.config.hostname));
+    strncpy(cfg.config.hostname, DEFAULT_HOSTNAME, sizeof(DEFAULT_HOSTNAME));
     cfg.setConfigChanged();
   }
 
@@ -31,12 +31,12 @@ void FrontEnd::loadConfig()
   {
     cfg.config.MQTTEnabled = MQTT_ENABLED;
     // Convert String data of global definitions into Char pointers for use in strncpy
-    char *MQTT_BROKER = HMSmain.StringtoChar(MQTT_HOSTNAME);
-    char *mqtt_user = HMSmain.StringtoChar(MQTT_USER);
-    char *mqtt_pass = HMSmain.StringtoChar(MQTT_PASS);
-    char *mqtt_topic = HMSmain.StringtoChar(MQTT_TOPIC);
-    char *mqtt_topic_set = HMSmain.StringtoChar(MQTT_HOMEASSISTANT_TOPIC_SET);
-    char *mqtt_device_name = HMSmain.StringtoChar(MQTT_DEVICE_NAME);
+    char *MQTT_BROKER = StringtoChar(MQTT_HOSTNAME);
+    char *mqtt_user = StringtoChar(MQTT_USER);
+    char *mqtt_pass = StringtoChar(MQTT_PASS);
+    char *mqtt_topic = StringtoChar(MQTT_TOPIC);
+    char *mqtt_topic_set = StringtoChar(MQTT_HOMEASSISTANT_TOPIC_SET);
+    char *mqtt_device_name = StringtoChar(MQTT_DEVICE_NAME);
 
     if (MQTT_SECURE_ENABLED != 0)
     {
@@ -47,12 +47,13 @@ void FrontEnd::loadConfig()
       heapStr(&cfg.config.MQTTPort, (char *)MQTT_PORT);
     }
 
-    strncpy(mqtt_host, MQTT_BROKER, sizeof(cfg.config.MQTTBroker));
-    strncpy(cfg.config.MQTTUser, mqtt_user, sizeof(cfg.config.MQTTUser));
-    strncpy(cfg.config.MQTTPass, mqtt_pass, sizeof(cfg.config.MQTTPass));
-    strncpy(cfg.config.MQTTTopic, mqtt_topic, sizeof(cfg.config.MQTTTopic));
-    strncpy(cfg.config.MQTTSetTopic, mqtt_topic_set, sizeof(cfg.config.MQTTSetTopic));
-    strncpy(cfg.config.MQTTDeviceName, mqtt_device_name, sizeof(cfg.config.MQTTDeviceName));
+    heapStr(&cfg.config.MQTTBroker, MQTT_BROKER);
+    heapStr(&cfg.config.MQTTUser, mqtt_user);
+    heapStr(&cfg.config.MQTTPass, mqtt_pass);
+    heapStr(&cfg.config.MQTTTopic, mqtt_topic);
+    heapStr(&cfg.config.MQTTSetTopic, mqtt_topic_set);
+    heapStr(&cfg.config.MQTTDeviceName, mqtt_device_name);
+
     cfg.setConfigChanged();
   }
 #endif

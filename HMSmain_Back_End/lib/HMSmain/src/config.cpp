@@ -1,18 +1,22 @@
 #include "config.hpp"
 
 // save last "timestamp" the config has been saved
-auto last_config = 0;
 
-Config::Config(void)
+
+Config::Config()
 {
     last_config_change = false;
+    last_config = 0;
     maxVoltage = 24;
     maxTemp = 120;
+    doc_string = "";
+    // Temporary function to ensure that the correct number of cells are being read - this will be removed when the cell count is dynamically allocated
+    numSensors = Cell_Temp.GetSensorCount();
 }
 
-Config::~Config(void)
+Config::~Config()
 {
-    // Free the allocated memory
+    /* // Free the allocated memory
     if (config.hostname)
     {
         freeStr(&config.hostname);
@@ -69,6 +73,10 @@ Config::~Config(void)
     {
         freeStr(&config.DHCPCHECK);
     }
+    if (config.configData)
+    {
+        freeStr(&config.configData);
+    } */
 }
 
 void Config::CreateDefaultConfig()
@@ -94,18 +102,22 @@ void Config::CreateDefaultConfig()
     config.WIFISSID = NULL;
     config.WIFIPASS = NULL;
     config.MQTTConnectedState = false;
-    config.configData = "";
+    config.configData = NULL;
     config.NTPTIME = NULL;
     config.NTPTIMEOFFSET = NULL;
     config.MDNS = NULL;
     config.DHCPCHECK = NULL;
+
     for (int i = 0; i < 5; i++)
     {
         config.relays[i] = false;
     }
+
     config.stack_humidity = 0;
     config.stack_temp = 0;
     config.stack_voltage = 0;
+    config.stack_current = 0;
+
     for (int i = 0; i < 10; i++)
     {
         config.cell_temp[i] = 0;
@@ -118,10 +130,10 @@ bool Config::initSPIFFS()
 {
     if (!SPIFFS.begin(false))
     {
-        Serial.println("An error has occurred while mounting SPIFFS");
+        SERIAL_DEBUG_LN("An error has occurred while mounting SPIFFS");
         return false;
     }
-    Serial.println("SPIFFS mounted successfully");
+    SERIAL_DEBUG_LN("SPIFFS mounted successfully");
     return true;
 }
 
@@ -149,59 +161,149 @@ String Config::readFile(fs::FS &fs, const char *path)
 // Write file to SPIFFS
 void Config::writeFile(fs::FS &fs, const char *path, const char *message)
 {
-    SERIAL_DEBUG_ADDF("Writing file: %s\r\n", path);
+    SERIAL_DEBUG_ADDF("[Writing File]: Writing file: %s\r\n", path);
     delay(10);
 
     File file = fs.open(path, FILE_WRITE);
     if (!file)
     {
-        SERIAL_DEBUG_LN("[INFO]: failed to open file for writing");
+        SERIAL_DEBUG_LN("[Writing File]: failed to open file for writing");
         return;
     }
     if (file.print(message))
     {
-        SERIAL_DEBUG_LN("[INFO]: file written");
+        SERIAL_DEBUG_LN("[Writing File]: file written");
     }
     else
     {
-        SERIAL_DEBUG_LN("[INFO]: file write failed");
+        SERIAL_DEBUG_LN("[Writing File]: file write failed");
+    }
+}
+
+/******************************************************************************
+ * Function: Setup _relays
+ * Description: Loop through and set all relays to output and off state
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
+void Config::SetupRelays()
+{
+    int temp[5] = {45, 38, 36, 35, 48};
+    // initialize the Relay pins and set them to off state
+    std::copy(temp, temp+sizeof(temp)/sizeof(temp[0]), config.relays_pin);
+
+    /* config.relays_pin[0] = 45;
+    config.relays_pin[1] = 38;
+    config.relays_pin[2] = 36;
+    config.relays_pin[3] = 35;
+    config.relays_pin[4] = 48; */
+
+    for (int i = 0; i < sizeof(config.relays_pin); i++)
+    {
+        pinMode(config.relays_pin[i], OUTPUT);
+        digitalWrite(config.relays_pin[i], LOW);
+    }
+}
+
+/******************************************************************************
+ * Function: Accumulate Data to send from sensors and store in json
+ * Description: This function accumulates all sensor data and stores it in the main json data structure.
+ * Parameters: None
+ * Return: None
+ ******************************************************************************/
+void Config::InitAccumulateDataJson()
+{
+    if (numSensors > maxCellCount)
+    {
+        numSensors = maxCellCount;
+    }
+
+    // Stack Data to send
+    config.stack_humidity = Hum.StackHumidity();
+    config.stack_temp = Hum.AverageStackTemp();
+    config.stack_current = HMSmain.readAmps();
+    config.stack_voltage = HMSmain.StackVoltage();
+    config.cell_count_max = maxCellCount;
+    config.numSensors = numSensors;
+    // Flow Rate dataTosend
+    if (config.flow_rate > 0)
+    {
+        // SFM3003 flow rate dataTosend in slm
+        config.flow_rate = Hum.flow;
+        // SFM3003 mass temp dataTosend
+        config.flow_rate_sensor_temp = Hum.temperature;
+    }
+    else
+    {
+        SERIAL_DEBUG_LN(("Flow Rate Sensor Could Not Be Read\n"));
+        // SFM3003 flow rate dataTosend in slm
+        config.flow_rate = 0;
+        // SFM3003 mass temp dataTosend
+        config.flow_rate_sensor_temp = 0;
+    }
+
+    // Add arrays for Cell level Data.
+    float *cell_voltage = HMSmain.readSensAndCondition();
+    // loop through and store per cell voltage
+    for (int i = 0; i < numSensors; i++)
+    {
+        config.cell_voltage[i] = cell_voltage[i];
+    }
+
+    free(cell_voltage); // free the memory
+
+    float *cell_temp = Cell_Temp.ReadTempSensorData(); // returns a float array of cell temperatures
+    // loop through and store per cell temp data
+    for (int i = 0; i < numSensors; i++)
+    {
+        config.cell_temp[i] = cell_temp[i];
+    }
+
+    free(cell_temp); // free the memory
+
+    // Individual Humidity sensor data
+    float stack_humidity[4];
+    for (int i = 0; i < 4; i++)
+    {
+        stack_humidity[i] = *Hum.ReadSensor();
+        config.stack_humidity = stack_humidity[1];
+        config.stack_temp = stack_humidity[3];
     }
 }
 
 bool Config::loadConfig()
 {
-    Serial.println("Loading Config File");
+    SERIAL_DEBUG_LN("[Load config]: Loading Config File");
+
     // load the config file
     initSPIFFS();
     File configFile = SPIFFS.open("/config.json", "r");
     if (!configFile)
     {
-        Serial.println("Failed to open config file");
+        SERIAL_DEBUG_LN("[Load config]: Failed to open config file");
         CreateDefaultConfig();
         return false;
     }
 
     size_t size = configFile.size();
-    Serial.print("Config file size: ");
-    Serial.println(size);
+    Serial.print("[Load config]: Config file size: ");
+    SERIAL_DEBUG_LN(size);
 
     if (size > 1024)
     {
-        Serial.println("Config file size is too large");
+        SERIAL_DEBUG_LN("[Load config]: Config file size is too large");
         CreateDefaultConfig();
         return false;
     }
 
     // Allocate a buffer to store contents of the file.
     std::unique_ptr<char[]> buf(new char[size]);
-
     // We don't use String here because ArduinoJson library requires the input
     // to be mutable. If you don't use ArduinoJson, you may as well
     // use configFile.readString instead.
-
     configFile.readBytes(buf.get(), size);
-    Serial.println(F("Config file content:"));
-    Serial.println(buf.get());
+    SERIAL_DEBUG_LN(F("[Load config]: Config file content:"));
+    SERIAL_DEBUG_LN(buf.get());
 
     // Parse the buffer into an object
 
@@ -210,9 +312,9 @@ bool Config::loadConfig()
     auto error = deserializeJson(jsonBuffer, buf.get());
     if (error)
     {
-        Serial.println(F("Failed to parse config file"));
-        Serial.print(F("deserializeJson() failed with code "));
-        Serial.println(error.c_str());
+        SERIAL_DEBUG_LN(F("[Load config]: Failed to parse config file"));
+        Serial.print(F("[Load config]: deserializeJson() failed with code "));
+        SERIAL_DEBUG_LN(error.c_str());
         CreateDefaultConfig();
         return false;
     }
@@ -238,14 +340,26 @@ bool Config::loadConfig()
     heapStr(&config.WIFISSID, jsonBuffer["WIFISSID"]);
     heapStr(&config.WIFIPASS, jsonBuffer["WIFIPASS"]);
     config.MQTTConnectedState = jsonBuffer["MQTTConnectedState"];
+    heapStr(&config.configData, jsonBuffer["configData"]);
+    heapStr(&config.NTPTIME, jsonBuffer["NTPTIME"]);
+    heapStr(&config.NTPTIMEOFFSET, jsonBuffer["NTPTIMEOFFSET"]);
+    heapStr(&config.MDNS, jsonBuffer["MDNS"]);
+    heapStr(&config.DHCPCHECK, jsonBuffer["DHCPCHECK"]);
+
+    for (int i = 0; i < sizeof(config.relays); i++)
+    {
+        config.relays[i] = jsonBuffer["relays"][i];
+    }
+
+
     return true;
 }
 
 // trigger a config write/commit
 bool Config::setConfigChanged()
 {
-    Serial.println(F("Should save config"));
     last_config_change = true;
+    SERIAL_DEBUG_LN(F("[Set Config Changed]: Config save set to true"));
     return true;
 }
 
@@ -254,12 +368,14 @@ bool Config::saveConfig()
     // check if the data in config is different from the data in the file
     if (!last_config_change)
     {
-        Serial.println(F("Config has not changed"));
+        SERIAL_DEBUG_LN(F("[Save Config Changes]: Config has not changed because it is the same as the file"));
         return false;
     }
-    Serial.println(F("Saving Config"));
+
+    SERIAL_DEBUG_LN(F("[Save Config Changes]: Saving Config"));
+
     // create a json file from the config struct and save it using SPIFFs
-    Serial.println(F("Writing config"));
+    SERIAL_DEBUG_LN(F("[Save Config Changes]: Writing config"));
     // create a json file from the config struct
     StaticJsonDocument<1024> jsonConfig;
     JsonObject json = jsonConfig.to<JsonObject>();
@@ -286,43 +402,73 @@ bool Config::saveConfig()
     json["WIFISSID"] = config.WIFISSID;
     json["WIFIPASS"] = config.WIFIPASS;
     json["MQTTConnectedState"] = config.MQTTConnectedState;
+    json["configData"] = config.configData;
+    json["NTPTIME"] = config.NTPTIME;
+    json["NTPTIMEOFFSET"] = config.NTPTIMEOFFSET;
+    json["MDNS"] = config.MDNS;
+    json["DHCPCHECK"] = config.DHCPCHECK;
+    json["Number of Sensors"] = config.numSensors;
+    json["Max Cell Count"] = config.cell_count_max;
+
+    // Relays
+    JsonArray Relays = json.createNestedArray("HMS_Relays_State");
+    for (int i = 0; i < sizeof(config.relays); i++)
+    {
+        Relays.add(config.relays[i]);
+    }
 
     // Set the values in the document
-
     File configFile = SPIFFS.open("/config.json", "w");
     if (!configFile)
     {
-        Serial.println(F("Failed to open config file for writing"));
+        SERIAL_DEBUG_LN(F("[Save Config Changes]: Failed to open config file for writing"));
         return false;
     }
     if (serializeJson(json, configFile) == 0)
     {
-        Serial.println(F("Failed to write to file"));
+        SERIAL_DEBUG_LN(F("[Save Config Changes]: Failed to write to file"));
         return false;
     }
+
     configFile.print("\r\n");
     configFile.close();
     // end save
-    Serial.println(F("Config written"));
+    SERIAL_DEBUG_LN(F("[Save Config Changes]: Config written"));
+    last_config_change = false;
+
+    /* if (!PRODUCTION)
+    {
+        SERIAL_DEBUG_EOL(serializeJson(json, Serial));
+        doc_string = String(json);
+        if (doc_string.length() > 0)
+        {
+            SERIAL_DEBUG_LN(doc_string);
+        }
+    } */
 
     return true;
 }
 
 bool Config::updateCurrentData()
 {
+    // check if the data in config is different from the data in the file
+    if (!last_config_change)
+    {
+        SERIAL_DEBUG_LN(F("[Update Current Data]: Config has not changed because it is the same as the file"));
+        return false;
+    }
+    SERIAL_DEBUG_LN(F("[Update Current Data]: Updating Config"));
     // call to save config if config has changed
     saveConfig();
-    SERIAL_DEBUG_LNF("Heap: %d", ESP.getFreeHeap());
-    SERIAL_DEBUG_LN(F("Updating current data"));
+    SERIAL_DEBUG_LNF("[INFO - FREE HEAP SIZE]: Heap: %d", ESP.getFreeHeap());
     return true;
-    // update current data
 }
 
 // overwrite all config settings with "0"
 void Config::resetConfig()
 {
     CreateDefaultConfig();
-    saveConfig();
+    setConfigChanged();
 }
 
 bool Config::isValidHostname(char *hostname_to_check, long size)

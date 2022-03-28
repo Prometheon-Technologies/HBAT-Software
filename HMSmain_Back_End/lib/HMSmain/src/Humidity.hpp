@@ -24,19 +24,18 @@ public:
   float *ReadSensor();
   void HumRelayOnOff();
   void SetupPID();
-  void SetupRelays();
   void setupSfm3003();
   int loopSFM3003();
   uint8_t crc8(const uint8_t data, uint8_t crc);
 
   // Variables
-  float returnData[2];
-  float flow;
-  float temperature;
+  int returnData[2];
+  int flow;
+  int temperature;
 private:
   int _received;
-  bool _sensor1 = sht31.isHeaterEnabled();
-  bool _sensor2 = sht31_2.isHeaterEnabled();
+  bool _sensor1;
+  bool _sensor2;
   byte _degree[8] =
       {
           0b00011,
@@ -49,7 +48,7 @@ private:
           0b00000};
   int _offset;  // Offset for the sensor
   float _scale; // Scale factor for Air and N2 is 140.0, O2 is 142.8
-  int _relays[5];
 };
+
 extern Humidity Hum;
 #endif

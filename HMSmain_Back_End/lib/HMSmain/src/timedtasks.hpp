@@ -1,17 +1,17 @@
 #pragma once
-#ifndef TIMEDTASKS_hpp
-#define TIMEDTASKS_hpp
+#ifndef TIMEDTASKS_HPP
+#define TIMEDTASKS_HPP
+#include "defines.hpp"
 #include <blinker.h>
 /* #include <iostream>     // std::cout
 #include <functional>   // std::bind */
-#include "defines.hpp" // std::thread
 
 class TimedTasks : public timeObj,
                    public idler
 {
 public:
-  TimedTasks(void);
-  virtual ~TimedTasks(void);
+  TimedTasks();
+  virtual ~TimedTasks();
   virtual void Run_NetworkCheck_Background_every_10_Seconds();
   virtual void Run_Check_DataJSON_5();
   void setCallback(void (*funct)(void));
@@ -21,17 +21,9 @@ public:
 
   void (*callback)(void);
   void SetupTimers();
-  timeObj ReadTimer;
-  timeObj ReadTimer_10;
-  timeObj ReadTimer2_10;
-  timeObj ReadTimer3_10;
-  timeObj ReadTimer2;
-  timeObj ReadTimer3;
-  timeObj ReadTimer_10_2;
+
+private:
 };
 
-#if !defined(NO_GLOBAL_INSTANCES) && !defined(NO_GLOBAL_TIMEDTASKS)
 extern TimedTasks timedTasks;
-#endif
-
 #endif

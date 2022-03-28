@@ -1,15 +1,23 @@
 
 #include "timedtasks.hpp"
 
-TimedTasks::TimedTasks(void)
+timeObj ReadTimer;
+timeObj ReadTimer_10;
+timeObj ReadTimer2_10;
+timeObj ReadTimer3_10;
+timeObj ReadTimer2;
+timeObj ReadTimer3;
+timeObj ReadTimer_10_2;
+
+TimedTasks::TimedTasks()
 {
 }
 
-TimedTasks::~TimedTasks(void)
+TimedTasks::~TimedTasks()
 {
 }
 
-void TimedTasks::SetupTimers() // TODO: CALL IN THE MAIN SETUP
+void TimedTasks::SetupTimers()
 {
   ReadTimer.setTime(5000);
   ReadTimer_10.setTime(10000);
@@ -32,7 +40,6 @@ void TimedTasks::setSeconds(float seconds) { setTime(seconds * 1000); }
 
 void TimedTasks::idle(void)
 {
-
   if (ding() && callback)
   {
     stepTime();
@@ -53,19 +60,19 @@ void TimedTasks::Run_Check_DataJSON_5()
 {
   if (ReadTimer2.ding())
   {
-    Accumulate_Data.InitAccumulateDataJson();
+    cfg.InitAccumulateDataJson();
     Hum.loopSFM3003();
     ReadTimer2.start();
   }
 }
 
-void TimedTasks::updateCurrentData()// check to see if the data has changed
+void TimedTasks::updateCurrentData() // check to see if the data has changed
 {
   if (ReadTimer_10_2.ding())
   {
     // call to save config if config has changed
-    cfg.saveConfig();
-    SERIAL_DEBUG_LNF("Heap: %d", system_get_free_heap_size())
+    cfg.updateCurrentData();
+    SERIAL_DEBUG_LNF("Heap: %d", ESP.getFreeHeap());
     ReadTimer_10_2.start();
   }
 }

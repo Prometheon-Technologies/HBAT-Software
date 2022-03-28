@@ -16,15 +16,12 @@ Adafruit_SHT31 sht31_2;
 
 Humidity::Humidity(void)
 {
+  _sensor1 = sht31.isHeaterEnabled();
+  _sensor2 = sht31_2.isHeaterEnabled();
   flow = returnData[0];
   temperature = returnData[1];
   sht31 = Adafruit_SHT31();
   sht31_2 = Adafruit_SHT31();
-  _relays[0] = 45;
-  _relays[1] = 38;
-  _relays[2] = 36;
-  _relays[3] = 35;
-  _relays[4] = 48;
   _offset = 32000; // _Offset for the sensor
   _scale = 140.0;  // _Scale factor for Air and N2 is 140.0, O2 is 142.8
 }
@@ -106,14 +103,14 @@ float *Humidity::ReadSensor()
   float *climatedata = (float *)malloc(sizeof(float) * 4);
 
   // check if 'is not a number
-  if (!isnan(climatedata[0] and climatedata[1]))
+  if (!isnan(climatedata[0] && climatedata[1]))
   {
     climatedata[0] = sht31.readTemperature();
     climatedata[1] = sht31_2.readTemperature();
     SERIAL_DEBUG_LN("Sensor 1 Temp *C = ");
-    Serial.print(climatedata[0]);
+    SERIAL_DEBUG_ADD(climatedata[0]);
     SERIAL_DEBUG_LN("Sensor 2 Temp *C = ");
-    Serial.print(climatedata[1]);
+    SERIAL_DEBUG_ADD(climatedata[1]);
   }
   else
   {
@@ -121,21 +118,21 @@ float *Humidity::ReadSensor()
   }
 
   // check if 'is not a number'
-  if (!isnan(climatedata[2] and climatedata[3]))
+  if (!isnan(climatedata[2] && climatedata[3]))
   {
     climatedata[2] = sht31.readHumidity();
     climatedata[3] = sht31_2.readHumidity();
     SERIAL_DEBUG_LN("Sensor 1 Humidity %% = ");
-    Serial.print(climatedata[2]);
+    SERIAL_DEBUG_ADD(climatedata[2]);
     SERIAL_DEBUG_LN("Sensor 2 Humidity %% = ");
-    Serial.print(climatedata[3]);
+    SERIAL_DEBUG_ADD(climatedata[3]);
   }
   else
   {
     SERIAL_DEBUG_LN("Failed to read humidity");
   }
 
-  delay(1000);
+  my_delay(100000L);
 
   // Toggle heater enabled state every 30 seconds
   // An ~3.0 degC _temperature increase can be noted when heater is enabled
@@ -145,11 +142,11 @@ float *Humidity::ReadSensor()
     enableHeater = !enableHeater;
     sht31.heater(enableHeater);
     sht31_2.heater(enableHeater);
-    Serial.print("Heater Enabled State: ");
+    SERIAL_DEBUG_ADD("Heater Enabled State: ");
 
     if (_sensor1 ^ _sensor2)
     {
-      Serial.print("Sensors have Heater ENABLED");
+      SERIAL_DEBUG_ADD("Sensors have Heater ENABLED");
     }
     else
     {
@@ -168,21 +165,6 @@ float *Humidity::ReadSensor()
  * Return: None
  ******************************************************************************/
 // FIXME: ADD IN CODE TO READ PRESSURE SENSORS
-/******************************************************************************
- * Function: Setup _relays
- * Description: Loop through and set all _relays to output and off state
- * Parameters: None
- * Return: None
- ******************************************************************************/
-void Humidity::SetupRelays()
-{
-  // initialize the Relay pins and set them to off state
-  for (int i = 0; i <= 5; i++)
-  {
-    pinMode(_relays[i], OUTPUT);
-    digitalWrite(_relays[i], LOW);
-  }
-}
 
 /******************************************************************************
  * Function: Setup PID Controller
@@ -192,8 +174,6 @@ void Humidity::SetupRelays()
  ******************************************************************************/
 void Humidity::SetupPID()
 {
-  // Initialize the relay pins
-  SetupRelays();
 
   windowStartTime = millis();
 
@@ -229,9 +209,9 @@ void Humidity::HumRelayOnOff()
     windowStartTime += WindowSize;
   }
   if (Output > now - windowStartTime)
-    digitalWrite(_relays[0], HIGH);
+    digitalWrite(cfg.config.relays_pin[0], HIGH);
   else
-    digitalWrite(_relays[0], LOW);
+    digitalWrite(cfg.config.relays_pin[0], LOW);
 }
 
 /* int Humidity::SetupSFM3003()
@@ -325,23 +305,23 @@ int Humidity::SFM3003()
 void Humidity::setupSfm3003()
 {
   Wire.begin();
-  int a = 0;
+  /* int a = 0;
   int b = 0;
   int c = 0;
 
-  /*Wire.requestFrom(0x40, 3); //
+  Wire.requestFrom(0x28, 3); //
    a = Wire.read(); // first received byte stored here
    b = Wire.read(); // second received byte stored here
    c = Wire.read(); // third received byte stored here
    Wire.endTransmission();
    delay(5);
 
-   Wire.requestFrom(0x40, 3); //
+   Wire.requestFrom(0x28, 3); //
    a = Wire.read(); // first received byte stored here
    b = Wire.read(); // second received byte stored here
    c = Wire.read(); // third received byte stored here
    Wire.endTransmission();
-   delay(5);*/
+   delay(5); */
 }
 
 uint8_t Humidity::crc8(const uint8_t data, uint8_t crc)

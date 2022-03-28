@@ -8,6 +8,8 @@
 #error This code is intended to run on the ESP32 platform! Please check your Board setting.
 #endif
 
+#define LED_BUILTIN 2
+
 #include <Arduino.h>
 #include "globaldebug.hpp"
 #include <stdio.h>  /* printf, NULL */
@@ -26,14 +28,11 @@
 #include <SPIFFS.h>
 
 // Data stack
-#include "AccumulateData.hpp"
-#include <ACS712.h>
 #include "HMS.hpp"
 #include "Humidity.hpp"
 #include "celltemp.hpp"
 #include <ArduinoJson.h>
 #include <strTools.h>
-#include "config.hpp" /* data Struct */
 // Humidity Sensors
 //#include <sfm3003.hpp>
 
@@ -43,10 +42,11 @@
 // wifi definitions
 #include "HMSnetwork.hpp"
 
-#define LED_BUILTIN 2
+#include "config.hpp" /* data Struct */
+
 
 #ifdef DEFAULT_HOSTNAME
-#pragma message STR(DEFAULT_HOSTNAME)
+#pragma message DEFAULT_HOSTNAME
 #endif
 
 #ifdef PRODUCTION
@@ -64,7 +64,7 @@
 #define MQTT_PORT 1883
 #define MQTT_PORT_SECURE 8883
 #define MQTT_UNIQUE_IDENTIFIER HMSmain.generateDeviceID() // A Unique Identifier for the device in Homeassistant (MAC Address used by default)
-#define MQTT_MAX_PACKET_SIZE 1024
+
 #define MQTT_MAX_TRANSFER_SIZE 1024
 // MQTT includes
 #include "HMSmqtt.hpp"
@@ -82,12 +82,6 @@ extern bool mqttProcessing;
 #endif
 /*###################### MQTT Configuration END ######################*/
 
-// define externalized classes
-extern Scanner scanner;
-
-// Custom Objects
-extern StaticJsonDocument<1000> Doc;
-
 // Variables
 extern const char *mqtt_mDNS_clientId;
 extern char mDNS_hostname[4];
@@ -102,5 +96,6 @@ extern bool wifiConnected;
 // Globally available functions
 char *StringtoChar(String inputString);
 char *appendChartoChar(const char *hostname, const char *def_host);
+void my_delay(volatile long delay_time);
 
 #endif

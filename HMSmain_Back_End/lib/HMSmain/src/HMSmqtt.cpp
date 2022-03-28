@@ -15,6 +15,7 @@ HMSMqtt::~HMSMqtt(void)
 
 void mqttSendStatus()
 {
+  StaticJsonDocument<1024> Doc;
   uint8_t JSONmessage[1000];
   size_t n = serializeJson(Doc, JSONmessage);
   if (!mqttProcessing)
@@ -24,6 +25,7 @@ void mqttSendStatus()
     topic_data = appendChartoChar(cfg.config.MQTTTopic, json); // append string two to the result.
     mqttClient.publish(topic_data, JSONmessage, n, true);
     SERIAL_DEBUG_LNF("Sending MQTT package: %s", Doc.as<String>().c_str());
+    mqttProcessing = false;
   }
 }
 
@@ -204,11 +206,10 @@ int HMSMqtt::MQTTLoop()
 
 void HMSMqtt::RunMqttService()
 {
-  static bool mqttConnected = false;
+  bool mqttConnected = false;
 
   if (!mqttClient.connected() && cfg.config.MQTTEnabled != 0)
   {
-    mqttConnected = false;
     SERIAL_DEBUG_LN("MQTT not connected, attempting to reconnect...")
     // MQTTLoop();
   }
@@ -216,8 +217,8 @@ void HMSMqtt::RunMqttService()
   {
     SERIAL_DEBUG_BOL
     SERIAL_DEBUG_ADD("Connecting to MQTT...")
-    mqttConnected = true;
-    cfg.config.MQTTConnectedState = 1;
+    cfg.config.MQTTConnectedState = mqttConnected = true;
+    
     cfg.setConfigChanged();
     SERIAL_DEBUG_LN("MQTT connected!")
 
@@ -246,15 +247,9 @@ void HMSMqtt::RunMqttService()
       JSONencoder["uniq_id"] = MQTT_UNIQUE_IDENTIFIER,
       JSONencoder["schema"] = "json";
 
-      /* JsonArray sensors_list = JSONencoder.createNestedArray("sensors_list");
-      for (uint8_t i = 0; i < sensorCount; i++)
-      {
-        sensors_list.add(sensors[i].name);
-      } */
-
       size_t n = measureJson(JSONencoder);
       char *mqttConfigTopic = NULL;
-      heapStr(&mqttConfigTopic, appendChartoChar("/config", cfg.config.MQTTTopic));
+      heapStr(&mqttConfigTopic, appendChartoChar(cfg.config.MQTTTopic, "/config"));
       bool publish = mqttClient.beginPublish(mqttConfigTopic, n, true);
       if (publish == true)
       {

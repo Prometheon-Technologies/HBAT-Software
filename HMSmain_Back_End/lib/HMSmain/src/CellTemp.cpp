@@ -1,13 +1,10 @@
 #include "CellTemp.hpp"
 
-// Data wire is plugged into port 42 on the ESP32
-#define ONE_WIRE_BUS 42
-
-CellTemp::CellTemp(void)
+CellTemp::CellTemp()
 {
 }
 
-CellTemp::~CellTemp(void)
+CellTemp::~CellTemp()
 {
 }
 
@@ -21,17 +18,6 @@ DallasTemperature sensors(&oneWire);
 DeviceAddress temp_sensor_addresses;
 
 /******************************************************************************
- * Function: Set Sensor Count
- * Description: Find the number of sensors on the bus
- * Parameters: None
- * Return: None
- ******************************************************************************/
-void CellTemp::SetSensorCount()
-{
-    sensors_count = sensors.getDeviceCount();
-}
-
-/******************************************************************************
  * Function: Get Sensor Count
  * Description: Return the number of sensors on the bus
  * Parameters: None
@@ -39,7 +25,8 @@ void CellTemp::SetSensorCount()
  ******************************************************************************/
 int CellTemp::GetSensorCount()
 {
-    return sensors_count;
+    // Grab a count of devices on the wire
+    return sensors.getDeviceCount();
 }
 
 /******************************************************************************
@@ -52,9 +39,6 @@ void CellTemp::SetupSensors()
 {
     // Start up the ds18b20 library
     sensors.begin();
-
-    // Grab a count of devices on the wire
-    SetSensorCount();
 
     // locate devices on the bus
     Serial.print("Locating devices...");

@@ -5,13 +5,14 @@
 
 #ifndef HMS_h
 #define HMS_h
+#include <ACS712.h>
 #include "defines.hpp"
 
 class HMS
 {
 public:
-  HMS(void);
-  virtual ~HMS(void);
+  HMS();
+  virtual ~HMS();
   void calibrateAmps();
   void setupSensor();
   int readAmps();
@@ -22,7 +23,6 @@ public:
   float StackVoltage();
   float *readSensAndCondition();
   String generateDeviceID();
-  char *StringtoChar(String inputString);
 
 private:
 };

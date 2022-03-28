@@ -55,3 +55,5 @@ void Scanner::BeginScan()
   }
   delay(5000);
 }
+
+Scanner Scan;

@@ -5,11 +5,11 @@
 uint8_t _amppin = 18;
 ACS712 ACS(_amppin, 5.0, 4095, 100);
 
-HMS::HMS(void)
+HMS::HMS()
 {
 }
 
-HMS::~HMS(void)
+HMS::~HMS()
 {
 }
 
@@ -32,23 +32,23 @@ float HMS::readVoltage(int pinnumber)
  ******************************************************************************/
 float *HMS::readSensAndCondition()
 {
-    int numtoaverage = 5;
+    int numtoaverage = 10;
     float *cell_voltage = (float *)malloc(sizeof(float) * 10);
     for (int i = 0; i < numtoaverage; i++)
     {
-        cell_voltage[0] += readVoltage(39); // sensor on analog pin
-        cell_voltage[1] += readVoltage(34);
-        cell_voltage[2] += readVoltage(35);
-        cell_voltage[3] += readVoltage(32);
-        cell_voltage[4] += readVoltage(33);
-        cell_voltage[5] += readVoltage(25);
-        cell_voltage[6] += readVoltage(26);
-        cell_voltage[7] += readVoltage(27);
-        cell_voltage[8] += readVoltage(14);
-        cell_voltage[9] += readVoltage(12);
+        cell_voltage[0] = readVoltage(36); // sensor on analog pins ADC1 && ADC2 - ADC2 pins do not work when wifi is enabled
+        cell_voltage[1] = readVoltage(39);
+        cell_voltage[2] = readVoltage(34);
+        cell_voltage[3] = readVoltage(35);
+        cell_voltage[4] = readVoltage(32);
+        cell_voltage[5] = readVoltage(33);
+        cell_voltage[6] = readVoltage(25);
+        cell_voltage[7] = readVoltage(26);
+        cell_voltage[8] = readVoltage(27);
+        cell_voltage[9] = readVoltage(14);
     }
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < numtoaverage; i++)
     {
         cell_voltage[i] = cell_voltage[i] / numtoaverage;
     }
@@ -145,6 +145,13 @@ int HMS::ChargeStatus()
         return 5;
         printf("Stack has encountered an overcharge condition");
     }
+
+    else
+    {
+        return 0;
+        printf("Stack is in an unknown state");
+    }
+    return 0;
 }
 
 /******************************************************************************
@@ -175,13 +182,13 @@ void HMS::calibrateAmps()
             break;
         case '/':
             ACS.setmVperAmp(ACS.getmVperAmp() / 1.05);
-            // SerialBT.print("," + ACS.getmVperAmp());
+            Serial.print("," + ACS.getmVperAmp());
             break;
         default:
             printf("No input detected");
         }
     }
-    delay(1000);
+    my_delay(100000L);
 }
 
 // a function to generate the device ID and called generateDeviceID()

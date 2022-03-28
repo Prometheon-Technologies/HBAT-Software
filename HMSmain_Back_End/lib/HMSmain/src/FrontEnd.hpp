@@ -25,6 +25,8 @@ public:
 
     // Variables
 
+
+private:
     String NewMQTTIP;
     String NewMQTTPass;
     String NewMQTTUser;
@@ -35,8 +37,6 @@ public:
     String clientPass;
     String clientUser;
     bool mqttEnabled;
-
-private:
 };
 
 extern FrontEnd Front_End;

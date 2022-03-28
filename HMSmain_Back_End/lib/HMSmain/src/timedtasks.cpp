@@ -51,7 +51,7 @@ void TimedTasks::Run_NetworkCheck_Background_every_10_Seconds()
 {
   if (ReadTimer_10.ding())
   {
-    network.CheckNetworkLoop(); // Check the network state and connect to the AP if needed
+    //network.CheckNetworkLoop(); // Check the network state and connect to the AP if needed
     ReadTimer_10.start();
   }
 }
@@ -60,8 +60,8 @@ void TimedTasks::Run_Check_DataJSON_5()
 {
   if (ReadTimer2.ding())
   {
-    cfg.InitAccumulateDataJson();
-    Hum.loopSFM3003();
+    accumulatedata.InitAccumulateDataJson();
+    //Hum.loopSFM3003();
     ReadTimer2.start();
   }
 }
@@ -71,8 +71,8 @@ void TimedTasks::updateCurrentData() // check to see if the data has changed
   if (ReadTimer_10_2.ding())
   {
     // call to save config if config has changed
-    cfg.updateCurrentData();
-    SERIAL_DEBUG_LNF("Heap: %d", ESP.getFreeHeap());
+    //cfg.updateCurrentData();
+    //SERIAL_DEBUG_LNF("Heap: %d", ESP.getFreeHeap());
     ReadTimer_10_2.start();
   }
 }

@@ -10,8 +10,6 @@ Config::Config()
     maxVoltage = 24;
     maxTemp = 120;
     doc_string = "";
-    // Temporary function to ensure that the correct number of cells are being read - this will be removed when the cell count is dynamically allocated
-    numSensors = Cell_Temp.GetSensorCount();
 }
 
 Config::~Config()
@@ -177,72 +175,6 @@ void Config::writeFile(fs::FS &fs, const char *path, const char *message)
     else
     {
         SERIAL_DEBUG_LN("[Writing File]: file write failed");
-    }
-}
-
-/******************************************************************************
- * Function: Accumulate Data to send from sensors and store in json
- * Description: This function accumulates all sensor data and stores it in the main json data structure.
- * Parameters: None
- * Return: None
- ******************************************************************************/
-void Config::InitAccumulateDataJson()
-{
-    if (numSensors > maxCellCount)
-    {
-        numSensors = maxCellCount;
-    }
-
-    // Stack Data to send
-    config.stack_humidity = Hum.StackHumidity();
-    config.stack_temp = Hum.AverageStackTemp();
-    config.stack_current = HMSmain.readAmps();
-    config.stack_voltage = HMSmain.StackVoltage();
-    config.cell_count_max = maxCellCount;
-    config.numSensors = numSensors;
-    // Flow Rate dataTosend
-    if (config.flow_rate > 0)
-    {
-        // SFM3003 flow rate dataTosend in slm
-        config.flow_rate = Hum.flow;
-        // SFM3003 mass temp dataTosend
-        config.flow_rate_sensor_temp = Hum.temperature;
-    }
-    else
-    {
-        SERIAL_DEBUG_LN(("Flow Rate Sensor Could Not Be Read\n"));
-        // SFM3003 flow rate dataTosend in slm
-        config.flow_rate = 0;
-        // SFM3003 mass temp dataTosend
-        config.flow_rate_sensor_temp = 0;
-    }
-
-    // Add arrays for Cell level Data.
-    float *cell_voltage = HMSmain.readSensAndCondition();
-    // loop through and store per cell voltage
-    for (int i = 0; i < numSensors; i++)
-    {
-        config.cell_voltage[i] = cell_voltage[i];
-    }
-
-    free(cell_voltage); // free the memory
-
-    float *cell_temp = Cell_Temp.ReadTempSensorData(); // returns a float array of cell temperatures
-    // loop through and store per cell temp data
-    for (int i = 0; i < numSensors; i++)
-    {
-        config.cell_temp[i] = cell_temp[i];
-    }
-
-    free(cell_temp); // free the memory
-
-    // Individual Humidity sensor data
-    float stack_humidity[4];
-    for (int i = 0; i < 4; i++)
-    {
-        stack_humidity[i] = *Hum.ReadSensor();
-        config.stack_humidity = stack_humidity[1];
-        config.stack_temp = stack_humidity[3];
     }
 }
 

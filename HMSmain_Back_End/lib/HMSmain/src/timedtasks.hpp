@@ -2,7 +2,8 @@
 #ifndef TIMEDTASKS_HPP
 #define TIMEDTASKS_HPP
 #include "defines.hpp"
-#include <blinker.h>
+#include <timeObj.h>
+#include <idlers.h>
 /* #include <iostream>     // std::cout
 #include <functional>   // std::bind */
 

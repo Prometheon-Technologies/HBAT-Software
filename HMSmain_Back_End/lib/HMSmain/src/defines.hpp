@@ -11,39 +11,44 @@
 #define LED_BUILTIN 2
 
 #include <Arduino.h>
-#include "globaldebug.hpp"
 #include <stdio.h>  /* printf, NULL */
 #include <stdlib.h> /* strtoul */
-#include "timedtasks.hpp"
+#include <ArduinoJson.h>
 #include <MD5.h>
+#include <strTools.h>
+#include <PID_v1.h>
+
+// File System
+#include <SPIFFS.h>
+
+// data Struct
+#include "globaldebug.hpp"
+#include "config.hpp"
 
 // IO
 #include <Wire.h>
 #include "i2cscan.hpp"
+
 // FrontEnd
-
 #include "FrontEnd.hpp"
-
-// File System
-#include <SPIFFS.h>
 
 // Data stack
 #include "HMS.hpp"
 #include "Humidity.hpp"
 #include "celltemp.hpp"
-#include <ArduinoJson.h>
-#include <strTools.h>
 // Humidity Sensors
 //#include <sfm3003.hpp>
 
 // Temp Sensors
-#include <PID_v1.h>
 
 // wifi definitions
 #include "HMSnetwork.hpp"
 
-#include "config.hpp" /* data Struct */
+// Accumulate Data
+#include "accumulatedata.hpp"
 
+// Timed tasks
+#include "timedtasks.hpp"
 
 #ifdef DEFAULT_HOSTNAME
 #pragma message DEFAULT_HOSTNAME
@@ -92,6 +97,8 @@ extern bool Charge_State;
 // Wifi Variables
 extern bool wifiMangerPortalRunning;
 extern bool wifiConnected;
+// Temporary function to ensure that the correct number of cells are being read - this will be removed when the cell count is dynamically allocated
+extern int numSensors;
 
 // Globally available functions
 char *StringtoChar(String inputString);

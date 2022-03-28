@@ -7,9 +7,9 @@
 #define CELLTEMP_HPP
 // Data wire is plugged into port 42 on the ESP32
 #define ONE_WIRE_BUS 42
+#include "defines.hpp"
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include "defines.hpp"
 
 class CellTemp
 {
@@ -20,10 +20,9 @@ public:
     void readAddresses(DeviceAddress deviceAddress);
     void printAddress(DeviceAddress deviceAddress);
     float *ReadTempSensorData();
-    int GetSensorCount();
+    int sensors_count;
 
 private:
-    int sensors_count;
 };
 extern CellTemp Cell_Temp;
 #endif

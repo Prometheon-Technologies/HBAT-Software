@@ -2,6 +2,7 @@
 
 CellTemp::CellTemp()
 {
+    sensors_count = sensors.getDeviceCount();
 }
 
 CellTemp::~CellTemp()
@@ -18,18 +19,6 @@ DallasTemperature sensors(&oneWire);
 DeviceAddress temp_sensor_addresses;
 
 /******************************************************************************
- * Function: Get Sensor Count
- * Description: Return the number of sensors on the bus
- * Parameters: None
- * Return: Int - Number of sensors on the bus
- ******************************************************************************/
-int CellTemp::GetSensorCount()
-{
-    // Grab a count of devices on the wire
-    return sensors.getDeviceCount();
-}
-
-/******************************************************************************
  * Function: Setup DS18B20 sensors
  * Description: Setup DS18B20 sensors by beginning the Dallas Temperature library and counting the connected sensors
  * Parameters: None
@@ -41,10 +30,10 @@ void CellTemp::SetupSensors()
     sensors.begin();
 
     // locate devices on the bus
-    Serial.print("Locating devices...");
-    Serial.print("Found ");
+    SERIAL_DEBUG_LN("Locating devices...");
+    SERIAL_DEBUG_LN("Found ");
     Serial.print(sensors_count, DEC);
-    Serial.println(" devices.");
+    SERIAL_DEBUG_LN(" devices.");
 
     // Loop through each device, print out address
     for (int i = 0; i < sensors_count; i++)
@@ -52,17 +41,17 @@ void CellTemp::SetupSensors()
         // Search the wire for address
         if (sensors.getAddress(temp_sensor_addresses, i))
         {
-            Serial.print("Found device ");
+            SERIAL_DEBUG_LN("Found device ");
             Serial.print(i, DEC);
-            Serial.print(" with address: ");
+            SERIAL_DEBUG_LN(" with address: ");
             printAddress(temp_sensor_addresses);
-            Serial.println();
+            SERIAL_DEBUG_EOL("");
         }
         else
         {
-            Serial.print("Found ghost device at ");
+            SERIAL_DEBUG_LN("Found ghost device at ");
             Serial.print(i, DEC);
-            Serial.print(" but could not detect address. Check power and cabling");
+            SERIAL_DEBUG_LN(" but could not detect address. Check power and cabling");
         }
     }
 }
@@ -79,7 +68,7 @@ void CellTemp::printAddress(DeviceAddress deviceAddress)
     for (uint8_t i = 0; i < sensors_count; i++)
     {
         if (deviceAddress[i] < 16)
-            Serial.print("0");
+            SERIAL_DEBUG_LN("0");
         Serial.print(deviceAddress[i], HEX);
     }
 }
@@ -101,13 +90,13 @@ float *CellTemp::ReadTempSensorData()
             cell_temp_sensor_results[i] = sensors.getTempC(temp_sensor_addresses);
 
             printAddress(temp_sensor_addresses);
-            Serial.println();
+            SERIAL_DEBUG_EOL("");
         }
         else
         {
-            Serial.print("Found ghost device at ");
+            SERIAL_DEBUG_LN("Found ghost device at ");
             Serial.print(i, DEC);
-            Serial.print(" but could not detect address. Check power and cabling");
+            SERIAL_DEBUG_LN(" but could not detect address. Check power and cabling");
         }
     }
     return cell_temp_sensor_results;

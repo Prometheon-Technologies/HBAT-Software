@@ -55,8 +55,8 @@ public:
         int flow_rate;
         int flow_rate_sensor_temp;
     };
+    Config_t config;
 
-    void InitAccumulateDataJson();
     bool loadConfig();
     // trigger a config write/commit
     bool setConfigChanged();
@@ -74,7 +74,6 @@ public:
     bool initSPIFFS();
     String readFile(fs::FS &fs, const char *path);
     void writeFile(fs::FS &fs, const char *path, const char *message);
-    Config_t config;
 
 private:
     Config_t default_cfg;
@@ -86,7 +85,6 @@ private:
     int maxTemp;
     String doc_string;
     // Temporary function to ensure that the correct number of cells are being read - this will be removed when the cell count is dynamically allocated
-    int numSensors;
 };
 
 extern Config cfg;

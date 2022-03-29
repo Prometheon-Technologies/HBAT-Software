@@ -20,9 +20,10 @@ public:
     void readAddresses(DeviceAddress deviceAddress);
     void printAddress(DeviceAddress deviceAddress);
     float *ReadTempSensorData();
-    int sensors_count;
 
 private:
 };
+
+extern int sensors_count;
 extern CellTemp Cell_Temp;
 #endif

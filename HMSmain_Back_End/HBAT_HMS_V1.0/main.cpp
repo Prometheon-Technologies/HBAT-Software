@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <defines.hpp>
 
 /******************************************************************************
@@ -11,36 +12,50 @@ void setup()
     Serial.begin(115200);
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW);
+
     Serial.println("Setting up the program, standby...");
     // Setup the main loop
-
-    timedTasks.SetupTimers();
     // Initialize the relay pins
-    /* int temp[5] = {45, 38, 36, 35, 48};
+    int temp[5] = {45, 38, 36, 35, 48};
     // initialize the Relay pins and set them to off state
     std::copy(temp, temp + sizeof(temp) / sizeof(temp[0]), cfg.config.relays_pin);
-
-    config.relays_pin[0] = 45;
-    config.relays_pin[1] = 38;
-    config.relays_pin[2] = 36;
-    config.relays_pin[3] = 35;
-    config.relays_pin[4] = 48;
 
     for (int i = 0; i < sizeof(cfg.config.relays_pin); i++)
     {
         pinMode(cfg.config.relays_pin[i], OUTPUT);
         digitalWrite(cfg.config.relays_pin[i], LOW);
     }
-    Hum.setupSfm3003();
-    Hum.SetupSensor();
+    // Wire.begin();
     HMSmain.setupSensor();
-    Cell_Temp.SetupSensors();
-    Hum.SetupPID();
+
     SERIAL_DEBUG_LN("HMS booting - please wait");
     Serial.println("Version: " + String(VERSION) + " " + String(__DATE__) + " " + String(__TIME__));
     Serial.println("");
-    cfg.CreateDefaultConfig();
     Serial.println("Starting...");
+    Serial.println("Creating Config File");
+    Cell_Temp.SetupSensors();
+    switch (humidity.setupSensor())
+    {
+    case 0:
+        Serial.println("Humidity Sensor Setup Failed - No sensors present");
+        break;
+    case 1:
+        Serial.println("Humidity Sensor Setup Failed - initialised sensor one");
+        break;
+    case 2:
+        Serial.println("Humidity Sensor Setup Failed - initialised sensor two");
+        break;
+    case 3:
+        Serial.println("Humidity Sensor Setup Successful");
+        break;
+    default:
+        Serial.println("Humidity Sensor Setup Failed - Unknown Error");
+        break;
+    }
+
+    /*
+    Relays.SetupPID();
+    cfg.CreateDefaultConfig();
     // Setup the network stack
     // Setup the Wifi Manager
     Serial.println("Reading Config File");
@@ -60,12 +75,12 @@ void setup()
     delay(100); */
 }
 
-void ScanI2CBus()
+/* void ScanI2CBus()
 {
     Scan.SetupScan();
     Scan.BeginScan();
 }
-
+ */
 void loop()
 {
     /* timedTasks.Run_Check_DataJSON_5();

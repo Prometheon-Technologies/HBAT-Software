@@ -8,7 +8,7 @@ public:
     AccumulateData();
     virtual ~AccumulateData();
 
-    void InitAccumulateDataJson();
+    void InitAccumulateData();
 
 private:
     // Stack Data to send

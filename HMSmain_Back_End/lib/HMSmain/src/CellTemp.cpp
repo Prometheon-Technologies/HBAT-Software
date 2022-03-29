@@ -1,14 +1,5 @@
 #include "CellTemp.hpp"
 
-CellTemp::CellTemp()
-{
-    sensors_count = sensors.getDeviceCount();
-}
-
-CellTemp::~CellTemp()
-{
-}
-
 // Setup a oneWire instance to communicate with any OneWire devices
 OneWire oneWire(ONE_WIRE_BUS);
 
@@ -17,6 +8,16 @@ DallasTemperature sensors(&oneWire);
 // variable to hold device addresses
 
 DeviceAddress temp_sensor_addresses;
+
+int sensors_count = sensors.getDeviceCount();
+
+CellTemp::CellTemp()
+{
+}
+
+CellTemp::~CellTemp()
+{
+}
 
 /******************************************************************************
  * Function: Setup DS18B20 sensors

@@ -1,5 +1,7 @@
 #include "accumulatedata.hpp"
 
+int numSensors = 10;
+
 AccumulateData::AccumulateData()
 {
 }
@@ -14,16 +16,16 @@ AccumulateData::~AccumulateData()
  * Parameters: None
  * Return: None
  ******************************************************************************/
-void AccumulateData::InitAccumulateDataJson()
+void AccumulateData::InitAccumulateData()
 {
-    if (numSensors > maxCellCount)
+    /* if (numSensors > maxCellCount)
     {
         numSensors = maxCellCount;
-    }
+    } */
 
     // Stack Data to send
-    cfg.config.stack_humidity = Hum.StackHumidity();
-    cfg.config.stack_temp = Hum.AverageStackTemp();
+    cfg.config.stack_humidity = humidity.StackHumidity();
+    cfg.config.stack_temp = humidity.AverageStackTemp();
     cfg.config.stack_current = HMSmain.readAmps();
     cfg.config.stack_voltage = HMSmain.StackVoltage();
     cfg.config.cell_count_max = maxCellCount;
@@ -32,9 +34,9 @@ void AccumulateData::InitAccumulateDataJson()
     if (cfg.config.flow_rate > 0)
     {
         // SFM3003 flow rate dataTosend in slm
-        cfg.config.flow_rate = Hum.flow;
+        cfg.config.flow_rate = humidity.loopSFM3003();
         // SFM3003 mass temp dataTosend
-        cfg.config.flow_rate_sensor_temp = Hum.temperature;
+        //cfg.config.flow_rate_sensor_temp = humidity.temperature;
     }
     else
     {
@@ -68,7 +70,7 @@ void AccumulateData::InitAccumulateDataJson()
     float stack_humidity[4];
     for (int i = 0; i < 4; i++)
     {
-        stack_humidity[i] = *Hum.ReadSensor();
+        stack_humidity[i] = *humidity.ReadSensor();
         cfg.config.stack_humidity = stack_humidity[1];
         cfg.config.stack_temp = stack_humidity[3];
     }

@@ -29,7 +29,7 @@ bool Charge_State;
 // Wifi Variables
 bool wifiMangerPortalRunning = false;
 bool wifiConnected = false;
-int numSensors = Cell_Temp.sensors_count;
+
 
 // Globally available functions
 char *StringtoChar(String inputString)

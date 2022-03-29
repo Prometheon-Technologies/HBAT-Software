@@ -1,13 +1,13 @@
 
 #include "timedtasks.hpp"
 
-timeObj ReadTimer;
+/* timeObj ReadTimer;
 timeObj ReadTimer_10;
 timeObj ReadTimer2_10;
 timeObj ReadTimer3_10;
 timeObj ReadTimer2;
 timeObj ReadTimer3;
-timeObj ReadTimer_10_2;
+timeObj ReadTimer_10_2; */
 
 TimedTasks::TimedTasks()
 {
@@ -17,7 +17,7 @@ TimedTasks::~TimedTasks()
 {
 }
 
-void TimedTasks::SetupTimers()
+/* void TimedTasks::SetupTimers()
 {
   ReadTimer.setTime(5000);
   ReadTimer_10.setTime(10000);
@@ -26,7 +26,7 @@ void TimedTasks::SetupTimers()
   ReadTimer2.setTime(5000);
   ReadTimer3.setTime(5000);
   ReadTimer_10_2.setTime(10000);
-}
+} */
 
 // Timer delay Settings
 
@@ -47,7 +47,7 @@ void TimedTasks::idle(void)
   }
 }
 
-void TimedTasks::Run_NetworkCheck_Background_every_10_Seconds()
+/* void TimedTasks::Run_NetworkCheck_Background_every_10_Seconds()
 {
   if (ReadTimer_10.ding())
   {
@@ -60,7 +60,7 @@ void TimedTasks::Run_Check_DataJSON_5()
 {
   if (ReadTimer2.ding())
   {
-    accumulatedata.InitAccumulateDataJson();
+    accumulatedata.InitAccumulateData();
     //Hum.loopSFM3003();
     ReadTimer2.start();
   }
@@ -75,6 +75,6 @@ void TimedTasks::updateCurrentData() // check to see if the data has changed
     //SERIAL_DEBUG_LNF("Heap: %d", ESP.getFreeHeap());
     ReadTimer_10_2.start();
   }
-}
+} */
 
 TimedTasks timedTasks;

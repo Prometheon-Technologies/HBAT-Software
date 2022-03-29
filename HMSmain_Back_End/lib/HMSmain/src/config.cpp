@@ -258,7 +258,6 @@ bool Config::loadConfig()
         config.relays[i] = jsonBuffer["relays"][i];
     }
 
-
     return true;
 }
 

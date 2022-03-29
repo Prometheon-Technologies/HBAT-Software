@@ -34,8 +34,8 @@
 
 // Data stack
 #include "HMS.hpp"
-#include "Humidity.hpp"
 #include "celltemp.hpp"
+#include "Humidity.hpp"
 // Humidity Sensors
 //#include <sfm3003.hpp>
 
@@ -98,7 +98,6 @@ extern bool Charge_State;
 extern bool wifiMangerPortalRunning;
 extern bool wifiConnected;
 // Temporary function to ensure that the correct number of cells are being read - this will be removed when the cell count is dynamically allocated
-extern int numSensors;
 
 // Globally available functions
 char *StringtoChar(String inputString);

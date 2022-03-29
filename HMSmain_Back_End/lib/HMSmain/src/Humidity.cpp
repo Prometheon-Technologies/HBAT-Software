@@ -3,30 +3,25 @@
 // Global Variables
 //  Setup an array of _relays to control peripherals. Numbers represent pin numbers.
 
-bool enableHeater = false;
-int WindowSize = 5000;
-unsigned long windowStartTime;
-uint16_t status;
-uint8_t loopCnt = 0;
-double Setpoint, Input, Output;
-PID myPID(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT); // Specify the links and initial tuning parameters
+int status = 0;
+int loopCnt = 0;
 
 Adafruit_SHT31 sht31;
 Adafruit_SHT31 sht31_2;
 
-Humidity::Humidity(void)
+bool enableHeater = false;
+
+int _offset = 32000; // _Offset for the sensor
+int HUMIDITY_SENSORS_ACTIVE = 0;
+
+float _scale = 140.0; // _Scale factor for Air and N2 is 140.0, O2 is 142.8
+
+Humidity::Humidity()
 {
-  _sensor1 = sht31.isHeaterEnabled();
-  _sensor2 = sht31_2.isHeaterEnabled();
-  flow = returnData[0];
-  temperature = returnData[1];
-  sht31 = Adafruit_SHT31();
-  sht31_2 = Adafruit_SHT31();
-  _offset = 32000; // _Offset for the sensor
-  _scale = 140.0;  // _Scale factor for Air and N2 is 140.0, O2 is 142.8
+  // Constructor
 }
 
-Humidity::~Humidity(void)
+Humidity::~Humidity()
 {
 }
 
@@ -36,26 +31,127 @@ Humidity::~Humidity(void)
  * Parameters: None
  * Return: None
  ******************************************************************************/
-void Humidity::SetupSensor()
+int Humidity::setupSensor()
 {
-  SERIAL_DEBUG_LN("SHT31 Sensors Setup Beginning");
+  Serial.println("SHT31 Sensors Setup Beginning....");
   // Set to 0x45 for alternate i2c address
-  if (!sht31.begin(0x44) ^ !sht31_2.begin(0x45))
+  if (!sht31.begin(0x44) && !sht31_2.begin(0x45))
   {
-    SERIAL_DEBUG_LN("Couldn't find SHT31 sensors");
-    while (1)
-      delay(1);
+    Serial.println("Couldn't find SHT31 sensors");
+    Serial.println("SHT31 Sensors Setup did not complete successfully, check your wiring or the addresses and try again");
+    HUMIDITY_SENSORS_ACTIVE = 0;
+    return 0;
   }
-  SERIAL_DEBUG_LN("SHT31 Sensors Setup Complete");
-  delay(1); // delay in between reads for stability
-
-  if (_sensor1 ^ _sensor2)
+  else if (!sht31.begin(0x44) && sht31_2.begin(0x45))
   {
-    SERIAL_DEBUG_LN("Sensors have Heater ENABLED");
+    Serial.println("Couldn't find SHT31 sensor #1");
+    Serial.println("SHT31 Sensors Setup did not complete successfully, check your wiring and try again");
+    HUMIDITY_SENSORS_ACTIVE = 1;
+    return 1;
+  }
+  else if (!sht31_2.begin(0x45) && sht31.begin(0x44))
+  {
+    Serial.println("Couldn't find SHT31 sensor #2");
+    Serial.println("SHT31 Sensors Setup did not complete successfully, check your wiring and try again");
+    HUMIDITY_SENSORS_ACTIVE = 2;
+    return 2;
   }
   else
   {
-    SERIAL_DEBUG_LN("Sensor 1 Heater Disabled");
+    Serial.println("SHT31 Sensors Setup Complete");
+    HUMIDITY_SENSORS_ACTIVE = 3;
+    return 3;
+  }
+  my_delay(1000L * 1000L); // delay in between reads for stability
+}
+
+bool Humidity::checkHeaterEnabled()
+{
+  switch (HUMIDITY_SENSORS_ACTIVE)
+  {
+  case 0:
+    return false;
+    break;
+  case 1:
+  {
+    bool _sensor1 = sht31.isHeaterEnabled();
+    bool heaterenabled = false;
+    if (++loopCnt == 30)
+    {
+      enableHeater = !enableHeater;
+      sht31.heater(enableHeater);
+      Serial.print("Heater Enabled State: ");
+      Serial.println(enableHeater);
+      if (_sensor1)
+      {
+        Serial.println("Sensor 1 Heater Heater ENABLED");
+        heaterenabled = true;
+      }
+      else
+      {
+        Serial.println("Sensor 1 Heater Disabled");
+        heaterenabled = false;
+      }
+      loopCnt = 0;
+    }
+    return heaterenabled;
+    break;
+  }
+  case 2:
+  {
+    bool _sensor2 = sht31_2.isHeaterEnabled();
+    bool heaterenabled = false;
+    if (++loopCnt == 30)
+    {
+      enableHeater = !enableHeater;
+      sht31_2.heater(enableHeater);
+      Serial.print("Heater Enabled State: ");
+      Serial.println(enableHeater);
+      if (_sensor2)
+      {
+        Serial.println("Sensors have Heater ENABLED");
+        heaterenabled = true;
+      }
+      else
+      {
+        Serial.println("Sensor 1 Heater Disabled");
+        heaterenabled = false;
+      }
+      loopCnt = 0;
+    }
+    return heaterenabled;
+    break;
+  }
+  case 3:
+  {
+    bool _sensor1 = sht31.isHeaterEnabled();
+    bool _sensor2 = sht31_2.isHeaterEnabled();
+    bool heaterenabled = false;
+    if (++loopCnt == 30)
+    {
+      enableHeater = !enableHeater;
+      sht31.heater(enableHeater);
+      sht31_2.heater(enableHeater);
+      Serial.print("Heater Enabled State: ");
+      Serial.println(enableHeater);
+      if (_sensor1 ^ _sensor2)
+      {
+        Serial.println("Sensors have Heater ENABLED");
+        heaterenabled = true;
+      }
+      else
+      {
+        Serial.println("Sensor 1 Heater Disabled");
+        heaterenabled = false;
+      }
+      loopCnt = 0;
+    }
+    return heaterenabled;
+    break;
+  }
+  default: // Should never get here
+    return false;
+    break;
   }
 }
 
@@ -65,7 +161,7 @@ void Humidity::SetupSensor()
  * Parameters: None
  * Return: float
  ******************************************************************************/
-float Humidity::AverageStackTemp()
+/* float Humidity::AverageStackTemp()
 {
   float stack_temp[4];
   for (int i = 0; i < 4; i++)
@@ -73,7 +169,7 @@ float Humidity::AverageStackTemp()
     stack_temp[i] = *ReadSensor();
   }
   return (stack_temp[0] + stack_temp[2]) / 2; // Read the _temperature from the sensor and average the two sensors.
-}
+} */
 
 /******************************************************************************
  * Function: Average Stack Humidity
@@ -81,7 +177,7 @@ float Humidity::AverageStackTemp()
  * Parameters: None
  * Return: float
  ******************************************************************************/
-float Humidity::StackHumidity()
+/* float Humidity::StackHumidity()
 {
   float stack_humidity[4];
 
@@ -90,7 +186,7 @@ float Humidity::StackHumidity()
     stack_humidity[i] = *ReadSensor();
   }
   return (stack_humidity[1] + stack_humidity[3]) / 2;
-}
+} */
 
 /******************************************************************************
  * Function: Read Humidity Sensors
@@ -98,7 +194,7 @@ float Humidity::StackHumidity()
  * Parameters: None
  * Return: float array
  ******************************************************************************/
-float *Humidity::ReadSensor()
+/* float *Humidity::ReadSensor()
 {
   float *climatedata = (float *)malloc(sizeof(float) * 4);
 
@@ -107,14 +203,14 @@ float *Humidity::ReadSensor()
   {
     climatedata[0] = sht31.readTemperature();
     climatedata[1] = sht31_2.readTemperature();
-    SERIAL_DEBUG_LN("Sensor 1 Temp *C = ");
-    SERIAL_DEBUG_ADD(climatedata[0]);
-    SERIAL_DEBUG_LN("Sensor 2 Temp *C = ");
-    SERIAL_DEBUG_ADD(climatedata[1]);
+    Serial.println("Sensor 1 Temp *C = ");
+    Serial.print(climatedata[0]);
+    Serial.println("Sensor 2 Temp *C = ");
+    Serial.print(climatedata[1]);
   }
   else
   {
-    SERIAL_DEBUG_LN("Failed to read _temperature");
+    Serial.println("Failed to read _temperature");
   }
 
   // check if 'is not a number'
@@ -122,97 +218,32 @@ float *Humidity::ReadSensor()
   {
     climatedata[2] = sht31.readHumidity();
     climatedata[3] = sht31_2.readHumidity();
-    SERIAL_DEBUG_LN("Sensor 1 Humidity %% = ");
-    SERIAL_DEBUG_ADD(climatedata[2]);
-    SERIAL_DEBUG_LN("Sensor 2 Humidity %% = ");
-    SERIAL_DEBUG_ADD(climatedata[3]);
+    Serial.println("Sensor 1 Humidity %% = ");
+    Serial.print(climatedata[2]);
+    Serial.println("Sensor 2 Humidity %% = ");
+    Serial.print(climatedata[3]);
   }
   else
   {
-    SERIAL_DEBUG_LN("Failed to read humidity");
+    Serial.println("Failed to read humidity");
   }
-
-  my_delay(100000L);
+  delay(1000); // delay in between reads for stability
+  // my_delay(100000L);
 
   // Toggle heater enabled state every 30 seconds
   // An ~3.0 degC _temperature increase can be noted when heater is enabled
   // This is needed due to the high operating humidity of the system
-  if (++loopCnt == 30)
-  {
-    enableHeater = !enableHeater;
-    sht31.heater(enableHeater);
-    sht31_2.heater(enableHeater);
-    SERIAL_DEBUG_ADD("Heater Enabled State: ");
-
-    if (_sensor1 ^ _sensor2)
-    {
-      SERIAL_DEBUG_ADD("Sensors have Heater ENABLED");
-    }
-    else
-    {
-      SERIAL_DEBUG_LN("Sensor 1 Heater Disabled");
-    }
-
-    loopCnt = 0;
-  }
+  checkHeaterEnabled();
   return climatedata;
-}
+} */
 
 /******************************************************************************
  * Function: Control MPX2010DP - K014308 and AD623
  * Description: This function allows for the control of the MPX2010DP - K014308 and AD623
  * Parameters: None
  * Return: None
+ * ADD IN CODE TO READ PRESSURE SENSORS
  ******************************************************************************/
-// FIXME: ADD IN CODE TO READ PRESSURE SENSORS
-
-/******************************************************************************
- * Function: Setup PID Controller
- * Description: This function sets up the PID controller
- * Parameters: None
- * Return: None
- ******************************************************************************/
-void Humidity::SetupPID()
-{
-
-  windowStartTime = millis();
-
-  // initialize the variables we're linked to
-  Setpoint = 80;
-
-  // tell the PID to range between 0 and the full window size
-  myPID.SetOutputLimits(0, WindowSize);
-
-  // turn the PID on
-  myPID.SetMode(AUTOMATIC);
-}
-
-/******************************************************************************
- * Function: Humidity Related Relay Control
- * Description: Initialise a PID controller to control a relay based on humidity sensor readings
- * Parameters: None
- * Return: None
- * SFM3003 Mass Air _Flow Sensor code to be integrated
- * Below PID Relay code is an example of how to use the PID controller
- * This code should only be used during the Charging phase. Integrate State Machine to use this code
- ******************************************************************************/
-void Humidity::HumRelayOnOff()
-{
-  float climate_data = StackHumidity();
-  Input = climate_data;
-  myPID.Compute();
-
-  // turn the output pin on/off based on pid output
-  unsigned long now = millis();
-  if (now - windowStartTime > WindowSize)
-  { // time to shift the Relay Window
-    windowStartTime += WindowSize;
-  }
-  if (Output > now - windowStartTime)
-    digitalWrite(cfg.config.relays_pin[0], HIGH);
-  else
-    digitalWrite(cfg.config.relays_pin[0], LOW);
-}
 
 /* int Humidity::SetupSFM3003()
 {
@@ -302,10 +333,10 @@ int Humidity::SFM3003()
   return 0;
 } */
 
-void Humidity::setupSfm3003()
+/* void Humidity::setupSfm3003()
 {
-  Wire.begin();
-  /* int a = 0;
+
+  int a = 0;
   int b = 0;
   int c = 0;
 
@@ -321,23 +352,21 @@ void Humidity::setupSfm3003()
    b = Wire.read(); // second received byte stored here
    c = Wire.read(); // third received byte stored here
    Wire.endTransmission();
-   delay(5); */
-}
+   delay(5);
+} */
 
-uint8_t Humidity::crc8(const uint8_t data, uint8_t crc)
+/* uint8_t Humidity::crc8(const uint8_t data, uint8_t crc)
 {
   crc ^= data;
 
   for (uint8_t i = 8; i; --i)
   {
-    crc = (crc & 0x80)
-              ? (crc << 1) ^ 0x31
-              : (crc << 1);
+    crc = (crc & 0x80) ? (crc << 1) ^ 0x31 : (crc << 1);
   }
   return crc;
-}
+} */
 
-int Humidity::loopSFM3003()
+/* int Humidity::loopSFM3003()
 {
   auto device = 0x28;
   unsigned long timed_event = 500;
@@ -361,23 +390,23 @@ int Humidity::loopSFM3003()
       mycrc = crc8(b, mycrc);    // and the second byte too
       if (mycrc != crc)
       { // check if the calculated and the received CRC byte matches
-        SERIAL_DEBUG_LN("Error: wrong CRC");
+        Serial.println("Error: wrong CRC");
       }
-      SERIAL_DEBUG_LN('p');
-      SERIAL_DEBUG_LN(a);
-      SERIAL_DEBUG_LN(b);
-      SERIAL_DEBUG_LN(crc);
-      SERIAL_DEBUG_LN('h');
+      Serial.println('p');
+      Serial.println(a);
+      Serial.println(b);
+      Serial.println(crc);
+      Serial.println('h');
       a = (a << 8) | b; // combine the two received bytes to a 16bit integer value
       // a >>= 2; // remove the two least significant bits
       int Flow = (a - _offset) / _scale;
-      // SERIAL_DEBUG_LN(a); // print the raw data from the sensor to the serial interface
-      SERIAL_DEBUG_LN(Flow); // print the calculated _flow to the serial interface
+      // Serial.println(a); // print the raw data from the sensor to the serial interface
+      Serial.println(Flow); // print the calculated flow to the serial interface
       start_time = current_time;
-      returnData[0] = Flow;
+      return Flow;
     }
   }
-  return flow;
-}
+  return 0;
+} */
 
-Humidity Hum;
+Humidity humidity;

@@ -33,7 +33,7 @@ void CellTemp::SetupSensors()
     //handle the case where no sensors are connected
     if (sensors_count == 0)
     {
-        Serial.println("No sensors found");
+        Serial.println("No temperature sensors found - please connect them and restart the device");
         return;
     }
     // locate devices on the bus

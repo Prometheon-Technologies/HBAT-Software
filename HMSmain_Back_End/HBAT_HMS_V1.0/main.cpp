@@ -29,7 +29,9 @@ void setup()
     HMSmain.setupSensor();
 
     SERIAL_DEBUG_LN("HMS booting - please wait");
-    Serial.println("Version: " + String(VERSION) + " " + String(__DATE__) + " " + String(__TIME__));
+    Serial.println("Version: " + String(VERSION) + " ");
+    Serial.println("");
+    Serial.println("Date: " + String(__DATE__) + " " + String(__TIME__));
     Serial.println("");
     Serial.println("Starting...");
     Cell_Temp.SetupSensors();

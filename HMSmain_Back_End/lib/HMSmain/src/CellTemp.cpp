@@ -30,6 +30,12 @@ void CellTemp::SetupSensors()
     // Start up the ds18b20 library
     sensors.begin();
 
+    //handle the case where no sensors are connected
+    if (sensors_count == 0)
+    {
+        Serial.println("No sensors found");
+        return;
+    }
     // locate devices on the bus
     SERIAL_DEBUG_LN("Locating devices...");
     SERIAL_DEBUG_LN("Found ");

@@ -32,7 +32,6 @@ void setup()
     Serial.println("Version: " + String(VERSION) + " " + String(__DATE__) + " " + String(__TIME__));
     Serial.println("");
     Serial.println("Starting...");
-    Serial.println("Creating Config File");
     Cell_Temp.SetupSensors();
     switch (humidity.setupSensor())
     {
@@ -53,6 +52,7 @@ void setup()
         break;
     }
 
+    Serial.println("Creating Config File");
     /*
     Relays.SetupPID();
     cfg.CreateDefaultConfig();

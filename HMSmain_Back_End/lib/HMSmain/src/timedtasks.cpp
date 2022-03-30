@@ -1,14 +1,13 @@
 
 #include "timedtasks.hpp"
 
-/* timeObj ReadTimer;
-timeObj ReadTimer_10;
+/* timeObj ReadTimer_10;
+timeObj ReadTimer;
 timeObj ReadTimer2_10;
 timeObj ReadTimer3_10;
 timeObj ReadTimer2;
 timeObj ReadTimer3;
 timeObj ReadTimer_10_2; */
-
 TimedTasks::TimedTasks()
 {
 }

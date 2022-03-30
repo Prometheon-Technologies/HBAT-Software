@@ -31,32 +31,5 @@
 		false,
 		false,
 		false
-	],
-	"stack_humidity": 0,
-	"stack_temp": 0,
-	"stack_voltage": 0,
-	"cell_temp": [
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0
-	],
-	"cell_voltage": [
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
-		0
 	]
 }

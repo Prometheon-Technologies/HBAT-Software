@@ -48,6 +48,7 @@
 #include "accumulatedata.hpp"
 
 // Timed tasks
+#include "Relays.hpp"
 #include "timedtasks.hpp"
 
 #ifdef DEFAULT_HOSTNAME

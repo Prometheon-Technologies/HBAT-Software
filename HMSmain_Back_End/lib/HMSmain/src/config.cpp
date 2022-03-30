@@ -2,7 +2,6 @@
 
 // save last "timestamp" the config has been saved
 
-
 Config::Config()
 {
     last_config_change = false;

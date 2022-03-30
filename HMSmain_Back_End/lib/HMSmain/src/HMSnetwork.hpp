@@ -30,7 +30,7 @@ public:
     int DiscovermDNSBroker();
     void SetupmDNSServer();
     bool SetupmDNSLoop();
-    void loadConfig();
+    void loadMQTTConfig();
     void SetupServer();
     void CheckNetworkLoop();
     void SetupWifiScan();

@@ -29,7 +29,7 @@ uint32_t _lastOTACheck = 0;
 String SSID;
 String PASS;
 String ntptime;
-String ntptimeoffset;µ
+String ntptimeoffset;
 String mdns;
 String dhcpcheck;
 
@@ -57,7 +57,6 @@ HMSnetwork::~HMSnetwork()
 
 bool HMSnetwork::SetupNetworkStack()
 {
-    WiFi.persistent(true);
     if (!cfg.loadConfig())
     {
         SERIAL_DEBUG_LN("[INFO]: Failed to load config");
@@ -96,7 +95,7 @@ bool HMSnetwork::SetupNetworkStack()
         SERIAL_DEBUG_ADD(SSID);
         SERIAL_DEBUG_LN("");
         WiFi.mode(WIFI_STA);
-        // WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
+        WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
         WiFi.disconnect(); // Disconnect from WiFi AP if connected
         localIP.fromString(cfg.config.clientIP);
 
@@ -105,8 +104,7 @@ bool HMSnetwork::SetupNetworkStack()
             SERIAL_DEBUG_LN("[INFO]: STA Failed to configure");
             return false;
         }
-
-        WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
+        // WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
 
         unsigned long currentMillis = millis();
         previousMillis = currentMillis;

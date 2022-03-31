@@ -49,25 +49,46 @@ void setup()
         SERIAL_DEBUG_LN("Humidity Sensor Setup Failed - Unknown Error");
         break;
     }
+
     SERIAL_DEBUG_LN("");
     Relay.SetupPID();
     // Setup the network stack
     // Setup the Wifi Manager
     SERIAL_DEBUG_LN("Setting up WiFi");
+    if (ENABLE_MQTT_SUPPORT)
+    {
+        SERIAL_DEBUG_LN("Setting up MQTT");
+        network.loadMQTTConfig();
+    }
+
     network.SetupWebServer();
     SERIAL_DEBUG_LN(F("Starting Webserver"));
     network.SetupServer();
-    // network.SetupmDNSServer(); // setup the mDNS server for the future web-front-end
-    /*
-    // network.SetupWebServer();// Setup the server
-    network.loadConfig();
-    //network.DiscovermDNSBroker(); // discover the mDNS broker for mqtt
-    HMSmqtt.MQTTSetup();
-    SERIAL_DEBUG_LN("INFO: HTTP web server started");
+
+    if (ENABLE_MQTT_SUPPORT)
+    {
+        HMSmqtt.MQTTSetup();
+    }
+    if (ENABLE_MDNS_SUPPORT)
+    {
+        network.SetupmDNSServer();    // setup the mDNS server for the future web-front-end
+        network.SetupWebServer();     // Setup the server
+        network.DiscovermDNSBroker(); // discover the mDNS broker for mqtt
+    }
+
+    SERIAL_DEBUG_LN("");
+    if (network.SetupNetworkStack())
+    {
+        SERIAL_DEBUG_LN("Network Stack Setup Successful");
+        SERIAL_DEBUG_LN("INFO: HTTP web server started");
+    }
+    else
+    {
+        SERIAL_DEBUG_LN("Network Stack Setup Failed - Activating Access Point Mode");
+    }
     SERIAL_DEBUG_LN("\n===================================");
-    Front_End.SetupServer();
     SERIAL_DEBUG_LN("Setup Complete");
-    delay(100); */
+    delay(100);
 }
 
 /* void ScanI2CBus()

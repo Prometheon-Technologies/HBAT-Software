@@ -70,42 +70,4 @@ void FrontEnd::loadConfig()
                    cfg.config.MQTTDeviceName)
 }
 
-void FrontEnd::SetupServer()
-{
-  Serial.begin(115200);
-#if HMS_DEBUG != 0
-  while (!Serial)
-    delay(10); // will pause until serial console opens
-#endif
-  SERIAL_DEBUG_LN(F("Starting Webserver"))
-  // start the server
-
-  SERIAL_DEBUG_LN("Booting up...");
-// FS debug information
-// THIS NEEDS TO BE PAST THE WIFI SETUP!! OTHERWISE WIFI SETUP WILL BE DELAYED
-#if HMS_DEBUG != 0
-  SERIAL_DEBUG_LN(F("SPIFFS contents:"))
-#ifdef ESP32
-  File root = SPIFFS.open("/");
-  File file = root.openNextFile();
-  while (file)
-  {
-    SERIAL_DEBUG_LNF("FS File: %s, size: %lu", file.name(), file.size())
-    file = root.openNextFile();
-  }
-  SERIAL_DEBUG_EOL
-  unsigned int totalBytes = SPIFFS.totalBytes();
-  unsigned int usedBytes = SPIFFS.usedBytes();
-#endif
-  if (usedBytes == 0)
-  {
-    SERIAL_DEBUG_LN(F("NO WEB SERVER FILES PRESENT! SEE: \n"))
-  }
-  SERIAL_DEBUG_LNF("FS Size: %luKB, used: %luKB, %0.2f%%",
-                   totalBytes, usedBytes,
-                   (float)100 / totalBytes * usedBytes)
-  SERIAL_DEBUG_EOL
-#endif
-}
-
 FrontEnd Front_End;

@@ -84,29 +84,59 @@ void setup()
     }
     else
     {
-        SERIAL_DEBUG_LN("Network Stack Setup Failed - Activating Access Point Mode");
+        SERIAL_DEBUG_LN("Network Stack Setup Failed - Activating Access-Point Mode");
     }
     SERIAL_DEBUG_LN("\n===================================");
     SERIAL_DEBUG_LN("Setup Complete");
     delay(100);
 }
 
-/* void ScanI2CBus()
+void ScanI2CBus()
 {
-    Scan.SetupScan();
-    Scan.BeginScan();
+    if (ENABLE_I2C_SCANNER)
+    {
+        Scan.SetupScan();
+        Scan.BeginScan();
+    }
 }
- */
+
+void accumulateSensorData()
+{
+    accumulatedata.InitAccumulateData();
+}
+
+void checkNetwork()
+{
+    network.CheckNetworkLoop();
+}
+
+void updateCurrentData() // check to see if the data has changed
+{
+    cfg.updateCurrentData();
+    SERIAL_DEBUG_LNF("Heap: %d", ESP.getFreeHeap());
+}
+
 void loop()
 {
-    /* timedTasks.Run_Check_DataJSON_5();
-    timedTasks.Run_NetworkCheck_Background_every_10_Seconds();
-    delay(100);
-    if (WiFi.status() == WL_CONNECTED)
+    // Check for the network state
+    timedTasks.idle();
+    timedTasks.setSeconds(10);
+    timedTasks_2.idle();
+    timedTasks_2.setSeconds(2);
+
+    timedTasks.setCallback(ScanI2CBus);
+
+    timedTasks_2.setCallback(accumulateSensorData);
+    timedTasks.setCallback(checkNetwork);
+    if (ENABLE_MQTT_SUPPORT)
     {
-        network.SetupmDNSLoop();
-        HMSmqtt.MQTTLoop();
-        // Front_End.Loop();
-        HMSmqtt.RunMqttService();
-    } */
+        if (WiFi.status() == WL_CONNECTED)
+        {
+            network.mDNSLoop();
+            HMSmqtt.MQTTLoop();
+            // Front_End.Loop();
+            HMSmqtt.RunMqttService();
+        }
+    }
+    delay(100);
 }

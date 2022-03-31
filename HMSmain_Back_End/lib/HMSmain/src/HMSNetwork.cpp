@@ -456,7 +456,7 @@ void HMSnetwork::SetupmDNSServer()
     MDNS.addService("http", "tcp", 80);
 }
 
-bool HMSnetwork::SetupmDNSLoop()
+bool HMSnetwork::mDNSLoop()
 {
     // ######################## Multicast DNS #########################
     // Check if a new espClient has connected

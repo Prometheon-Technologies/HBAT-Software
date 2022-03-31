@@ -27,4 +27,6 @@ private:
 };
 
 extern TimedTasks timedTasks;
+extern TimedTasks timedTasks_2;
+
 #endif

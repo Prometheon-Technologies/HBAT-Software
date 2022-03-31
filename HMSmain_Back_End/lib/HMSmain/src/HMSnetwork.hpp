@@ -29,7 +29,7 @@ public:
     void SetupWebServer();
     int DiscovermDNSBroker();
     void SetupmDNSServer();
-    bool SetupmDNSLoop();
+    bool mDNSLoop();
     void loadMQTTConfig();
     void SetupServer();
     void CheckNetworkLoop();

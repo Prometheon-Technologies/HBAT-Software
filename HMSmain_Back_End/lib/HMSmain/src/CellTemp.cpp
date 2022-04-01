@@ -52,7 +52,7 @@ void CellTemp::SetupSensors()
             Serial.print(i, DEC);
             SERIAL_DEBUG_LN(" with address: ");
             printAddress(temp_sensor_addresses);
-            SERIAL_DEBUG_EOL("");
+            SERIAL_DEBUG_BOL;
         }
         else
         {
@@ -97,7 +97,7 @@ float *CellTemp::ReadTempSensorData()
             cell_temp_sensor_results[i] = sensors.getTempC(temp_sensor_addresses);
 
             printAddress(temp_sensor_addresses);
-            SERIAL_DEBUG_EOL("");
+            SERIAL_DEBUG_BOL;
         }
         else
         {

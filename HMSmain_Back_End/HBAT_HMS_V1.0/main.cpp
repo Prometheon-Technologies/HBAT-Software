@@ -45,7 +45,7 @@ void setup()
     // initialize the Relay pins and set them to off state
     std::copy(temp, temp + sizeof(temp) / sizeof(temp[0]), cfg.config.relays_pin);
 
-    for (int i = 0; i < sizeof(cfg.config.relays_pin); i++)
+    for (int i = 0; i < sizeof(cfg.config.relays_pin) / sizeof(cfg.config.relays_pin[0]); i++)
     {
         pinMode(cfg.config.relays_pin[i], OUTPUT);
         digitalWrite(cfg.config.relays_pin[i], LOW);

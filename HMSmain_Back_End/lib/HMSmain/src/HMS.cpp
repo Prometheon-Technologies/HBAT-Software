@@ -175,17 +175,17 @@ void HMS::calibrateAmps()
             break;
         case '0':
             ACS.setMidPoint(512);
-            Serial.print("," + ACS.getMidPoint());
+            Serial.print("," + String(ACS.getMidPoint()));
             break;
         case '*':
             ACS.setmVperAmp(ACS.getmVperAmp() * 1.05);
             break;
         case '/':
             ACS.setmVperAmp(ACS.getmVperAmp() / 1.05);
-            Serial.print("," + ACS.getmVperAmp());
+            Serial.print("," + String(ACS.getmVperAmp()));
             break;
         default:
-            printf("No input detected");
+            Serial.println("No input detected");
         }
     }
     my_delay(100000L);

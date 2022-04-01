@@ -16,15 +16,18 @@ HMSMqtt::~HMSMqtt()
 //############################## MQTT HELPER FUNCTIONS ##############################
 void mqttSendStatus(String doc)
 {
+  StaticJsonDocument<1024> Doc;
+  size_t b = sizeof(doc);
+  deserializeJson(Doc, doc.c_str(), b);
   char buffer[256];
-  size_t n = serializeJson(doc, buffer);
+  size_t n = serializeJson(Doc, buffer);
   if (!mqttProcessing)
   {
     char *topic_data;
     const char *json = "/json_data";
     topic_data = appendChartoChar(cfg.config.MQTTTopic, json); // append string two to the result.
     mqttClient.publish(topic_data, buffer, n);
-    SERIAL_DEBUG_LNF("Sending MQTT package: %s", doc.c_str());
+    SERIAL_DEBUG_LNF("Sending MQTT package: %s", String(buffer));
     mqttProcessing = false;
     free(topic_data);
   }
@@ -46,7 +49,7 @@ void callback(char *topic, byte *message, unsigned int length)
   StaticJsonDocument<1024> doc;
   deserializeJson(doc, message, length);
 
-  SERIAL_DEBUG_LNF("Received MQTT package: %s", doc.as<String>().c_str())
+  // SERIAL_DEBUG_LNF("Received MQTT package: %s", doc.as<String>())
 
   JsonObject obj = doc.as<JsonObject>();
   for (JsonPair p : obj)
@@ -73,7 +76,8 @@ void callback(char *topic, byte *message, unsigned int length)
     }
   }
   mqttProcessing = false;
-  mqttSendStatus(doc.as<String>());
+  String Doc = doc.as<String>();
+  mqttSendStatus(Doc);
 }
 //############################## MQTT HELPER FUNCTIONS END ############################HMS
 
@@ -223,7 +227,7 @@ void HMSMqtt::RunMqttService()
       free(mqttSetTopicS);
       free(setTopic);
 
-      DynamicJsonDocument JSONencoder(1024);
+      StaticJsonDocument<1024> JSONencoder;
       JSONencoder["~"] = cfg.config.MQTTTopic,
       JSONencoder["name"] = cfg.config.MQTTDeviceName,
       JSONencoder["dev"]["ids"] = cfg.config.MQTTClientID,
@@ -257,7 +261,8 @@ void HMSMqtt::RunMqttService()
         if (mqttClient.endPublish())
         {
           SERIAL_DEBUG_LN("Configuration Publishing Finished");
-          mqttSendStatus(JSONencoder.as<String>());
+          String status = JSONencoder.as<String>();
+          mqttSendStatus(status);
           SERIAL_DEBUG_LN("Sending Initial Status");
         }
       }

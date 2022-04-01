@@ -29,9 +29,6 @@
 #include <Wire.h>
 #include "i2cscan.hpp"
 
-// FrontEnd
-#include "FrontEnd.hpp"
-
 // Data stack
 #include "HMS.hpp"
 #include "celltemp.hpp"
@@ -61,15 +58,19 @@
 
 #define maxCellCount 10 // max number of cells
 
+// Globally available functions
+char *StringtoChar(String inputString);
+char *appendChartoChar(const char *hostname, const char *def_host);
+void my_delay(volatile long delay_time);
+String generateDeviceID();
+
 /*######################## MQTT Configuration ########################*/
 #ifdef ENABLE_MQTT_SUPPORT
 #pragma message STR(ENABLE_MQTT_SUPPORT)
 // these are deafault settings which can be changed in the web interface "settings" page
-#define MQTT_ENABLED 1
 #define MQTT_SECURE_ENABLED 0
 #define MQTT_PORT 1883
 #define MQTT_PORT_SECURE 8883
-#define MQTT_UNIQUE_IDENTIFIER HMSmain.generateDeviceID() // A Unique Identifier for the device in Homeassistant (MAC Address used by default)
 
 #define MQTT_MAX_TRANSFER_SIZE 1024
 // MQTT includes
@@ -78,7 +79,6 @@
 // Variables for MQTT
 extern const char *MQTT_TOPIC;
 extern const String HOMEASSISTANT_MQTT_HOSTNAME;
-extern const String MQTT_HOSTNAME;
 extern const String MQTT_USER;
 extern const String MQTT_PASS;
 extern const String MQTT_HOMEASSISTANT_TOPIC_SET; // MQTT Topic to subscribe to for changes(Home Assistant)
@@ -95,14 +95,9 @@ extern char mDNS_hostname[4];
 extern int period;
 extern unsigned long time_now;
 extern bool Charge_State;
+
 // Wifi Variables
 extern bool wifiMangerPortalRunning;
 extern bool wifiConnected;
-// Temporary function to ensure that the correct number of cells are being read - this will be removed when the cell count is dynamically allocated
-
-// Globally available functions
-char *StringtoChar(String inputString);
-char *appendChartoChar(const char *hostname, const char *def_host);
-void my_delay(volatile long delay_time);
 
 #endif

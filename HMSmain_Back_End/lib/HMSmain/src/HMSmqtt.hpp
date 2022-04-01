@@ -13,18 +13,16 @@ class HMSMqtt
 {
 public:
   // Constructor
-  HMSMqtt(void);
-  virtual ~HMSMqtt(void);
+  HMSMqtt();
+  virtual ~HMSMqtt();
   
   // Initialize the library
-  void mqttCallback(char *topic, byte *payload, unsigned int length);
   bool MQTTSetup();
-  int MQTTLoop();
+  bool MQTTLoop();
   void RunMqttService();
   void MessageReceived(char topic[], char payload[]);
   void MQTTPublish(char topic[], char payload[]);
-  int CheckWifiState();
-  int ReConnect();
+  bool ReConnect();
 
 private:
 };

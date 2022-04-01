@@ -381,18 +381,18 @@ int HMSnetwork::DiscovermDNSBroker()
     // check if there is a WiFi connection
     if (WiFi.status() == WL_CONNECTED)
     {
-        SERIAL_DEBUG_LN("[INFO]: \nconnected!");
+        SERIAL_DEBUG_LN("[mDNS Broker Discovery]: \nconnected!");
 
         // ######################## Multicast DNS #########################
 
-        SERIAL_DEBUG_ADD("Setting up mDNS: ");
+        SERIAL_DEBUG_ADD("[mDNS Broker Discovery]: Setting up mDNS: ");
         if (!MDNS.begin(mqtt_mDNS_clientId))
         {
-            SERIAL_DEBUG_LN("[INFO]: [Fail]");
+            SERIAL_DEBUG_LN("[mDNS Broker Discovery]: [Fail]");
         }
         else
         {
-            SERIAL_DEBUG_LN("[INFO]: [OK]");
+            SERIAL_DEBUG_LN("[mDNS Broker Discovery]: [OK]");
             SERIAL_DEBUG_ADD("Querying MQTT broker: ");
 
             int n = MDNS.queryService("mqtt", "tcp");
@@ -400,22 +400,20 @@ int HMSnetwork::DiscovermDNSBroker()
             if (n == 0)
             {
                 // No service found
-                SERIAL_DEBUG_LN("[INFO]: [Fail]");
+                SERIAL_DEBUG_LN("[mDNS Broker Discovery]: [Fail]");
                 return 0;
             }
             else
             {
                 int mqttPort;
                 // Found one or more MQTT service - use the first one.
-                SERIAL_DEBUG_LN("[INFO]: [OK]");
+                SERIAL_DEBUG_LN("[mDNS Broker Discovery]: [OK]");
                 mqttServer = MDNS.IP(0);
                 mqttPort = MDNS.port(0);
                 heapStr(&(cfg.config.MQTTBroker), mqttServer.toString().c_str());
-                int number = mqttPort;
-                char charValue = number + '0';
-                SERIAL_DEBUG_ADDF("The port is:%c", charValue);
-                heapStr(&(cfg.config.MQTTPort), &charValue);
-                SERIAL_DEBUG_ADD("MQTT broker found at: ");
+                SERIAL_DEBUG_ADDF("[mDNS Broker Discovery]: The port is:%d", mqttPort);
+                cfg.config.MQTTPort = mqttPort;
+                SERIAL_DEBUG_ADD("[mDNS Broker Discovery]: MQTT broker found at: ");
                 SERIAL_DEBUG_ADD(mqttServer);
                 SERIAL_DEBUG_ADD(cfg.config.MQTTBroker);
                 SERIAL_DEBUG_ADD(":");
@@ -576,33 +574,43 @@ void HMSnetwork::loadMQTTConfig()
     size_t size = sizeof(cfg.config.hostname);
     if (!cfg.isValidHostname(cfg.config.hostname, size - 1))
     {
-        strncpy(cfg.config.hostname, DEFAULT_HOSTNAME, size - 1);
+        heapStr(&cfg.config.hostname, DEFAULT_HOSTNAME);
         cfg.setConfigChanged();
     }
+    String MQTT_CLIENT_ID = generateDeviceID();
+    cfg.config.MQTTEnabled = ENABLE_MQTT_SUPPORT;
+    char *mqtt_user = StringtoChar(MQTT_USER);
+    char *mqtt_pass = StringtoChar(MQTT_PASS);
+    char *mqtt_topic = StringtoChar(MQTT_TOPIC);
+    char *mqtt_topic_set = StringtoChar(MQTT_HOMEASSISTANT_TOPIC_SET);
+    char *mqtt_device_name = StringtoChar(MQTT_DEVICE_NAME);
+    char *mqtt_client_id = StringtoChar(MQTT_CLIENT_ID);
+    heapStr(&cfg.config.MQTTUser, mqtt_user);
+    heapStr(&cfg.config.MQTTPass, mqtt_pass);
+    heapStr(&cfg.config.MQTTTopic, mqtt_topic);
+    heapStr(&cfg.config.MQTTSetTopic, mqtt_topic_set);
+    heapStr(&cfg.config.MQTTDeviceName, mqtt_device_name);
+    heapStr(&cfg.config.MQTTClientID, mqtt_client_id);
     WiFi.setHostname(cfg.config.hostname); // define hostname
+    cfg.setConfigChanged();
 
-    if (cfg.config.MQTTEnabled)
-    {
-        SERIAL_DEBUG_LN(F("MQTT Enabled"));
-        SERIAL_DEBUG_LN(F("MQTT Broker: "));
-        SERIAL_DEBUG_LN(cfg.config.MQTTBroker);
-        SERIAL_DEBUG_LN(F("MQTT Port: "));
-        SERIAL_DEBUG_LN(cfg.config.MQTTPort);
-        SERIAL_DEBUG_LN(F("MQTT User: "));
-        SERIAL_DEBUG_LN(cfg.config.MQTTUser);
-        SERIAL_DEBUG_LN(F("MQTT Pass: "));
-        SERIAL_DEBUG_LN(cfg.config.MQTTPass);
-        SERIAL_DEBUG_LN(F("MQTT Topic: "));
-        SERIAL_DEBUG_LN(cfg.config.MQTTTopic);
-        SERIAL_DEBUG_LN(F("MQTT Set Topic: "));
-        SERIAL_DEBUG_LN(cfg.config.MQTTSetTopic);
-        SERIAL_DEBUG_LN(F("MQTT Device Name: "));
-        SERIAL_DEBUG_LN(cfg.config.MQTTDeviceName);
-    }
-    else
-    {
-        SERIAL_DEBUG_LN(F("MQTT Disabled"));
-    }
+    free(mqtt_user);
+    free(mqtt_pass);
+    free(mqtt_topic);
+    free(mqtt_topic_set);
+    free(mqtt_device_name);
+
+    SERIAL_DEBUG_LNF("Loaded config: hostname %s, MQTT enabled %s, MQTT host %s, MQTT port %d, MQTT user %s, MQTT pass %s, MQTT topic %s, MQTT set topic %s, MQTT device name %s",
+                     cfg.config.hostname,
+                     (cfg.config.MQTTEnabled == ENABLE_MQTT_SUPPORT) ? "true" : "false",
+                     cfg.config.MQTTBroker,
+                     cfg.config.MQTTPort,
+                     cfg.config.MQTTUser,
+                     cfg.config.MQTTPass,
+                     cfg.config.MQTTTopic,
+                     cfg.config.MQTTSetTopic,
+                     cfg.config.MQTTDeviceName);
+
     SERIAL_DEBUG_LNF("Loaded config: hostname %s", cfg.config.hostname);
 }
 

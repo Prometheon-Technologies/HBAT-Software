@@ -79,8 +79,10 @@ Config::~Config()
 void Config::CreateDefaultConfig()
 {
     config.hostname = NULL;
-    config.MQTTEnabled = 0;
-    config.MQTTPort = NULL;     // Port to use for unsecured MQTT
+    config.MQTTClientID = NULL;
+    config.MQTTBroker = NULL;
+    config.MQTTPort = 0; // Port to use for unsecured MQTT
+    config.MQTTEnabled = 0;     
     config.MQTTPort_Secure = 0; // port to use if Secured MQTT is enabled
     config.MQTTUser = NULL;
     config.MQTTPass = NULL;
@@ -92,7 +94,6 @@ void Config::CreateDefaultConfig()
     config.lastMillis = 0;
     config.clientIP = NULL;
     config.MQTTSecureState = false;
-    config.MQTTBroker = NULL;
     config.lastMsg = 0;
     config.msg = NULL;
     config.value = 0;
@@ -213,7 +214,7 @@ bool Config::loadConfig()
 
     // Parse the buffer into an object
 
-    StaticJsonDocument<1024> jsonBuffer;
+    StaticJsonDocument<512> jsonBuffer;
     // Deserialize the JSON document
     auto error = deserializeJson(jsonBuffer, buf.get());
     if (error)
@@ -226,8 +227,9 @@ bool Config::loadConfig()
     }
 
     heapStr(&config.hostname, jsonBuffer["hostname"]);
+    heapStr(&config.MQTTClientID, jsonBuffer["MQTTClientID"]);
     config.MQTTEnabled = jsonBuffer["MQTTEnabled"];
-    heapStr(&config.MQTTPort, jsonBuffer["MQTTPort"]);
+    config.MQTTPort = jsonBuffer["MQTTPort"];
     config.MQTTPort_Secure = jsonBuffer["MQTTPort_Secure"];
     heapStr(&config.MQTTUser, jsonBuffer["MQTTUser"]);
     heapStr(&config.MQTTPass, jsonBuffer["MQTTPass"]);
@@ -282,11 +284,12 @@ bool Config::saveConfig()
     // create a json file from the config struct and save it using SPIFFs
     SERIAL_DEBUG_LN(F("[Save Config Changes]: Writing config"));
     // create a json file from the config struct
-    StaticJsonDocument<1024> jsonConfig;
+    StaticJsonDocument<512> jsonConfig;
     JsonObject json = jsonConfig.to<JsonObject>();
 
     // create a json file from the config struct
     json["hostname"] = config.hostname;
+    json["MQTTClientID"] = config.MQTTClientID;
     json["MQTTEnabled"] = config.MQTTEnabled;
     json["MQTTPort"] = config.MQTTPort;
     json["MQTTPort_Secure"] = config.MQTTPort_Secure;

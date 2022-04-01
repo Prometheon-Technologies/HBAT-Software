@@ -18,15 +18,16 @@ public:
         // Variables
         char *hostname;
         uint8_t MQTTEnabled;
-        char *MQTTPort;           // Port to use for unsecured MQTT
-        uint16_t MQTTPort_Secure; // port to use if Secured MQTT is enabled
+        char *MQTTClientID;
+        int MQTTPort;        // Port to use for unsecured MQTT
+        int MQTTPort_Secure; // port to use if Secured MQTT is enabled
         char *MQTTUser;
         char *MQTTPass;
         char *MQTTTopic;
         char *MQTTSetTopic;
         char *MQTTDeviceName;
-        uint8_t last_mqtt_connect_attempt;
-        uint8_t last_mqtt_publish_attempt;
+        int last_mqtt_connect_attempt;
+        int last_mqtt_publish_attempt;
         unsigned long lastMillis;
         char *clientIP;
         bool MQTTSecureState;

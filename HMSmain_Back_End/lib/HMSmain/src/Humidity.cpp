@@ -161,7 +161,7 @@ bool Humidity::checkHeaterEnabled()
  * Parameters: None
  * Return: float
  ******************************************************************************/
-/* float Humidity::AverageStackTemp()
+float Humidity::AverageStackTemp()
 {
   float stack_temp[4];
   for (int i = 0; i < 4; i++)
@@ -169,7 +169,7 @@ bool Humidity::checkHeaterEnabled()
     stack_temp[i] = *ReadSensor();
   }
   return (stack_temp[0] + stack_temp[2]) / 2; // Read the _temperature from the sensor and average the two sensors.
-} */
+}
 
 /******************************************************************************
  * Function: Average Stack Humidity
@@ -177,7 +177,7 @@ bool Humidity::checkHeaterEnabled()
  * Parameters: None
  * Return: float
  ******************************************************************************/
-/* float Humidity::StackHumidity()
+float Humidity::StackHumidity()
 {
   float stack_humidity[4];
 
@@ -186,7 +186,7 @@ bool Humidity::checkHeaterEnabled()
     stack_humidity[i] = *ReadSensor();
   }
   return (stack_humidity[1] + stack_humidity[3]) / 2;
-} */
+}
 
 /******************************************************************************
  * Function: Read Humidity Sensors
@@ -194,7 +194,7 @@ bool Humidity::checkHeaterEnabled()
  * Parameters: None
  * Return: float array
  ******************************************************************************/
-/* float *Humidity::ReadSensor()
+float *Humidity::ReadSensor()
 {
   float *climatedata = (float *)malloc(sizeof(float) * 4);
 
@@ -235,7 +235,7 @@ bool Humidity::checkHeaterEnabled()
   // This is needed due to the high operating humidity of the system
   checkHeaterEnabled();
   return climatedata;
-} */
+}
 
 /******************************************************************************
  * Function: Control MPX2010DP - K014308 and AD623
@@ -355,7 +355,7 @@ int Humidity::SFM3003()
    delay(5);
 } */
 
-/* uint8_t Humidity::crc8(const uint8_t data, uint8_t crc)
+uint8_t Humidity::crc8(const uint8_t data, uint8_t crc)
 {
   crc ^= data;
 
@@ -364,9 +364,9 @@ int Humidity::SFM3003()
     crc = (crc & 0x80) ? (crc << 1) ^ 0x31 : (crc << 1);
   }
   return crc;
-} */
+}
 
-/* int Humidity::loopSFM3003()
+int Humidity::loopSFM3003()
 {
   auto device = 0x28;
   unsigned long timed_event = 500;
@@ -407,6 +407,6 @@ int Humidity::SFM3003()
     }
   }
   return 0;
-} */
+}
 
 Humidity humidity;

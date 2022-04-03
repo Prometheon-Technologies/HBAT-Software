@@ -1,4 +1,5 @@
 #include "HMS.hpp"
+#include <esp_adc_cal.h>
 
 // ESP 32 (requires resistors to step down the logic voltage)
 // ACS712  ACS(25, 5.0, 4095, 185);
@@ -19,9 +20,55 @@ HMS::~HMS()
  * Parameters: int pinnumber
  * Return: float
  ******************************************************************************/
-float HMS::readVoltage(int pinnumber)
+int HMS::readVoltage(adc1_channel_t pinnumber)
 {
-    return (float)((analogRead(pinnumber) * 5.0) / 1024.0);
+    if (!PRODUCTION)
+    {
+        // Check TP is burned into eFuse
+        if (esp_adc_cal_check_efuse(ESP_ADC_CAL_VAL_EFUSE_TP) == ESP_OK)
+        {
+            printf("eFuse Two Point: Supported\n");
+            // setup esp_adc_cal_characteristics_t
+            esp_adc_cal_characteristics_t *adc_chars = new esp_adc_cal_characteristics_t();
+            // Characterize ADC
+            esp_adc_cal_value_t val_type = esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, adc_chars);
+            // use adc1 API to read EFUSE value
+            if (esp_adc_cal_get_voltage(pinnumber, ESP_ADC_CAL_VAL_EFUSE_TP, &efuse_voltage) == ESP_OK)
+            {
+
+                printf("eFuse Two Point: %dmV\n", efuse_voltage);
+            }
+        }
+        else
+        {
+            printf("eFuse Two Point: NOT supported\n");
+        }
+
+        // Check Vref is burned into eFuse
+        if (esp_adc_cal_check_efuse(ESP_ADC_CAL_VAL_EFUSE_VREF) == ESP_OK)
+        {
+            printf("eFuse Vref: Supported\n");
+        }
+        else
+        {
+            printf("eFuse Vref: NOT supported\n");
+        }
+    }
+    else
+    {
+    }
+
+    // Read the voltage from the cell
+    adc1_config_channel_atten(pinnumber, ADC_ATTEN_DB_11);
+    adc1_config_width(ADC_WIDTH_BIT_12);
+    adc_power_acquire();
+
+    uint32_t voltage = adc1_get_raw(pinnumber);
+    int voltage_mv = voltage * 3300.0 / 4095.0;
+
+    // return (float)((analogRead(pinnumber) * 3.3) / 4096.0);
+    esp_adc_cal_raw_to_voltage(); // convert adc to voltage
+    adc_power_release();
 }
 
 /******************************************************************************
@@ -30,10 +77,10 @@ float HMS::readVoltage(int pinnumber)
  * Parameters: None
  * Return: float array
  ******************************************************************************/
-float *HMS::readSensAndCondition()
+int *HMS::readSensAndCondition()
 {
     int numtoaverage = 10;
-    float *cell_voltage = (float *)malloc(sizeof(float) * 10);
+    int *cell_voltage = (int *)malloc(sizeof(int) * 10);
     for (int i = 0; i < numtoaverage; i++)
     {
         cell_voltage[0] = readVoltage(36); // sensor on analog pins ADC1 && ADC2 - ADC2 pins do not work when wifi is enabled
@@ -55,7 +102,7 @@ float *HMS::readSensAndCondition()
     return cell_voltage;
 }
 
-float HMS::sumArray(float array[], int size)
+int HMS::sumArray(int array[], int size)
 {
     int sum = 0;
     for (int i = 0; i < size; i++)
@@ -71,15 +118,15 @@ float HMS::sumArray(float array[], int size)
  * Parameters: None
  * Return: The mean Stack Voltage
  ******************************************************************************/
-float HMS::StackVoltage()
+int HMS::StackVoltage()
 {
-    float array[10];
+    int array[10];
     for (int i = 0; i < 10; i++)
     {
         array[i] = readSensAndCondition()[i];
     }
     int size = sizeof(array) / sizeof(array[0]);
-    float sum = sumArray(array, size);
+    int sum = sumArray(array, size);
     Serial.println(sum);
     return sum;
 }

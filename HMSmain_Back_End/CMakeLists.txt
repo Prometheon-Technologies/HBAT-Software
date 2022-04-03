@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.0.0)
-project(HMSmain VERSION 0.1.0)
+cmake_minimum_required(VERSION 3.16.0)
+project(HMSmain VERSION 0.0.1)
 
 include(CTest)
 enable_testing()

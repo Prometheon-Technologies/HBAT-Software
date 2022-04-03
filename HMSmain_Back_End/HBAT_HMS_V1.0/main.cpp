@@ -51,7 +51,7 @@ void setup()
         pinMode(pin, OUTPUT);
         digitalWrite(pin, LOW);
     }
-    
+
     // C for loop - legacy function
     /* for (int i = 0; i < sizeof(cfg.config.relays_pin) / sizeof(cfg.config.relays_pin[0]); i++)
     {

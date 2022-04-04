@@ -114,8 +114,10 @@ void HMS::setupSensor()
 int HMS::readAmps()
 {
     int mA = ACS.mA_DC();
-    String Amps = String(mA);
-    Serial.println("Stack Amps:" + Amps);
+    char buffer[sizeof(mA)];
+    snprintf(buffer, sizeof(buffer), "Stack Amps: %d", mA);
+    Serial.println(buffer);
+    free(buffer);
     return mA;
 }
 

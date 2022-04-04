@@ -88,16 +88,16 @@ void setup()
     Relay.SetupPID();
     // Setup the network stack
     // Setup the Wifi Manager
+    network.SetupWebServer();
+    Serial.println(F("Starting Webserver"));
+    network.SetupServer();
     Serial.println("Setting up WiFi");
+
     if (ENABLE_MQTT_SUPPORT)
     {
         Serial.println("Setting up MQTT");
         network.loadMQTTConfig();
     }
-
-    network.SetupWebServer();
-    Serial.println(F("Starting Webserver"));
-    network.SetupServer();
 
     if (ENABLE_MDNS_SUPPORT)
     {
@@ -124,7 +124,7 @@ void setup()
         Serial.println("Network Stack Setup Failed - Activating Access-Point Mode");
     }
 
-    Serial.print("\n===================================");
+    Serial.print("\n===================================\n");
     Serial.println("Setup Complete");
     my_delay(1000L);
 }
@@ -138,6 +138,7 @@ void loop()
     timedTasks_2.setSeconds(2);
 
     timedTasks.setCallback(ScanI2CBus);
+    timedTasks.setCallback(updateCurrentData);
 
     timedTasks_2.setCallback(accumulateSensorData);
     timedTasks.setCallback(checkNetwork);

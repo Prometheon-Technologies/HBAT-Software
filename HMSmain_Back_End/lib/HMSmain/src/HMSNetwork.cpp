@@ -154,6 +154,8 @@ void HMSnetwork::SetupWebServer()
             SERIAL_DEBUG_ADD("SSID set to: ");
             SERIAL_DEBUG_LN(ssID);
             // Write file to save value
+            heapStr(&cfg.config.WIFISSID, ssID.c_str());
+            cfg.setConfigChanged();
             cfg.writeFile(SPIFFS, ssidPath, ssID.c_str());
           }
           // HTTP POST pass value
@@ -163,13 +165,15 @@ void HMSnetwork::SetupWebServer()
             SERIAL_DEBUG_ADD("Password set to: ");
             SERIAL_DEBUG_LN(passWord);
             // Write file to save value
+            heapStr(&cfg.config.WIFIPASS, passWord.c_str());
+            cfg.setConfigChanged();
             cfg.writeFile(SPIFFS, passPath, passWord.c_str());
           }
           SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
         }
       }
       request->send(200, "text/plain", "Done. ESP will restart and connect to your router. To access it go to IP address: " + String(cfg.config.clientIP));
-      delay(30000);
+      my_delay(300000L);
       ESP.restart(); });
 
         // Route to set GPIO state to LOW
@@ -308,7 +312,10 @@ void HMSnetwork::SetupWebServer()
                 SERIAL_DEBUG_ADD("SSID set to: ");
                 SERIAL_DEBUG_LN(ssID);
                 // Write file to save value
-                cfg.writeFile(SPIFFS, ssidPath, ssID.c_str());
+                heapStr(&cfg.config.WIFISSID, ssID.c_str());
+                cfg.setConfigChanged();
+                my_delay(1000L);
+                //cfg.writeFile(SPIFFS, ssidPath, ssID.c_str());
             }
             // HTTP POST pass value
             if (p->name() == PARAM_INPUT_2) {
@@ -317,13 +324,16 @@ void HMSnetwork::SetupWebServer()
                 SERIAL_DEBUG_ADD("Password set to: ");
                 SERIAL_DEBUG_LN(passWord);
                 // Write file to save value
-                cfg.writeFile(SPIFFS, passPath, passWord.c_str());
+                heapStr(&cfg.config.WIFIPASS, passWord.c_str());
+                cfg.setConfigChanged();
+                my_delay(1000L);
+                //cfg.writeFile(SPIFFS, passPath, passWord.c_str());
             }
             SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
         }
       }
       request->send(200, "text/plain", "Done. ESP will restart, connect to your router and go to IP address: " + String(cfg.config.clientIP));
-      delay(3000);
+      my_delay(30000L);
       ESP.restart(); });
         server.begin();
     }

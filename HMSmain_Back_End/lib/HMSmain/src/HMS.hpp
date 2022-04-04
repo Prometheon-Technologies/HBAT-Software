@@ -17,11 +17,10 @@ public:
   void setupSensor();
   int readAmps();
   int ChargeStatus();
-  int voltageValues[10];
-  int sumArray(int array[], int size);
-  int readVoltage(adc1_channel_t pinnumber);
-  int StackVoltage();
-  int *readSensAndCondition();
+  float sumArray(float array[], int size);
+  float readVoltage(int pinnumber);
+  float StackVoltage();
+  float *readSensAndCondition();
   String generateDeviceID();
 
 private:

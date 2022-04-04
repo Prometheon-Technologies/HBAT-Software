@@ -20,79 +20,33 @@ HMS::~HMS()
  * Parameters: int pinnumber
  * Return: float
  ******************************************************************************/
-int HMS::readVoltage(adc1_channel_t pinnumber)
+float HMS::readVoltage(int pinnumber)
 {
-    if (!PRODUCTION)
-    {
-        // Check TP is burned into eFuse
-        if (esp_adc_cal_check_efuse(ESP_ADC_CAL_VAL_EFUSE_TP) == ESP_OK)
-        {
-            printf("eFuse Two Point: Supported\n");
-            // setup esp_adc_cal_characteristics_t
-            esp_adc_cal_characteristics_t *adc_chars = new esp_adc_cal_characteristics_t();
-            // Characterize ADC
-            esp_adc_cal_value_t val_type = esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, adc_chars);
-            // use adc1 API to read EFUSE value
-            if (esp_adc_cal_get_voltage(pinnumber, ESP_ADC_CAL_VAL_EFUSE_TP, &efuse_voltage) == ESP_OK)
-            {
-
-                printf("eFuse Two Point: %dmV\n", efuse_voltage);
-            }
-        }
-        else
-        {
-            printf("eFuse Two Point: NOT supported\n");
-        }
-
-        // Check Vref is burned into eFuse
-        if (esp_adc_cal_check_efuse(ESP_ADC_CAL_VAL_EFUSE_VREF) == ESP_OK)
-        {
-            printf("eFuse Vref: Supported\n");
-        }
-        else
-        {
-            printf("eFuse Vref: NOT supported\n");
-        }
-    }
-    else
-    {
-    }
-
-    // Read the voltage from the cell
-    adc1_config_channel_atten(pinnumber, ADC_ATTEN_DB_11);
-    adc1_config_width(ADC_WIDTH_BIT_12);
-    adc_power_acquire();
-
-    uint32_t voltage = adc1_get_raw(pinnumber);
-    int voltage_mv = voltage * 3300.0 / 4095.0;
-
-    // return (float)((analogRead(pinnumber) * 3.3) / 4096.0);
-    esp_adc_cal_raw_to_voltage(); // convert adc to voltage
-    adc_power_release();
+    return (float)((analogRead(pinnumber) * 3300.0) / 4095.0);
 }
 
 /******************************************************************************
  * Function: Read Voltage per Cell and average
- * Description: This function loops through 5 times and reads the voltage from each cell. Adding the last result to the next one then averages these values - and stores it in a float array
+ * Description: This function loops through 5 times and reads the voltage from each celland stores it in a float array
  * Parameters: None
  * Return: float array
  ******************************************************************************/
-int *HMS::readSensAndCondition()
+float *HMS::readSensAndCondition()
 {
     int numtoaverage = 10;
-    int *cell_voltage = (int *)malloc(sizeof(int) * 10);
+    float *cell_voltage = (float *)malloc(sizeof(numtoaverage));
     for (int i = 0; i < numtoaverage; i++)
     {
-        cell_voltage[0] = readVoltage(36); // sensor on analog pins ADC1 && ADC2 - ADC2 pins do not work when wifi is enabled
-        cell_voltage[1] = readVoltage(39);
-        cell_voltage[2] = readVoltage(34);
-        cell_voltage[3] = readVoltage(35);
-        cell_voltage[4] = readVoltage(32);
-        cell_voltage[5] = readVoltage(33);
-        cell_voltage[6] = readVoltage(25);
-        cell_voltage[7] = readVoltage(26);
-        cell_voltage[8] = readVoltage(27);
-        cell_voltage[9] = readVoltage(14);
+        cell_voltage[7] = readVoltage(1);
+        cell_voltage[8] = readVoltage(2);
+        cell_voltage[5] = readVoltage(3);
+        cell_voltage[0] = readVoltage(4); // voltage leads on analog pins ADC1 - ADC2 pins do not work when wifi is enabled
+        cell_voltage[1] = readVoltage(5);
+        cell_voltage[2] = readVoltage(6);
+        cell_voltage[3] = readVoltage(7);
+        cell_voltage[6] = readVoltage(8);
+        cell_voltage[4] = readVoltage(9);
+        cell_voltage[9] = readVoltage(46);
     }
 
     for (int i = 0; i < numtoaverage; i++)
@@ -102,9 +56,15 @@ int *HMS::readSensAndCondition()
     return cell_voltage;
 }
 
-int HMS::sumArray(int array[], int size)
+/******************************************************************************
+ * Function: Summation of elements in an array
+ * Description: This function sums the elements in an array
+ * Parameters: float array and int size
+ * Return: float sum
+ ******************************************************************************/
+float HMS::sumArray(float array[], int size)
 {
-    int sum = 0;
+    float sum = 0;
     for (int i = 0; i < size; i++)
     {
         sum += array[i];
@@ -118,15 +78,15 @@ int HMS::sumArray(int array[], int size)
  * Parameters: None
  * Return: The mean Stack Voltage
  ******************************************************************************/
-int HMS::StackVoltage()
+float HMS::StackVoltage()
 {
-    int array[10];
+    float array[10];
     for (int i = 0; i < 10; i++)
     {
         array[i] = readSensAndCondition()[i];
     }
     int size = sizeof(array) / sizeof(array[0]);
-    int sum = sumArray(array, size);
+    float sum = sumArray(array, size);
     Serial.println(sum);
     return sum;
 }

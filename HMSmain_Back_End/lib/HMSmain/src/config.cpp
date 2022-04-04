@@ -214,7 +214,7 @@ bool Config::loadConfig()
 
     // Parse the buffer into an object
 
-    StaticJsonDocument<512> jsonBuffer;
+    StaticJsonDocument<1024> jsonBuffer;
     // Deserialize the JSON document
     auto error = deserializeJson(jsonBuffer, buf.get());
     if (error)
@@ -266,6 +266,7 @@ bool Config::loadConfig()
 bool Config::setConfigChanged()
 {
     last_config_change = true;
+    saveConfig();
     SERIAL_DEBUG_LN(F("[Set Config Changed]: Config save set to true"));
     return true;
 }
@@ -284,7 +285,7 @@ bool Config::saveConfig()
     // create a json file from the config struct and save it using SPIFFs
     SERIAL_DEBUG_LN(F("[Save Config Changes]: Writing config"));
     // create a json file from the config struct
-    StaticJsonDocument<512> jsonConfig;
+    StaticJsonDocument<1024> jsonConfig;
     JsonObject json = jsonConfig.to<JsonObject>();
 
     // create a json file from the config struct

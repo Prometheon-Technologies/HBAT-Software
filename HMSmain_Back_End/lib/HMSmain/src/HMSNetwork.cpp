@@ -57,6 +57,7 @@ HMSnetwork::~HMSnetwork()
 
 bool HMSnetwork::SetupNetworkStack()
 {
+    cfg.CreateDefaultConfig();
     if (!cfg.loadConfig())
     {
         SERIAL_DEBUG_LN("[INFO]: Failed to load config");
@@ -91,20 +92,21 @@ bool HMSnetwork::SetupNetworkStack()
     }
     else
     {
-        SERIAL_DEBUG_LN("[INFO]: Configured SSID: ");
-        SERIAL_DEBUG_ADD(SSID);
+        SERIAL_DEBUG_ADD("[INFO]: Configured SSID: ");
+        SERIAL_DEBUG_LN(SSID);
         SERIAL_DEBUG_LN("");
+        
         WiFi.mode(WIFI_STA);
-        WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
-        WiFi.disconnect(); // Disconnect from WiFi AP if connected
-        localIP.fromString(cfg.config.clientIP);
+        //WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
+        //WiFi.disconnect(); // Disconnect from WiFi AP if connected
+        localIP.fromString(WiFi.localIP().toString());
 
         if (!WiFi.config(localIP, gateway, subnet))
         {
             SERIAL_DEBUG_LN("[INFO]: STA Failed to configure");
             return false;
         }
-        // WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
+        WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
 
         unsigned long currentMillis = millis();
         previousMillis = currentMillis;

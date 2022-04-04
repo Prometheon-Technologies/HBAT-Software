@@ -640,7 +640,7 @@ void HMSnetwork::SetupServer()
     File file = root.openNextFile();
     while (file)
     {
-        SERIAL_DEBUG_LNF("FS File: %s, size: %lu", file.name(), file.size());
+        SERIAL_DEBUG_LNF("FS File: %s, size: %i", file.name(), file.size());
         file = root.openNextFile();
     }
     SERIAL_DEBUG_EOL;
@@ -650,7 +650,7 @@ void HMSnetwork::SetupServer()
     {
         SERIAL_DEBUG_LN(F("NO WEB SERVER FILES PRESENT: \n"));
     }
-    SERIAL_DEBUG_LNF("FS Size: %luKB, used: %luKB, %0.2f%%",
+    SERIAL_DEBUG_LNF("FS Size: %iKB, used: %iKB, %0.2f%%",
                      totalBytes, usedBytes,
                      (float)100 / totalBytes * usedBytes);
     SERIAL_DEBUG_EOL;

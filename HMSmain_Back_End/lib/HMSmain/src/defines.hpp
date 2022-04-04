@@ -48,12 +48,16 @@
 #include "Relays.hpp"
 #include "timedtasks.hpp"
 
+#define STR(x) #x
+#define XSTR(x) STR(x)
+#define MSG(x)
+
 #ifdef DEFAULT_HOSTNAME
 #pragma message DEFAULT_HOSTNAME
 #endif
 
 #ifdef PRODUCTION
-#pragma message STR(PRODUCTION)
+_Pragma (STR(message (PRODUCTION)))
 #endif
 
 #define maxCellCount 10 // max number of cells
@@ -66,7 +70,7 @@ String generateDeviceID();
 
 /*######################## MQTT Configuration ########################*/
 #ifdef ENABLE_MQTT_SUPPORT
-#pragma message STR(ENABLE_MQTT_SUPPORT)
+_Pragma (STR(message (ENABLE_MQTT_SUPPORT)))
 // these are deafault settings which can be changed in the web interface "settings" page
 #define MQTT_SECURE_ENABLED 0
 #define MQTT_PORT 1883
@@ -76,8 +80,8 @@ String generateDeviceID();
 // MQTT includes
 #include "HMSmqtt.hpp"
 
-// Variables for MQTT
-extern const char *MQTT_TOPIC;
+    // Variables for MQTT
+    extern const char *MQTT_TOPIC;
 extern const String HOMEASSISTANT_MQTT_HOSTNAME;
 extern const String MQTT_USER;
 extern const String MQTT_PASS;

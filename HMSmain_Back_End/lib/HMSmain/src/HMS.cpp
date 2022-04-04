@@ -117,7 +117,6 @@ int HMS::readAmps()
     char buffer[sizeof(mA)];
     snprintf(buffer, sizeof(buffer), "Stack Amps: %d", mA);
     Serial.println(buffer);
-    free(buffer);
     return mA;
 }
 

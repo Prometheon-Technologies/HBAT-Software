@@ -27,7 +27,7 @@ void mqttSendStatus(String doc)
     const char *json = "/json_data";
     topic_data = appendChartoChar(cfg.config.MQTTTopic, json); // append string two to the result.
     mqttClient.publish(topic_data, buffer, n);
-    SERIAL_DEBUG_LNF("Sending MQTT package: %s", String(buffer));
+    SERIAL_DEBUG_LNF("Sending MQTT package: %s", buffer);
     mqttProcessing = false;
     free(topic_data);
   }
@@ -274,7 +274,7 @@ void HMSMqtt::RunMqttService()
     }
     else
     {
-      SERIAL_DEBUG_ADDF("failed with state %s\n", mqttClient.state());
+      SERIAL_DEBUG_ADDF("failed with state %d\n", mqttClient.state());
     }
   }
   else

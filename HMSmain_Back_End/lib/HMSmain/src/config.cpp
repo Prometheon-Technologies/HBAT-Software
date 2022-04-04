@@ -160,7 +160,7 @@ String Config::readFile(fs::FS &fs, const char *path)
 void Config::writeFile(fs::FS &fs, const char *path, const char *message)
 {
     SERIAL_DEBUG_ADDF("[Writing File]: Writing file: %s\r\n", path);
-    delay(10);
+    my_delay(100L);
 
     File file = fs.open(path, FILE_WRITE);
     if (!file)

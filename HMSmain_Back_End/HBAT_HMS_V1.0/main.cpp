@@ -126,7 +126,7 @@ void setup()
 
     Serial.print("\n===================================");
     Serial.println("Setup Complete");
-    delay(100);
+    my_delay(1000L);
 }
 
 void loop()
@@ -154,5 +154,5 @@ void loop()
     {
         network.mDNSLoop();
     }
-    delay(100);
+    my_delay(1000L);
 }

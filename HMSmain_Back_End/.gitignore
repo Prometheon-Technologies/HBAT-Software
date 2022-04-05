@@ -1,4 +1,4 @@
 /.pio
 /.vscode
 /build
-.log
+**.log

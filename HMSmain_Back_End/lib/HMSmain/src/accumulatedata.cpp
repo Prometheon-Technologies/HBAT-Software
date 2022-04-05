@@ -30,23 +30,10 @@ void AccumulateData::InitAccumulateData()
     cfg.config.stack_voltage = HMSmain.StackVoltage();
     cfg.config.cell_count_max = maxCellCount;
     cfg.config.numSensors = numSensors;
+    
     // Flow Rate dataTosend
-    if (cfg.config.flow_rate > 0)
-    {
-        // SFM3003 flow rate dataTosend in slm
-        cfg.config.flow_rate = humidity.loopSFM3003();
-        // SFM3003 mass temp dataTosend
-        //cfg.config.flow_rate_sensor_temp = humidity.temperature;
-    }
-    else
-    {
-        SERIAL_DEBUG_LN(("Flow Rate Sensor Could Not Be Read\n"));
-        // SFM3003 flow rate dataTosend in slm
-        cfg.config.flow_rate = 0;
-        // SFM3003 mass temp dataTosend
-        cfg.config.flow_rate_sensor_temp = 0;
-    }
-
+    cfg.config.flow_rate = humidity.loopSFM3003();
+    
     // Add arrays for Cell level Data.
     float *cell_voltage = HMSmain.readSensAndCondition();
     // loop through and store per cell voltage

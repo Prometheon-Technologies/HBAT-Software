@@ -148,37 +148,37 @@ void HMSnetwork::SetupWebServer()
 
         server.serveStatic("/", SPIFFS, "/");
 
-        server.on("/wifiupdate", HTTP_POST, [&](AsyncWebServerRequest *request)
+        server.on("/wifiUpdate", HTTP_POST, [&](AsyncWebServerRequest *request)
                   {
         int params = request->params();
         for(int i=0;i<params;i++){
             AsyncWebParameter* p = request->getParam(i);
             if(p->isPost()){
-            // HTTP POST ssid value
-            if (p->name() == "apName") {
-                String ssID; 
-                ssID = p->value().c_str();
-                SERIAL_DEBUG_ADD("SSID set to: ");
-                SERIAL_DEBUG_LN(ssID);
-                // Write file to save value
-                heapStr(&cfg.config.WIFISSID, ssID.c_str());
-                cfg.setConfigChanged();
-                cfg.writeFile(SPIFFS, ssidPath, ssID.c_str());
-            }
-            // HTTP POST pass value
-            if (p->name() == "apPass") {
-                String passWord; 
-                passWord = p->value().c_str();
-                SERIAL_DEBUG_ADD("Password set to: ");
-                SERIAL_DEBUG_LN(passWord);
-                // Write file to save value
-                heapStr(&cfg.config.WIFIPASS, passWord.c_str());
-                cfg.setConfigChanged();
-                cfg.writeFile(SPIFFS, passPath, passWord.c_str());
-            }
+                // HTTP POST ssid value
+                if (p->name() == "apName") {
+                    String ssID; 
+                    ssID = p->value().c_str();
+                    SERIAL_DEBUG_ADD("SSID set to: ");
+                    SERIAL_DEBUG_LN(ssID);
+                    // Write file to save value
+                    heapStr(&cfg.config.WIFISSID, ssID.c_str());
+                    cfg.setConfigChanged();
+                    cfg.writeFile(SPIFFS, ssidPath, ssID.c_str());
+                }
+                // HTTP POST pass value
+                if (p->name() == "apPass") {
+                    String passWord; 
+                    passWord = p->value().c_str();
+                    SERIAL_DEBUG_ADD("Password set to: ");
+                    SERIAL_DEBUG_LN(passWord);
+                    // Write file to save value
+                    heapStr(&cfg.config.WIFIPASS, passWord.c_str());
+                    cfg.setConfigChanged();
+                    cfg.writeFile(SPIFFS, passPath, passWord.c_str());
+                }
             SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
             }
-        request->send(200, "text/plain", "Done. ESP will restart and connect to your router. To access it go to IP address: " + String(cfg.config.clientIP));
+        request->send(200, "text/plain", "Done. ESP will restart and connect to your router. To access it go to IP address: " + String(WiFi.localIP()));
         }
       my_delay(300000L);
       ESP.restart(); });
@@ -200,9 +200,10 @@ void HMSnetwork::SetupWebServer()
             SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
             }
         }
-      request->send(200, "application/json", "toggled"); });
+      request->send(200, "application/json", "toggled");
+      request->redirect("/"); });
 
-        server.on("/data_json", HTTP_GET, [&](AsyncWebServerRequest *request)
+        server.on("/data.json", HTTP_GET, [&](AsyncWebServerRequest *request)
                   {
         String json = "";
         json += R"====({)====";
@@ -246,6 +247,7 @@ void HMSnetwork::SetupWebServer()
         json += R"====(})====";
         json = "";
         request->send(200, "application/json", json); });
+
         server.onNotFound(notFound);
         server.begin();
         Serial.println("HBAT HMS server started");
@@ -273,7 +275,7 @@ void HMSnetwork::SetupWebServer()
             SERIAL_DEBUG_LN("");
         }
 
-        SERIAL_DEBUG_LN("\e[1;31m[INFO]: Configuring access point...\e[1;37m");
+        SERIAL_DEBUG_LN("[INFO]: Configuring access point...");
         WiFi.mode(WIFI_AP);
         WiFi.setTxPower(WIFI_POWER_19_5dBm);
         // You can remove the password parameter if you want the AP to be open.

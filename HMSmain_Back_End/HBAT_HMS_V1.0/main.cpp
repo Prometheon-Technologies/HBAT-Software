@@ -146,7 +146,6 @@ void loop()
     {
         if (WiFi.status() == WL_CONNECTED)
         {
-            HMSmqtt.MQTTLoop();
             HMSmqtt.RunMqttService();
         }
     }

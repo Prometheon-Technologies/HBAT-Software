@@ -1,0 +1,26 @@
+{
+  "name": "SecureOTA",
+  "keywords": "HMS, OTA, SecureOTA, network, security, update",
+  "description": "SecureOTA is a secure OTA update protocol for the OTA Server. It is based on the OTA protocol and adds a secure connection to the OTA Server.",
+  "authors": [
+    {
+      "name": "Prometheon Technologies",
+      "url": "https://prometheontechnologies.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Prometheon-Technologies/HBAT-Software"
+  },
+  "export": {
+    "include": "HMSmainBack_End/lib/SecureOTA"
+  },
+  "dependencies": {
+    "Arduino": "^",
+    "WiFiClientSecure": "^",
+    "BintrayClient": "^"
+  },
+  "version": "0.0.1",
+  "frameworks": "arduino",
+  "platforms": "espressif32"
+}

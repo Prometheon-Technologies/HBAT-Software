@@ -73,15 +73,15 @@ void setup()
     if (ENABLE_MQTT_SUPPORT)
     {
         Serial.println("Setting up MQTT");
-        network.loadMQTTConfig();
+        HMSmqtt.loadMQTTConfig();
     }
 
     if (ENABLE_MDNS_SUPPORT)
     {
-        network.SetupmDNSServer(); // setup the mDNS server for the future web-front-end
+        mdns.SetupmDNSServer(); // setup the mDNS server for the future web-front-end
         if (ENABLE_MQTT_SUPPORT)
         {
-            network.DiscovermDNSBroker(); // discover the mDNS broker for mqtt
+            mdns.DiscovermDNSBroker(); // discover the mDNS broker for mqtt
         }
     }
 
@@ -124,7 +124,7 @@ void loop()
 
     if (ENABLE_MDNS_SUPPORT)
     {
-        network.mDNSLoop();
+        mdns.mDNSLoop();
     }
     my_delay(1000L);
 }

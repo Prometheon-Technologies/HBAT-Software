@@ -1,0 +1,24 @@
+{
+    "name": "BintrayClient",
+    "keywords": "bintray, ota, cdn, storage",
+    "description": "A BintrayClient to connect to a JFrog Bintray.",
+    "authors": [
+      {
+        "name": "Prometheon Technologies",
+        "url": "https://prometheontechnologies.com"
+      }
+    ],
+    "repository": {
+      "type": "git",
+      "url": ""
+    },
+    "export": {
+      "include": "bintray-secure-ota/lib/BintrayClient"
+    },
+    "dependencies": {
+      "ArduinoJson": "^6"
+    },
+    "version": "1.0.0",
+    "frameworks": "arduino",
+    "platforms": "espressif32"
+  }

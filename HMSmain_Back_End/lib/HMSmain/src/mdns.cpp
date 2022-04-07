@@ -1,5 +1,6 @@
 #include "mdns.hpp"
 
+// ######################## Multicast DNS #########################
 IPAddress mqttServer;
 String mdnsdotlocalurl = "hmshbat";
 
@@ -9,8 +10,6 @@ int HMSmdns::DiscovermDNSBroker()
     if (WiFi.status() == WL_CONNECTED)
     {
         SERIAL_DEBUG_LN("[mDNS Broker Discovery]: \nconnected!");
-
-        // ######################## Multicast DNS #########################
 
         SERIAL_DEBUG_ADD("[mDNS Broker Discovery]: Setting up mDNS: ");
         if (!MDNS.begin(mqtt_mDNS_clientId))

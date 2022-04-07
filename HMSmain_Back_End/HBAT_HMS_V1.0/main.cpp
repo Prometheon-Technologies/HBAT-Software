@@ -1,31 +1,6 @@
 #include <Arduino.h>
 #include <defines.hpp>
 
-void ScanI2CBus()
-{
-    if (ENABLE_I2C_SCANNER)
-    {
-        Scan.SetupScan();
-        Scan.BeginScan();
-    }
-}
-
-void accumulateSensorData()
-{
-    accumulatedata.InitAccumulateData();
-}
-
-void checkNetwork()
-{
-    network.CheckNetworkLoop();
-}
-
-void updateCurrentData() // check to see if the data has changed
-{
-    cfg.updateCurrentData();
-    SERIAL_DEBUG_LNF("Heap: %d", ESP.getFreeHeap());
-}
-
 /******************************************************************************
  * Function: Setup Main Loop
  * Description: This is the setup function for the main loop of the whole program. Use this to setup the main loop.
@@ -37,6 +12,8 @@ void setup()
     Serial.begin(115200);
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LOW);
+
+    timedTasks.setupTimers();
 
     Serial.println("Setting up the program, standby...");
     // Setup the main loop
@@ -131,20 +108,11 @@ void setup()
 
 void loop()
 {
-    // Check for the network state
-
-    /* timedTasks.setSeconds(10);
-    timedTasks_2.setSeconds(2); */
-    /* timedTasks.setCallback(ScanI2CBus);
-    timedTasks.setCallback(updateCurrentData);
-
-    timedTasks_2.setCallback(accumulateSensorData);
-    timedTasks.setCallback(checkNetwork); */
-    checkNetwork();
-    accumulateSensorData();
-    updateCurrentData();
-    /* timedTasks.idle();
-    timedTasks_2.idle(); */
+    // Check for the network stack
+    timedTasks.ScanI2CBus();
+    timedTasks.checkNetwork();
+    timedTasks.accumulateSensorData();
+    timedTasks.updateCurrentData();
 
     if (ENABLE_MQTT_SUPPORT)
     {

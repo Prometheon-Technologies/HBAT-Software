@@ -25,9 +25,15 @@ void AccumulateData::InitAccumulateData()
         numSensors = maxCellCount;
     }
 
+    /******************************************************************************
+     * Function: Setup the Stack Climate Data
+     * Description: This function setups the stack climate data.
+     * Parameters: None
+     * Return: The mean Stack Climate Data
+     ******************************************************************************/
     // Stack Data to send
-    /* cfg.config.stack_humidity = humidity.StackHumidity();
-    cfg.config.stack_temp = humidity.AverageStackTemp(); */
+    cfg.config.stack_humidity = humidity.StackHumidity();
+    cfg.config.stack_temp = humidity.AverageStackTemp();
     cfg.config.stack_current = HMSmain.readAmps();
 
     // Add arrays for Cell level Data.

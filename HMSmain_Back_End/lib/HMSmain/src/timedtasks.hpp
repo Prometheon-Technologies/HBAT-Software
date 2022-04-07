@@ -3,30 +3,30 @@
 #define TIMEDTASKS_HPP
 #include "defines.hpp"
 #include <timeObj.h>
-#include <idlers.h>
-/* #include <iostream>     // std::cout
-#include <functional>   // std::bind */
+/* #include <idlers.h> */
 
-class TimedTasks : public timeObj,
-                   public idler
+class TimedTasks : public timeObj
 {
 public:
   TimedTasks();
   virtual ~TimedTasks();
-  void setCallback(void (*funct)(void));
-  void setSeconds(float seconds);
-  void (*callback)(void);
-  virtual void idle(void);
-  /* void updateCurrentData();
-  void SetupTimers();
-  void Run_Check_DataJSON_5();
-  void Run_NetworkCheck_Background_every_10_Seconds(); */
 
+  void setupTimers();
+  void updateCurrentData();
+  void ScanI2CBus();
+  void accumulateSensorData();
+  void checkNetwork();
 
 private:
+  timeObj Timer_5s;
+  timeObj Timer_5s_2;
+  timeObj Timer_10s;
+  timeObj Timer_10s_2;
+  timeObj Timer_30s;
+  timeObj Timer_1m;
+  timeObj Timer_5m;
 };
 
 extern TimedTasks timedTasks;
-extern TimedTasks timedTasks_2;
 
 #endif

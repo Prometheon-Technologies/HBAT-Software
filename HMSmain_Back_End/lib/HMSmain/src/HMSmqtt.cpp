@@ -13,6 +13,60 @@ HMSMqtt::~HMSMqtt()
 {
 }
 
+// ############## functions to update current server settings ###################
+/**
+ * @brief Check if the current hostname is the same as the one in the config file
+ * Call in the Setup BEFORE the WiFi.begin()
+ * @param None
+ * @return None
+ */
+void HMSMqtt::loadMQTTConfig()
+{
+  SERIAL_DEBUG_LN(F("Checking if hostname is set and valid"));
+  WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
+  size_t size = sizeof(cfg.config.hostname);
+  if (!cfg.isValidHostname(cfg.config.hostname, size - 1))
+  {
+    heapStr(&cfg.config.hostname, DEFAULT_HOSTNAME);
+    cfg.setConfigChanged();
+  }
+  String MQTT_CLIENT_ID = generateDeviceID();
+  cfg.config.MQTTEnabled = ENABLE_MQTT_SUPPORT;
+  char *mqtt_user = StringtoChar(MQTT_USER);
+  char *mqtt_pass = StringtoChar(MQTT_PASS);
+  char *mqtt_topic = StringtoChar(MQTT_TOPIC);
+  char *mqtt_topic_set = StringtoChar(MQTT_HOMEASSISTANT_TOPIC_SET);
+  char *mqtt_device_name = StringtoChar(MQTT_DEVICE_NAME);
+  char *mqtt_client_id = StringtoChar(MQTT_CLIENT_ID);
+  heapStr(&cfg.config.MQTTUser, mqtt_user);
+  heapStr(&cfg.config.MQTTPass, mqtt_pass);
+  heapStr(&cfg.config.MQTTTopic, mqtt_topic);
+  heapStr(&cfg.config.MQTTSetTopic, mqtt_topic_set);
+  heapStr(&cfg.config.MQTTDeviceName, mqtt_device_name);
+  heapStr(&cfg.config.MQTTClientID, mqtt_client_id);
+  WiFi.setHostname(cfg.config.hostname); // define hostname
+  cfg.setConfigChanged();
+  free(mqtt_user);
+  free(mqtt_pass);
+  free(mqtt_topic);
+  free(mqtt_topic_set);
+  free(mqtt_device_name);
+  free(mqtt_client_id);
+
+  SERIAL_DEBUG_LNF("Loaded config: hostname %s, MQTT enabled %s, MQTT host %s, MQTT port %d, MQTT user %s, MQTT pass %s, MQTT topic %s, MQTT set topic %s, MQTT device name %s",
+                   cfg.config.hostname,
+                   (cfg.config.MQTTEnabled == ENABLE_MQTT_SUPPORT) ? "true" : "false",
+                   cfg.config.MQTTBroker,
+                   cfg.config.MQTTPort,
+                   cfg.config.MQTTUser,
+                   cfg.config.MQTTPass,
+                   cfg.config.MQTTTopic,
+                   cfg.config.MQTTSetTopic,
+                   cfg.config.MQTTDeviceName);
+
+  SERIAL_DEBUG_LNF("Loaded config: hostname %s", cfg.config.hostname);
+}
+
 //############################## MQTT HELPER FUNCTIONS ##############################
 void mqttSendStatus(String doc)
 {

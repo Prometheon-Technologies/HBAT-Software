@@ -1,7 +1,4 @@
 #include "SecureOTA.hpp"
-#include <WiFiClientSecure.h>
-#include <Update.h>
-#include <BintrayClient.hpp>
 
 const BintrayClient bintray(BINTRAY_USER, BINTRAY_REPO, BINTRAY_PACKAGE);
 

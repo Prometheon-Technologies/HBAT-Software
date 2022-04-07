@@ -24,22 +24,16 @@ public:
     virtual ~HMSnetwork();
     // Functions
     bool SetupNetworkStack();
-    int CheckWifiState();
     bool connectToApWithFailToStation();
     void SetupWebServer();
-    int DiscovermDNSBroker();
-    void SetupmDNSServer();
-    bool mDNSLoop();
-    void loadMQTTConfig();
     void SetupServer();
     void CheckNetworkLoop();
     void SetupWifiScan();
     bool LoopWifiScan();
-    void setupOTA();
-    void loopOTA();
 
     // variables
 private:
+    int CheckWifiState();
     int maxVoltage;
     int maxTemp;
 };

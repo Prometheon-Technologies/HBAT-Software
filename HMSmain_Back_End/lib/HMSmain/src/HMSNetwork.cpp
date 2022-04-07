@@ -18,9 +18,6 @@ const char *passPath = "/pass.txt";
 const char *ntptimePath = "/ntptime.txt";
 const char *ntptimeoffsetPath = "/ntptimeoffset.txt";
 
-const uint16_t OTA_CHECK_INTERVAL = 3000; // ms
-uint32_t _lastOTACheck = 0;
-
 // char* create_mDNS_hostname = StringtoChar(MQTTCreateHostName(MQTT_HOSTNAME, ".local"));
 
 String SSID;
@@ -177,7 +174,7 @@ void HMSnetwork::SetupWebServer()
             }
         request->send(200, "text/plain", "Done. ESP will restart and connect to your router. To access it go to IP address: " + String(WiFi.localIP()));
         }
-      my_delay(300000L);
+      my_delay(30000000L);
       ESP.restart(); });
 
         // Route to set GPIO state to LOW
@@ -318,7 +315,7 @@ void HMSnetwork::SetupWebServer()
                     SERIAL_DEBUG_LN(ssID);
                     // Write file to save value
                     heapStr(&cfg.config.WIFISSID, ssID.c_str());
-                    my_delay(10000L);
+                    my_delay(100000L);
                     //cfg.writeFile(SPIFFS, ssidPath, ssID.c_str());
                 }
                 // HTTP POST pass value
@@ -329,7 +326,7 @@ void HMSnetwork::SetupWebServer()
                     SERIAL_DEBUG_LN(passWord);
                     // Write file to save value
                     heapStr(&cfg.config.WIFIPASS, passWord.c_str());
-                    my_delay(10000L);
+                    my_delay(100000L);
                     //cfg.writeFile(SPIFFS, passPath, passWord.c_str());
                 }
                 cfg.setConfigChanged();
@@ -337,7 +334,7 @@ void HMSnetwork::SetupWebServer()
         }
       }
       request->send(200, "text/plain", "Done. ESP will restart, connect to your router and go to IP address: " + String(cfg.config.clientIP));
-      my_delay(30000L);
+      my_delay(30000000L);
       ESP.restart(); });
         server.onNotFound(notFound);
         server.begin();
@@ -386,8 +383,8 @@ void HMSnetwork::CheckNetworkLoop()
         wifiConnected = true;
         SERIAL_DEBUG_LN(F("Wifi is connected"));
         SERIAL_DEBUG_ADD("[INFO]: WiFi Connected! Open http://");
-        SERIAL_DEBUG_ADD(WiFi.localIP());
-        SERIAL_DEBUG_LN("[INFO]:  in your browser");
+        SERIAL_DEBUG_LN(WiFi.localIP());
+        Serial.print("[INFO]:  in your browser");
     }
 }
 
@@ -441,60 +438,6 @@ bool HMSnetwork::connectToApWithFailToStation()
     return true;
 }
 
-// ############## functions to update current server settings ###################
-/**
- * @brief Check if the current hostname is the same as the one in the config file
- * Call in the Setup BEFORE the WiFi.begin()
- * @param None
- * @return None
- */
-void HMSnetwork::loadMQTTConfig()
-{
-    SERIAL_DEBUG_LN(F("Checking if hostname is set and valid"));
-    WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
-    size_t size = sizeof(cfg.config.hostname);
-    if (!cfg.isValidHostname(cfg.config.hostname, size - 1))
-    {
-        heapStr(&cfg.config.hostname, DEFAULT_HOSTNAME);
-        cfg.setConfigChanged();
-    }
-    String MQTT_CLIENT_ID = generateDeviceID();
-    cfg.config.MQTTEnabled = ENABLE_MQTT_SUPPORT;
-    char *mqtt_user = StringtoChar(MQTT_USER);
-    char *mqtt_pass = StringtoChar(MQTT_PASS);
-    char *mqtt_topic = StringtoChar(MQTT_TOPIC);
-    char *mqtt_topic_set = StringtoChar(MQTT_HOMEASSISTANT_TOPIC_SET);
-    char *mqtt_device_name = StringtoChar(MQTT_DEVICE_NAME);
-    char *mqtt_client_id = StringtoChar(MQTT_CLIENT_ID);
-    heapStr(&cfg.config.MQTTUser, mqtt_user);
-    heapStr(&cfg.config.MQTTPass, mqtt_pass);
-    heapStr(&cfg.config.MQTTTopic, mqtt_topic);
-    heapStr(&cfg.config.MQTTSetTopic, mqtt_topic_set);
-    heapStr(&cfg.config.MQTTDeviceName, mqtt_device_name);
-    heapStr(&cfg.config.MQTTClientID, mqtt_client_id);
-    WiFi.setHostname(cfg.config.hostname); // define hostname
-    cfg.setConfigChanged();
-
-    free(mqtt_user);
-    free(mqtt_pass);
-    free(mqtt_topic);
-    free(mqtt_topic_set);
-    free(mqtt_device_name);
-
-    SERIAL_DEBUG_LNF("Loaded config: hostname %s, MQTT enabled %s, MQTT host %s, MQTT port %d, MQTT user %s, MQTT pass %s, MQTT topic %s, MQTT set topic %s, MQTT device name %s",
-                     cfg.config.hostname,
-                     (cfg.config.MQTTEnabled == ENABLE_MQTT_SUPPORT) ? "true" : "false",
-                     cfg.config.MQTTBroker,
-                     cfg.config.MQTTPort,
-                     cfg.config.MQTTUser,
-                     cfg.config.MQTTPass,
-                     cfg.config.MQTTTopic,
-                     cfg.config.MQTTSetTopic,
-                     cfg.config.MQTTDeviceName);
-
-    SERIAL_DEBUG_LNF("Loaded config: hostname %s", cfg.config.hostname);
-}
-
 void HMSnetwork::SetupServer()
 {
     SERIAL_DEBUG_EOL;
@@ -544,7 +487,7 @@ void HMSnetwork::SetupWifiScan()
     // Set WiFi to station mode and disconnect from an AP if it was previously connected
     WiFi.mode(WIFI_STA);
     WiFi.disconnect(); // Disconnect from the access point if connected before
-    delay(100);
+    my_delay(100000L);
 
     SERIAL_DEBUG_LN("[INFO]: Setup done");
 }
@@ -575,40 +518,15 @@ bool HMSnetwork::LoopWifiScan()
             SERIAL_DEBUG_ADD(WiFi.RSSI(i));
             SERIAL_DEBUG_ADD(")");
             SERIAL_DEBUG_LN((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
-            delay(10);
+            delay(10000L);
             return true;
         }
     }
     SERIAL_DEBUG_LN("[INFO]: ");
 
     // Wait a bit before scanning again
-    delay(5000);
+    my_delay(5000000L);
     return true;
-}
-
-void HMSnetwork::setupOTA()
-{
-    Serial.print("Device version: v.");
-    Serial.println(VERSION);
-    Serial.print("Connecting to " + String(cfg.config.WIFISSID) + "...");
-
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        Serial.print(".");
-        delay(500);
-    }
-
-    Serial.println(" connected!");
-    _lastOTACheck = millis();
-}
-
-void HMSnetwork::loopOTA()
-{
-    if ((millis() - OTA_CHECK_INTERVAL) > _lastOTACheck)
-    {
-        _lastOTACheck = millis();
-        checkFirmwareUpdates();
-    }
 }
 
 HMSnetwork network;

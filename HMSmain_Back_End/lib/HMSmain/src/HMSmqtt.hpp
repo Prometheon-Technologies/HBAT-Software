@@ -17,6 +17,7 @@ public:
   virtual ~HMSMqtt();
   
   // Initialize the library
+  void loadMQTTConfig();
   bool MQTTSetup();
   bool MQTTLoop();
   void RunMqttService();

@@ -135,3 +135,5 @@ bool HMSmdns::mDNSLoop()
     }
     return false;
 }
+
+HMSmdns Mdns;

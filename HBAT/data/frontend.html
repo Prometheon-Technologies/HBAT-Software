@@ -374,11 +374,12 @@
 
     async function toggleRelay(relayToToggle) {
         var relayNumberToToggle = relayToToggle.id.replace("relay", "");
-        await getHTML("/toggle?pin=" + relayNumberToToggle);
+        /* await getHTML("/toggle?pin=" + relayNumberToToggle); */
+        alert(JSON.stringify(await getHTML("/toggle?pin=" + relayNumberToToggle)));
         grabData();
     }
 
-    //Navigation menu
+    /* Navigation menu */
     function showDiv(inputValue) {
         setCSSclass("🔋widget", "infoPane")
         setCSSclass("🌡widget", "infoPane")
@@ -408,7 +409,7 @@
         } catch (err) {
             console.error(err);
             /* handle errors */
-            
+
         }
     }
 

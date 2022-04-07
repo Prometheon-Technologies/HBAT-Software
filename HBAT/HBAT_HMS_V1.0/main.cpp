@@ -42,6 +42,7 @@ void setup()
     Serial.println("HMS booting - please wait");
     Serial.println("Starting...");
     Cell_Temp.SetupSensors();
+
     switch (humidity.setupSensor())
     {
     case 0:
@@ -78,10 +79,10 @@ void setup()
 
     if (ENABLE_MDNS_SUPPORT)
     {
-        mdns.SetupmDNSServer(); // setup the mDNS server for the future web-front-end
+        Mdns.SetupmDNSServer(); // setup the mDNS server for the future web-front-end
         if (ENABLE_MQTT_SUPPORT)
         {
-            mdns.DiscovermDNSBroker(); // discover the mDNS broker for mqtt
+            Mdns.DiscovermDNSBroker(); // discover the mDNS broker for mqtt
         }
     }
 
@@ -109,10 +110,10 @@ void setup()
 void loop()
 {
     // Check for the network stack
-    timedTasks.ScanI2CBus();
+    /* timedTasks.ScanI2CBus();
     timedTasks.checkNetwork();
     timedTasks.accumulateSensorData();
-    timedTasks.updateCurrentData();
+    timedTasks.updateCurrentData(); */
 
     if (ENABLE_MQTT_SUPPORT)
     {
@@ -124,7 +125,7 @@ void loop()
 
     if (ENABLE_MDNS_SUPPORT)
     {
-        mdns.mDNSLoop();
+        Mdns.mDNSLoop();
     }
     my_delay(1000L);
 }

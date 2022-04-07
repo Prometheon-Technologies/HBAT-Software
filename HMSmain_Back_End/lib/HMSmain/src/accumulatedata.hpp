@@ -9,6 +9,7 @@ public:
     virtual ~AccumulateData();
 
     void InitAccumulateData();
+    int ChargeStatus();
 
 private:
     // Stack Data to send

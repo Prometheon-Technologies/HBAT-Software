@@ -15,17 +15,9 @@ public:
     // constructors
     HMSmdns();
     virtual ~HMSmdns();
-
     int DiscovermDNSBroker();
     void SetupmDNSServer();
     bool mDNSLoop();
-    void loadMQTTConfig();
-    void SetupServer();
-    void CheckNetworkLoop();
-    void SetupWifiScan();
-    bool LoopWifiScan();
-    void setupOTA();
-    void loopOTA();
 
     // variables
 private:

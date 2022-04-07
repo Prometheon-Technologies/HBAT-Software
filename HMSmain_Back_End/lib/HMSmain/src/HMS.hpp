@@ -5,8 +5,8 @@
 
 #ifndef HMS_h
 #define HMS_h
-#include <ACS712.h>
 #include "defines.hpp"
+#include <ACS712.h>
 
 class HMS
 {
@@ -16,10 +16,7 @@ public:
   void calibrateAmps();
   void setupSensor();
   int readAmps();
-  int ChargeStatus();
-  float sumArray(float array[], int size);
   float readVoltage(int pinnumber);
-  float StackVoltage();
   float *readSensAndCondition();
   String generateDeviceID();
 

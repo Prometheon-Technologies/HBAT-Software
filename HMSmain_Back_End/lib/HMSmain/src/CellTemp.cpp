@@ -9,14 +9,20 @@ DallasTemperature sensors(&oneWire);
 
 DeviceAddress temp_sensor_addresses;
 
-int sensors_count = sensors.getDeviceCount();
+Temp cell_temp_sensor_results;
 
+int sensors_count = 0;
 CellTemp::CellTemp()
 {
 }
 
 CellTemp::~CellTemp()
 {
+}
+
+int setSensorCount()
+{
+    sensors_count = sensors.getDeviceCount(); // returns the number of sensors found
 }
 
 /******************************************************************************
@@ -29,6 +35,7 @@ void CellTemp::SetupSensors()
 {
     // Start up the ds18b20 library
     sensors.begin();
+    setSensorCount();
 
     // handle the case where no sensors are connected
     if (sensors_count == 0)
@@ -86,15 +93,26 @@ void CellTemp::printAddress(DeviceAddress deviceAddress)
  * Parameters: None
  * Return: float array - Temperature of the sensors
  ******************************************************************************/
-float *CellTemp::ReadTempSensorData()
+Temp CellTemp::ReadTempSensorData()
 {
-    float *cell_temp_sensor_results = (float *)malloc(sizeof(sensors_count));
+    // handle the case where no sensors are connected
+    if (sensors_count == 0)
+    {
+        float no_sensors[] = {0};
+        for (int i = 0; i < sensors_count; i++)
+        {
+            cell_temp_sensor_results.temp[i] = no_sensors[i];
+        }
+        Serial.println("No temperature sensors found - please connect them and restart the device");
+        return cell_temp_sensor_results;
+    }
+    // Allocate memory for the temperatures
     for (int i = 0; i < sensors_count; i++)
     {
         // Search the wire for address
         if (sensors.getAddress(temp_sensor_addresses, i))
         {
-            cell_temp_sensor_results[i] = sensors.getTempC(temp_sensor_addresses);
+            cell_temp_sensor_results.temp[i] = sensors.getTempC(temp_sensor_addresses);
 
             printAddress(temp_sensor_addresses);
             SERIAL_DEBUG_BOL;

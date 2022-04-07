@@ -16,6 +16,8 @@ int HUMIDITY_SENSORS_ACTIVE = 0;
 
 float _scale = 140.0; // _Scale factor for Air and N2 is 140.0, O2 is 142.8
 
+Hum result;
+
 Humidity::Humidity()
 {
   // Constructor
@@ -76,7 +78,7 @@ bool Humidity::checkHeaterEnabled()
   {
     bool _sensor1 = sht31.isHeaterEnabled();
     bool heaterenabled = false;
-    if (++loopCnt == 30)
+    if (loopCnt >= 30)
     {
       enableHeater = !enableHeater;
       sht31.heater(enableHeater);
@@ -94,6 +96,7 @@ bool Humidity::checkHeaterEnabled()
       }
       loopCnt = 0;
     }
+    loopCnt++;
     return heaterenabled;
     break;
   }
@@ -101,7 +104,7 @@ bool Humidity::checkHeaterEnabled()
   {
     bool _sensor2 = sht31_2.isHeaterEnabled();
     bool heaterenabled = false;
-    if (++loopCnt == 30)
+    if (loopCnt >= 30)
     {
       enableHeater = !enableHeater;
       sht31_2.heater(enableHeater);
@@ -119,6 +122,7 @@ bool Humidity::checkHeaterEnabled()
       }
       loopCnt = 0;
     }
+    loopCnt++;
     return heaterenabled;
     break;
   }
@@ -127,14 +131,14 @@ bool Humidity::checkHeaterEnabled()
     bool _sensor1 = sht31.isHeaterEnabled();
     bool _sensor2 = sht31_2.isHeaterEnabled();
     bool heaterenabled = false;
-    if (++loopCnt == 30)
+    if (loopCnt >= 30)
     {
       enableHeater = !enableHeater;
       sht31.heater(enableHeater);
       sht31_2.heater(enableHeater);
       Serial.print("Heater Enabled State: ");
       Serial.println(enableHeater);
-      if (_sensor1 ^ _sensor2)
+      if (_sensor1 != _sensor2)
       {
         Serial.println("Sensors have Heater ENABLED");
         heaterenabled = true;
@@ -146,6 +150,7 @@ bool Humidity::checkHeaterEnabled()
       }
       loopCnt = 0;
     }
+    loopCnt++;
     return heaterenabled;
     break;
   }
@@ -160,15 +165,12 @@ bool Humidity::checkHeaterEnabled()
  * Description: This function is used to average the Temp of the stack - from the temp sensors built into the Humidity Sensors
  * Parameters: None
  * Return: float
+ * Note: This function MUST be called after the ReadSensor function
  ******************************************************************************/
 float Humidity::AverageStackTemp()
 {
-  float stack_temp[4];
-  for (int i = 0; i < 4; i++)
-  {
-    stack_temp[i] = *ReadSensor();
-  }
-  return (stack_temp[0] + stack_temp[2]) / 2; // Read the _temperature from the sensor and average the two sensors.
+  float stack_temp = result.temp + result.temp_2;
+  return stack_temp / 2; // Read the _temperature from the sensor and average the two sensors.
 }
 
 /******************************************************************************
@@ -176,16 +178,12 @@ float Humidity::AverageStackTemp()
  * Description: This function is used to average the humidity of the stack
  * Parameters: None
  * Return: float
+ * Note: This function MUST be called after the ReadSensor function
  ******************************************************************************/
 float Humidity::StackHumidity()
 {
-  float stack_humidity[4];
-
-  for (int i = 0; i < 4; i++)
-  {
-    stack_humidity[i] = *ReadSensor();
-  }
-  return (stack_humidity[1] + stack_humidity[3]) / 2;
+  float stack_humidity = result.humidity + result.humidity_2;
+  return stack_humidity / 2;
 }
 
 /******************************************************************************
@@ -194,47 +192,143 @@ float Humidity::StackHumidity()
  * Parameters: None
  * Return: float array
  ******************************************************************************/
-float *Humidity::ReadSensor()
+Hum Humidity::ReadSensor()
 {
-  float *climatedata = (float *)malloc(sizeof(float) * 4);
+  switch (HUMIDITY_SENSORS_ACTIVE)
+  {
+  case 0:
+  {
+    result = {0, 0, 0, 0};
+    return result;
+    break;
+  }
+  case 1:
+  {
+    float temp = sht31.readTemperature();
+    float hum = sht31.readHumidity();
+    // check if 'is not a number
+    if (!isnan(temp))
+    { // check if 'is not a number'
+      Serial.print("Temp *C = ");
+      Serial.print(temp);
+      Serial.print("\t\t");
+    }
+    else
+    {
+      Serial.println("Failed to read temperature");
+    }
 
-  // check if 'is not a number
-  if (!isnan(climatedata[0] && climatedata[1]))
-  {
-    climatedata[0] = sht31.readTemperature();
-    climatedata[1] = sht31_2.readTemperature();
-    Serial.println("Sensor 1 Temp *C = ");
-    Serial.print(climatedata[0]);
-    Serial.println("Sensor 2 Temp *C = ");
-    Serial.print(climatedata[1]);
-  }
-  else
-  {
-    Serial.println("Failed to read _temperature");
-  }
+    if (!isnan(hum))
+    { // check if 'is not a number'
+      Serial.print("Hum. % = ");
+      Serial.println(hum);
+    }
+    else
+    {
+      Serial.println("Failed to read humidity");
+    }
+    my_delay(1000L); // delay in between reads for stability
 
-  // check if 'is not a number'
-  if (!isnan(climatedata[2] && climatedata[3]))
-  {
-    climatedata[2] = sht31.readHumidity();
-    climatedata[3] = sht31_2.readHumidity();
-    Serial.println("Sensor 1 Humidity %% = ");
-    Serial.print(climatedata[2]);
-    Serial.println("Sensor 2 Humidity %% = ");
-    Serial.print(climatedata[3]);
+    // Toggle heater enabled state every 30 seconds
+    // An ~3.0 degC _temperature increase can be noted when heater is enabled
+    // This is needed due to the high operating humidity of the system
+    checkHeaterEnabled();
+    result = {temp, hum, 0, 0};
+    return result;
+    break;
   }
-  else
+  case 2:
   {
-    Serial.println("Failed to read humidity");
-  }
-  delay(1000); // delay in between reads for stability
-  // my_delay(100000L);
+    float temp_2 = sht31_2.readTemperature();
+    float hum_2 = sht31_2.readHumidity();
+    if (!isnan(temp_2))
+    { // check if 'is not a number'
+      Serial.print("Temp *C = ");
+      Serial.print(temp_2);
+      Serial.print("\t\t");
+    }
+    else
+    {
+      Serial.println("Failed to read temperature");
+    }
 
-  // Toggle heater enabled state every 30 seconds
-  // An ~3.0 degC _temperature increase can be noted when heater is enabled
-  // This is needed due to the high operating humidity of the system
-  checkHeaterEnabled();
-  return climatedata;
+    if (!isnan(hum_2))
+    { // check if 'is not a number'
+      Serial.print("Hum. % = ");
+      Serial.println(hum_2);
+    }
+    else
+    {
+      Serial.println("Failed to read humidity");
+    }
+    my_delay(1000L); // delay in between reads for stability
+
+    // Toggle heater enabled state every 30 seconds
+    // An ~3.0 degC _temperature increase can be noted when heater is enabled
+    // This is needed due to the high operating humidity of the system
+    checkHeaterEnabled();
+    result = {0, 0, temp_2, hum_2};
+    return result;
+    break;
+  }
+  case 3:
+  {
+    float temp_1 = sht31.readTemperature();
+    float temp_2 = sht31_2.readTemperature();
+    if (!isnan(temp_1))
+    { // check if 'is not a number'
+      Serial.print("Temp 1 *C = ");
+      Serial.print(temp_1);
+      Serial.print("\t\t");
+    }
+    else
+    {
+      Serial.println("Failed to read temperature");
+    }
+
+    if (!isnan(temp_2))
+    { // check if 'is not a number'
+      Serial.print("Temp 2 *C = ");
+      Serial.println(temp_2);
+    }
+    else
+    {
+      Serial.println("Failed to read humidity");
+    }
+
+    // check if 'is not a number'
+    float hum_1 = sht31.readHumidity();
+    float hum_2 = sht31_2.readHumidity();
+    if (!isnan(hum_1))
+    { // check if 'is not a number'
+      Serial.print("Temp 1 *C = ");
+      Serial.print(hum_1);
+      Serial.print("\t\t");
+    }
+    else
+    {
+      Serial.println("Failed to read temperature");
+    }
+
+    if (!isnan(hum_2))
+    { // check if 'is not a number'
+      Serial.print("Temp 2 *C = ");
+      Serial.println(hum_2);
+    }
+    else
+    {
+      Serial.println("Failed to read humidity");
+    }
+    my_delay(1000L); // delay in between reads for stability
+    result = {temp_1, hum_1, temp_2, hum_2};
+    return result;
+    break;
+  }
+  default: // Should never get here
+    result = {0, 0, 0, 0};
+    return result;
+    break;
+  }
 }
 
 /******************************************************************************
@@ -244,7 +338,6 @@ float *Humidity::ReadSensor()
  * Return: None
  * ADD IN CODE TO READ PRESSURE SENSORS
  ******************************************************************************/
-
 /* int Humidity::SetupSFM3003()
 {
   const char *driver_version = sfm_common_get_driver_version();
@@ -355,9 +448,9 @@ int Humidity::SFM3003()
    delay(5);
 } */
 
-uint8_t Humidity::crc8(const uint8_t data, uint8_t crc)
+uint8_t Humidity::crc8(const uint8_t result, uint8_t crc)
 {
-  crc ^= data;
+  crc ^= result;
 
   for (uint8_t i = 8; i; --i)
   {
@@ -400,7 +493,7 @@ int Humidity::loopSFM3003()
       a = (a << 8) | b; // combine the two received bytes to a 16bit integer value
       // a >>= 2; // remove the two least significant bits
       int Flow = (a - _offset) / _scale;
-      // Serial.println(a); // print the raw data from the sensor to the serial interface
+      // Serial.println(a); // print the raw result from the sensor to the serial interface
       Serial.println(Flow); // print the calculated flow to the serial interface
       start_time = current_time;
       return Flow;

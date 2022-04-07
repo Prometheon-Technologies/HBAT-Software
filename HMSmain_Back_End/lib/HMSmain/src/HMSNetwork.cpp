@@ -197,8 +197,7 @@ void HMSnetwork::SetupWebServer()
             SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
             }
         }
-      request->send(200, "application/json", "toggled");
-      request->redirect("/"); });
+      request->send(200, "application/json", "toggled"); });
 
         server.on("/data.json", HTTP_GET, [&](AsyncWebServerRequest *request)
                   {
@@ -221,7 +220,6 @@ void HMSnetwork::SetupWebServer()
         json += "\n";
         for (int i = 0; i < 10; i++)
         {
-            delay(0);
             json += R"====({"label": "🌡 )====" + (String)i + "\",\n";
             json += R"====("type": "temp",)====" + (String) "\n";
             json += R"====("value": )====" + (String)cfg.config.cell_temp[i] + (String) ",\n";
@@ -242,7 +240,7 @@ void HMSnetwork::SetupWebServer()
         }
         json += R"====(])====";
         json += R"====(})====";
-        json = "";
+        json += "";
         request->send(200, "application/json", json); });
 
         server.onNotFound(notFound);
@@ -320,8 +318,7 @@ void HMSnetwork::SetupWebServer()
                     SERIAL_DEBUG_LN(ssID);
                     // Write file to save value
                     heapStr(&cfg.config.WIFISSID, ssID.c_str());
-                    cfg.setConfigChanged();
-                    my_delay(1000L);
+                    my_delay(10000L);
                     //cfg.writeFile(SPIFFS, ssidPath, ssID.c_str());
                 }
                 // HTTP POST pass value
@@ -332,10 +329,10 @@ void HMSnetwork::SetupWebServer()
                     SERIAL_DEBUG_LN(passWord);
                     // Write file to save value
                     heapStr(&cfg.config.WIFIPASS, passWord.c_str());
-                    cfg.setConfigChanged();
-                    my_delay(1000L);
+                    my_delay(10000L);
                     //cfg.writeFile(SPIFFS, passPath, passWord.c_str());
                 }
+                cfg.setConfigChanged();
             SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
         }
       }

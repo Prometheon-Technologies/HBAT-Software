@@ -11,6 +11,12 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
+struct Temp
+{
+    float temp[10];
+};
+
+extern Temp cell_temp_sensor_results;
 class CellTemp
 {
 public:
@@ -19,7 +25,7 @@ public:
     void SetupSensors();
     void readAddresses(DeviceAddress deviceAddress);
     void printAddress(DeviceAddress deviceAddress);
-    float *ReadTempSensorData();
+    Temp ReadTempSensorData();
 
 private:
 };

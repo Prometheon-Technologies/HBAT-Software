@@ -1,9 +1,15 @@
 #include "HMS.hpp"
-#include <esp_adc_cal.h>
 
 // ESP 32 (requires resistors to step down the logic voltage)
 // ACS712  ACS(25, 5.0, 4095, 185);
+#if !PRODUCTION
+
+uint8_t _amppin = 33;
+
+#else
 uint8_t _amppin = 10;
+#endif
+
 ACS712 ACS(_amppin, 5.0, 4095, 100);
 
 bool mux_enabled_voltage = false;
@@ -12,6 +18,7 @@ int power_mux_pin_amps = 20;
 int power_mux_pin_voltage = 46;
 bool POWER_MUX_ENABLED_AMPS = digitalRead(power_mux_pin_amps);
 bool POWER_MUX_ENABLED_VOLTAGE = digitalRead(power_mux_pin_voltage);
+float *cell_voltage = (float *)malloc(sizeof(float) * maxCellCount);
 
 HMS::HMS()
 {
@@ -41,29 +48,51 @@ float HMS::readVoltage(int pinnumber)
 float *HMS::readSensAndCondition()
 {
     int numtoaverage = 10;
-    float *cell_voltage = (float *)malloc(sizeof(numtoaverage));
     for (int i = 0; i < numtoaverage; i++)
     {
-        cell_voltage[0] = readVoltage(1);
-        cell_voltage[1] = readVoltage(2);
-        cell_voltage[2] = readVoltage(3);
-        cell_voltage[3] = readVoltage(4); // voltage leads on analog pins ADC1 - ADC2 pins do not work when wifi is enabled
-        cell_voltage[4] = readVoltage(5);
-        cell_voltage[5] = readVoltage(6);
-        cell_voltage[6] = readVoltage(7);
-        cell_voltage[7] = readVoltage(8);
-        cell_voltage[8] = readVoltage(9);
-        digitalWrite(power_mux_pin_amps, LOW);
-        my_delay(1000L);
-        if (!mux_enabled_amps && !POWER_MUX_ENABLED_AMPS)
+        if (!PRODUCTION)
         {
-            mux_enabled_voltage = true;
-            digitalWrite(power_mux_pin_voltage, HIGH);
-            cell_voltage[9] = readVoltage(10);
+            cell_voltage[0] = readVoltage(36);
+            cell_voltage[1] = readVoltage(39);
+            cell_voltage[2] = readVoltage(34);
+            cell_voltage[3] = readVoltage(35); // voltage leads on analog pins ADC1 - ADC2 pins do not work when wifi is enabled
+            cell_voltage[4] = readVoltage(32);
+
+            digitalWrite(power_mux_pin_amps, LOW);
+            my_delay(1000L);
+            if (!mux_enabled_amps && !POWER_MUX_ENABLED_AMPS)
+            {
+                mux_enabled_voltage = true;
+                digitalWrite(power_mux_pin_voltage, HIGH);
+                cell_voltage[5] = readVoltage(33);
+            }
+            digitalWrite(power_mux_pin_voltage, LOW);
+            my_delay(1000L);
+            mux_enabled_voltage = false;
         }
-        digitalWrite(power_mux_pin_voltage, LOW);
-        my_delay(1000L);
-        mux_enabled_voltage = false;
+        else
+        {
+            cell_voltage[0] = readVoltage(1);
+            cell_voltage[1] = readVoltage(2);
+            cell_voltage[2] = readVoltage(3);
+            cell_voltage[3] = readVoltage(4); // voltage leads on analog pins ADC1 - ADC2 pins do not work when wifi is enabled
+            cell_voltage[4] = readVoltage(5);
+            cell_voltage[5] = readVoltage(6);
+            cell_voltage[6] = readVoltage(7);
+            cell_voltage[7] = readVoltage(8);
+            cell_voltage[8] = readVoltage(9);
+            digitalWrite(power_mux_pin_amps, LOW);
+            my_delay(1000L);
+            if (!mux_enabled_amps && !POWER_MUX_ENABLED_AMPS)
+            {
+                mux_enabled_voltage = true;
+                digitalWrite(power_mux_pin_voltage, HIGH);
+                cell_voltage[9] = readVoltage(10);
+            }
+            digitalWrite(power_mux_pin_voltage, LOW);
+            my_delay(1000L);
+            mux_enabled_voltage = false;
+        }
     }
 
     for (int i = 0; i < numtoaverage; i++)
@@ -71,41 +100,6 @@ float *HMS::readSensAndCondition()
         cell_voltage[i] = cell_voltage[i] / numtoaverage;
     }
     return cell_voltage;
-}
-
-/******************************************************************************
- * Function: Summation of elements in an array
- * Description: This function sums the elements in an array
- * Parameters: float array and int size
- * Return: float sum
- ******************************************************************************/
-float HMS::sumArray(float array[], int size)
-{
-    float sum = 0;
-    for (int i = 0; i < size; i++)
-    {
-        sum += array[i];
-    }
-    return sum;
-}
-
-/******************************************************************************
- * Function: Setup the Stack Voltage
- * Description: This function setups the mean Stack Voltage by calculating the sum of the cell_voltage array
- * Parameters: None
- * Return: The mean Stack Voltage
- ******************************************************************************/
-float HMS::StackVoltage()
-{
-    float array[10];
-    for (int i = 0; i < 10; i++)
-    {
-        array[i] = readSensAndCondition()[i];
-    }
-    int size = sizeof(array) / sizeof(array[0]);
-    float sum = sumArray(array, size);
-    Serial.println(sum);
-    return sum;
 }
 
 /******************************************************************************
@@ -147,56 +141,13 @@ int HMS::readAmps()
         mux_enabled_amps = true;
         digitalWrite(power_mux_pin_amps, HIGH);
         int mA = ACS.mA_DC();
-        char buffer[sizeof(mA)];
         digitalWrite(power_mux_pin_amps, LOW);
         mux_enabled_amps = false;
         my_delay(1000L);
-        snprintf(buffer, sizeof(buffer), "Stack Amps: %d", mA);
-        Serial.println(buffer);
+        Serial.print("Stack Amps:");
+        Serial.println(mA);
         return mA;
     }
-}
-
-/******************************************************************************
- * Function: Return Charge Status of Stack
- * Description: This function reads the current stack voltage and returns a number representing the charge status
- * Parameters: None
- * Return: String
- ******************************************************************************/
-int HMS::ChargeStatus()
-{
-    if (StackVoltage() < 8.00 && StackVoltage() >= 0.00)
-    {
-        return 1;
-        printf("Stack is fully discharged");
-    }
-    else if (StackVoltage() < 10.00 && StackVoltage() >= 8.00)
-    {
-        return 2;
-        printf("Stack needs to be charged");
-    }
-    else if (StackVoltage() < 13.00 && StackVoltage() >= 11.0)
-    {
-        return 3;
-        printf("Stack has a full charge");
-    }
-    else if (StackVoltage() < 14.0 && StackVoltage() >= 12.0)
-    {
-        return 4;
-        printf("Stack is charging");
-    }
-    else if (StackVoltage() < 16.0 && StackVoltage() >= 14.0)
-    {
-        return 5;
-        printf("Stack has encountered an overcharge condition");
-    }
-
-    else
-    {
-        return 0;
-        printf("Stack is in an unknown state");
-    }
-    return 0;
 }
 
 /******************************************************************************

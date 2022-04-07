@@ -337,7 +337,7 @@
     x = 1;
     async function grabData() {
         if (x >= 10) { x = 1 } else { x++ };
-        graphData = await JSON.parse(await getHTML("./data.json"));
+        graphData = await JSON.parse(await getHTML("/data.json"));
         setMeeterValue("batteryLevel", graphData.stack_voltage, "%", "Yellow");
         setMeeterValue("batteryTemp", graphData.stack_temp, "℃", "red");
         setMeeterValue("batteryHumidity", graphData.stack_humidity, "%💧", "cyan");
@@ -360,11 +360,11 @@
     }
 
     async function saveSettings() {
-        await getHTML("./wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById("apPass").value, false);
+        await getHTML("/wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById("apPass").value, false);
     }
 
     async function saveMQTTSettings() {
-        await getHTML("./mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false);
+        await getHTML("/mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false);
     }
 
     function setMeeterValue(itemId, itemValue, itemTypeString, colorForMeeter) {
@@ -374,7 +374,7 @@
 
     async function toggleRelay(relayToToggle) {
         var relayNumberToToggle = relayToToggle.id.replace("relay", "");
-        await getHTML("./toggle?pin=" + relayNumberToToggle);
+        await getHTML("/toggle?pin=" + relayNumberToToggle);
         grabData();
     }
 
@@ -407,7 +407,8 @@
 
         } catch (err) {
             console.error(err);
-            // Handle errors here
+            /* handle errors */
+            
         }
     }
 

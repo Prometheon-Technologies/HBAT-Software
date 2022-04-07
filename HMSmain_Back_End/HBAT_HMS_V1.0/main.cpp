@@ -132,16 +132,20 @@ void setup()
 void loop()
 {
     // Check for the network state
-    timedTasks.idle();
-    timedTasks.setSeconds(10);
-    timedTasks_2.idle();
-    timedTasks_2.setSeconds(2);
 
-    timedTasks.setCallback(ScanI2CBus);
+    /* timedTasks.setSeconds(10);
+    timedTasks_2.setSeconds(2); */
+    /* timedTasks.setCallback(ScanI2CBus);
     timedTasks.setCallback(updateCurrentData);
 
     timedTasks_2.setCallback(accumulateSensorData);
-    timedTasks.setCallback(checkNetwork);
+    timedTasks.setCallback(checkNetwork); */
+    checkNetwork();
+    accumulateSensorData();
+    updateCurrentData();
+    /* timedTasks.idle();
+    timedTasks_2.idle(); */
+
     if (ENABLE_MQTT_SUPPORT)
     {
         if (WiFi.status() == WL_CONNECTED)

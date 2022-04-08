@@ -31,7 +31,7 @@ String ledState;
 
 // Timer variables
 unsigned long previousMillis = 0;
-const long interval = 10000; // interval to wait for Wi-Fi connection (milliseconds)
+const long interval = 20000; // interval to wait for Wi-Fi connection (milliseconds)
 
 HMSnetwork::HMSnetwork()
 {

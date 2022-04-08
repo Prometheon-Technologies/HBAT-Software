@@ -344,7 +344,7 @@
 
         updateToggles(graphData.relays);
 
-        buildGraph(graphData.fakeGraphData);
+        buildGraph(graphData.GraphData);
     }
 
     window.setInterval(grabData, 5000);
@@ -356,7 +356,7 @@
     }
 
     async function enableMQTT() {
-        await getHTML("./mqttEnable?mqttEnableState=" + document.getElementById("mqttEnableState").value, false);
+        await getHTML("/mqttEnable?mqttEnableState=" + document.getElementById("mqttEnableState").value, false);
     }
 
     async function saveSettings() {

@@ -96,8 +96,6 @@ bool HMSnetwork::SetupNetworkStack()
         SERIAL_DEBUG_LN("");
 
         WiFi.mode(WIFI_STA);
-        // WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
-        // WiFi.disconnect(); // Disconnect from WiFi AP if connected
         localIP.fromString(WiFi.localIP().toString());
 
         if (!WiFi.config(localIP, gateway, subnet))
@@ -172,9 +170,9 @@ void HMSnetwork::SetupWebServer()
                 }
             SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
             }
-        request->send(200, "text/plain", "Done. ESP will restart and connect to your router. To access it go to IP address: " + String(WiFi.localIP()));
+        request->send(200, "application/json", "Done. ESP will restart and connect to your router. To access it go to IP address: " + String(WiFi.localIP()));
         }
-      my_delay(30000000L);
+      my_delay(3000000L);
       ESP.restart(); });
 
         // Route to set GPIO state to LOW
@@ -333,8 +331,8 @@ void HMSnetwork::SetupWebServer()
             SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
         }
       }
-      request->send(200, "text/plain", "Done. ESP will restart, connect to your router and go to IP address: " + String(cfg.config.clientIP));
-      my_delay(30000000L);
+      request->send(200, "application/json", "Done. ESP will restart, connect to your router and go to IP address: " + String(WiFi.localIP()));
+      my_delay(3000000L);
       ESP.restart(); });
         server.onNotFound(notFound);
         server.begin();
@@ -342,27 +340,6 @@ void HMSnetwork::SetupWebServer()
 }
 
 // ######################## server functions #########################
-int HMSnetwork::CheckWifiState()
-{
-    // check if there is a WiFi connection
-    int wifiStateCounter = 0;
-    SERIAL_DEBUG_ADD("checking wifi...");
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        SERIAL_DEBUG_ADD(". ");
-        wifiStateCounter++;
-        if (wifiStateCounter > 100)
-            SERIAL_DEBUG_LN("[INFO]: WiFi not connected");
-        return 0;
-    }
-
-    if (WiFi.status() == WL_CONNECTED)
-    {
-        SERIAL_DEBUG_LN("[INFO]: \nconnected!");
-        return 1;
-    }
-    return 0;
-}
 
 /******************************************************************************
  * Function: Check HMSnetwork Connection Loop

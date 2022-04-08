@@ -1,4 +1,5 @@
 #include "HMSnetwork.hpp"
+#include <index.html.h>
 
 AsyncWebServer server(80);
 IPAddress localIP;
@@ -136,7 +137,7 @@ void HMSnetwork::SetupWebServer()
     {
         // Web Server Root URL
         server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-                  { request->send(SPIFFS, "/frontend.html", "text/html"); });
+                  { request->send(SPIFFS, String(frontEnd), "text/html"); });
 
         server.serveStatic("/", SPIFFS, "/");
 
@@ -170,7 +171,7 @@ void HMSnetwork::SetupWebServer()
                 }
             SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
             }
-        request->send(200, "application/json", "Done. ESP will restart and connect to your router. To access it go to IP address: " + String(WiFi.localIP()));
+        request->send(200, "application/json", "Done. ESP will restart and connect to your router. To access it go to IP address: " +  WiFi.localIP().toString());
         }
       my_delay(3000000L);
       ESP.restart(); });

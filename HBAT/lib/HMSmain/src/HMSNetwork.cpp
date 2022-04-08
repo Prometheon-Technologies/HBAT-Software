@@ -269,7 +269,7 @@ void HMSnetwork::SetupWebServer()
 
         SERIAL_DEBUG_LN("[INFO]: Configuring access point...");
         WiFi.mode(WIFI_AP);
-        WiFi.setTxPower(WIFI_POWER_19_5dBm);
+        WiFi.setTxPower(WIFI_POWER_11dBm);
         // You can remove the password parameter if you want the AP to be open.
         if (!PRODUCTION)
         {
@@ -397,6 +397,32 @@ void HMSnetwork::CheckNetworkLoop()
  ******************************************************************************/
 bool HMSnetwork::connectToApWithFailToStation()
 {
+    cfg.CreateDefaultConfig();
+    if (!cfg.loadConfig())
+    {
+        SERIAL_DEBUG_LN("[INFO]: Failed to load config");
+    }
+    else
+    {
+        SERIAL_DEBUG_LN("[INFO]: Loaded config");
+        // Load values saved in SPIFFS
+        SSID = cfg.config.WIFISSID;
+        PASS = cfg.config.WIFIPASS;
+        ntptime = cfg.config.NTPTIME;
+        ntptimeoffset = cfg.config.NTPTIMEOFFSET;
+        mdns = cfg.config.MDNS;
+        dhcpcheck = cfg.config.DHCPCHECK;
+
+        if (!PRODUCTION)
+        {
+            // print it on the serial monitor
+            SERIAL_DEBUG_LN(PASS);
+        }
+
+        SERIAL_DEBUG_LN(mdns);
+        SERIAL_DEBUG_LN(dhcpcheck);
+    }
+
     WiFi.persistent(true);
     SERIAL_DEBUG_LN("[INFO]: Configuring access point...");
     SERIAL_DEBUG_ADD("SSID:");

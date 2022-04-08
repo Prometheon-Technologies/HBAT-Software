@@ -356,15 +356,18 @@
     }
 
     async function enableMQTT() {
-        await getHTML("/mqttEnable?mqttEnableState=" + document.getElementById("mqttEnableState").value, false);
+        alert(JSON.stringify(await getHTML("./mqttEnable?mqttEnableState=" + document.getElementById("mqttEnableState").value, false)));
+        /* await getHTML("./mqttEnable?mqttEnableState=" + document.getElementById("mqttEnableState").value, false); */
     }
 
     async function saveSettings() {
-        await getHTML("/wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById("apPass").value, false);
+        alert(JSON.stringify(await getHTML("./wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById("apPass").value, false)));
+        /* await getHTML("./wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById("apPass").value, false); */
     }
 
     async function saveMQTTSettings() {
-        await getHTML("/mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false);
+        alert(JSON.stringify(await getHTML("./mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false)));
+        /* await getHTML("./mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false); */
     }
 
     function setMeeterValue(itemId, itemValue, itemTypeString, colorForMeeter) {

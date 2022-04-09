@@ -55,6 +55,42 @@ void notFound(AsyncWebServerRequest *request)
     request->send(404, "text/plain", "Not found");
 }
 
+// create file upload callback
+void onUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
+{
+    if (!index)
+    {
+        Serial.printf("UploadStart: %s\n", filename.c_str());
+        filename = "/" + filename;
+        if (!index)
+        {
+            // SPIFFS.remove(filename);
+            Serial.printf("UploadStart: %s\n", filename.c_str());
+        }
+    }
+    if (index + len > 1024)
+    {
+        Serial.printf("TOO MUCH DATA\n");
+        return;
+    }
+    if (!index)
+    {
+        Serial.printf("UploadStart: %s\n", filename.c_str());
+    }
+    File file = SPIFFS.open(filename, "a+");
+    if (!file)
+    {
+        Serial.printf("OPEN FAIL\n");
+        return;
+    }
+    if (file.write(data, len) != len)
+    {
+        Serial.printf("WRITE FAIL\n");
+    }
+    file.close();
+    Serial.printf("UploadEnd: %s, %u B\n", filename.c_str(), index + len);
+}
+
 bool HMSnetwork::SetupNetworkStack()
 {
     cfg.CreateDefaultConfig();
@@ -137,9 +173,12 @@ void HMSnetwork::SetupWebServer()
     {
         // Web Server Root URL
         server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-                  { request->send(SPIFFS, String(frontEnd), "text/html"); });
+                  { request->send(SPIFFS, "/frontend.html", "text/html"); });
 
         server.serveStatic("/", SPIFFS, "/");
+
+        server.on("/upload", HTTP_POST, [&](AsyncWebServerRequest *request)
+                  { request->send(200, "text/plain", "OK"); });
 
         server.on("/wifiUpdate", HTTP_POST, [&](AsyncWebServerRequest *request)
                   {
@@ -240,6 +279,7 @@ void HMSnetwork::SetupWebServer()
         request->send(200, "application/json", json); });
 
         server.onNotFound(notFound);
+        server.onFileUpload(onUpload);
         server.begin();
         Serial.println("HBAT HMS server started");
     }

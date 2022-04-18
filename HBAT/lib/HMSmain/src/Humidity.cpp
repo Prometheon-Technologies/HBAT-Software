@@ -339,9 +339,6 @@ Hum Humidity::ReadSensor()
  * ADD IN CODE TO READ PRESSURE SENSORS
  ******************************************************************************/
 
-
-
-
 uint8_t Humidity::crc8(const uint8_t result, uint8_t crc)
 {
   crc ^= result;

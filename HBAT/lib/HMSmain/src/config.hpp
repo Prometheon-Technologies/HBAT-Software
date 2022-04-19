@@ -42,7 +42,6 @@ public:
         char *NTPTIMEOFFSET;
         char *MDNS;
         char *DHCPCHECK;
-        char *configData;
         boolean relays[5];
         int relays_pin[5];
         float stack_humidity;

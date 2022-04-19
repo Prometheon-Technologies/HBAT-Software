@@ -147,8 +147,9 @@ bool AccumulateData::SendData()
     // Stack Voltage
 
     JsonArray graphdata = json.createNestedArray("GraphData");
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < sizeof(cfg.config.cell_temp) / sizeof(cfg.config.cell_temp[0]); i++)
     {
+        delay(0);
         JsonObject graph = graphdata.createNestedObject();
         graph["label"] = "🌡" + (String)i;
         graph["type"] = "temp";

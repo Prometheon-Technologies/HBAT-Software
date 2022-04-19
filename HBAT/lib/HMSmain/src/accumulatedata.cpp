@@ -130,7 +130,6 @@ int AccumulateData::ChargeStatus()
 bool AccumulateData::SendData()
 {
     // Send the data to the server
-    Serial.println("Sending data to server");
     String temp;
     StaticJsonDocument<1024> jsonConfig;
     JsonObject json = jsonConfig.to<JsonObject>();
@@ -144,11 +143,11 @@ bool AccumulateData::SendData()
         Relays.add(cfg.config.relays[i]);
     }
 
-    // Stack Voltage
     json["stack_voltage"] = cfg.config.stack_voltage;
+    // Stack Voltage
 
     JsonArray graphdata = json.createNestedArray("GraphData");
-    for (int i = 0; i < 11; i++)
+    for (int i = 0; i < 10; i++)
     {
         JsonObject graph = graphdata.createNestedObject();
         graph["label"] = "🌡" + (String)i;
@@ -172,9 +171,8 @@ bool AccumulateData::SendData()
     {
         SERIAL_DEBUG_LN(F("[Upload JSON data to Webserver]: Successfully serialized document"));
         SERIAL_DEBUG_LN(temp);
-        return true;
-
         cfg.config.data_json_string = temp;
+        return true;
     }
 }
 

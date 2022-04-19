@@ -359,7 +359,7 @@ void HMSnetwork::CheckNetworkLoop()
         wifiConnected = true;
         SERIAL_DEBUG_LN(F("Wifi is connected"));
         SERIAL_DEBUG_ADD("[INFO]: WiFi Connected! Open http://");
-        SERIAL_DEBUG_LN(WiFi.localIP());
+        Serial.println(WiFi.localIP());
         Serial.print("[INFO]:  in your browser");
     }
 }

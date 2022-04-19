@@ -253,6 +253,8 @@ bool Config::loadConfig()
     heapStr(&config.NTPTIMEOFFSET, jsonBuffer["NTPTIMEOFFSET"]);
     heapStr(&config.MDNS, jsonBuffer["MDNS"]);
     heapStr(&config.DHCPCHECK, jsonBuffer["DHCPCHECK"]);
+    config.numSensors = jsonBuffer["Number_of_Sensors"];
+    config.cell_count_max = jsonBuffer["Max_Cell_Count"];
 
     for (int i = 0; i < sizeof(config.relays); i++)
     {
@@ -316,8 +318,8 @@ bool Config::saveConfig()
     json["NTPTIMEOFFSET"] = config.NTPTIMEOFFSET;
     json["MDNS"] = config.MDNS;
     json["DHCPCHECK"] = config.DHCPCHECK;
-    json["Number of Sensors"] = config.numSensors;
-    json["Max Cell Count"] = config.cell_count_max;
+    json["Number_of_Sensors"] = config.numSensors;
+    json["Max_Cell_Count"] = config.cell_count_max;
 
     // Relays
     JsonArray Relays = json.createNestedArray("HMS_Relays_State");

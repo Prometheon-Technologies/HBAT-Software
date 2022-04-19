@@ -12,6 +12,8 @@ IPAddress subnet(255, 255, 0, 0);
 
 const char *PARAM_INPUT_1 = "ssid";
 const char *PARAM_INPUT_2 = "password";
+const char *PARAM_INPUT_3 = "apName";
+const char *PARAM_INPUT_4 = "apPass";
 const char *mdnsPath = "/mdns.txt";
 const char *dhcpcheckPath = "/dhcpcheck.txt";
 const char *ssidPath = "/ssid.txt";
@@ -187,7 +189,7 @@ void HMSnetwork::SetupWebServer()
             AsyncWebParameter* p = request->getParam(i);
             if(p->isPost()){
                 // HTTP POST ssid value
-                if (p->name() == "apName") {
+                if (p->name() == PARAM_INPUT_3) {
                     String ssID; 
                     ssID = p->value().c_str();
                     SERIAL_DEBUG_ADD("SSID set to: ");
@@ -195,10 +197,9 @@ void HMSnetwork::SetupWebServer()
                     // Write file to save value
                     heapStr(&cfg.config.WIFISSID, ssID.c_str());
                     cfg.setConfigChanged();
-                    cfg.writeFile(SPIFFS, ssidPath, ssID.c_str());
                 }
                 // HTTP POST pass value
-                if (p->name() == "apPass") {
+                if (p->name() == PARAM_INPUT_4) {
                     String passWord; 
                     passWord = p->value().c_str();
                     SERIAL_DEBUG_ADD("Password set to: ");
@@ -206,14 +207,13 @@ void HMSnetwork::SetupWebServer()
                     // Write file to save value
                     heapStr(&cfg.config.WIFIPASS, passWord.c_str());
                     cfg.setConfigChanged();
-                    cfg.writeFile(SPIFFS, passPath, passWord.c_str());
                 }
             SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
             }
         request->send(200, "application/json", "Done. ESP will restart and connect to your router. To access it go to IP address: " +  WiFi.localIP().toString());
         }
-      my_delay(3000000L);
-      ESP.restart(); });
+        my_delay(3000000L);
+        ESP.restart(); });
 
         // Route to set GPIO state to LOW
         server.on("/toggle", HTTP_GET, [&](AsyncWebServerRequest *request)
@@ -232,7 +232,7 @@ void HMSnetwork::SetupWebServer()
             SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
             }
         }
-      request->send(200, "application/json", "toggled"); });
+        request->send(200, "application/json", "toggled"); });
 
         server.on("/data.json", HTTP_GET, [&](AsyncWebServerRequest *request)
                   {
@@ -270,6 +270,7 @@ void HMSnetwork::SetupWebServer()
             if (i < 9)
             {
                 graph[""] = ",";
+                graph2[""] = ",";
 
             }
         }
@@ -358,7 +359,6 @@ void HMSnetwork::SetupWebServer()
                     // Write file to save value
                     heapStr(&cfg.config.WIFISSID, ssID.c_str());
                     my_delay(100000L);
-                    //cfg.writeFile(SPIFFS, ssidPath, ssID.c_str());
                 }
                 // HTTP POST pass value
                 if (p->name() == PARAM_INPUT_2) {
@@ -369,7 +369,6 @@ void HMSnetwork::SetupWebServer()
                     // Write file to save value
                     heapStr(&cfg.config.WIFIPASS, passWord.c_str());
                     my_delay(100000L);
-                    //cfg.writeFile(SPIFFS, passPath, passWord.c_str());
                 }
                 cfg.setConfigChanged();
             SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());

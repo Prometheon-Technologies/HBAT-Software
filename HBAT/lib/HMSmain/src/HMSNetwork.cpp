@@ -233,10 +233,47 @@ void HMSnetwork::SetupWebServer()
 
         server.on("/data.json", HTTP_GET, [&](AsyncWebServerRequest *request)
                   {
-                    cfg.config.data_json = true;
-                    my_delay(10000L);
-                    String temp = cfg.config.data_json_string;
-                    request->send(200, "application/json", temp); });
+                    String json = "";
+                    json += R"====({)====";
+
+                    json += R"====("stack_humidity":)====";
+                    json += (String)cfg.config.stack_humidity + ",\n";
+
+                    json += R"====("stack_temp":)====";
+                    json += (String)cfg.config.stack_temp + ",\n";
+
+                    json += R"====("relays":[)====";
+                    json += (String) cfg.config.relays[0] + "," + (String) cfg.config.relays[1] + "," +  (String) cfg.config.relays[2] + "," +  (String) cfg.config.relays[3] + "," +  (String) cfg.config.relays[4] + "],\n";
+
+                    json += R"====("stack_voltage":)====";
+                    json += (String)cfg.config.stack_voltage + ",\n";
+
+                    json += R"====("GraphData":[)====";
+                    json +=  "\n";
+                    for (int i = 0; i < 11; i++) 
+                    {
+                        delay(0);
+                        json += R"====({"label": "🌡 )====" + (String)i + "\",\n";
+                        json += R"====("type": "temp",)====" + (String)"\n";
+                        json += R"====("value": )====" + (String)cfg.config.cell_temp[i] + (String)",\n";
+                        json += R"====("maxValue": )====" + (String) maxTemp;
+                        json += R"====(})====" + (String)"\n";
+                        json += R"====(,)====";
+
+                        json += R"====({"label": "⚡ )====" + (String)i + "\",\n";
+                        json += R"====("type": "volt",)====" + (String)"\n";
+                        json += R"====("value": )====" + (String)cfg.config.cell_voltage[i] + (String)",\n";
+                        json += R"====("maxValue": )====" + (String) maxVoltage;
+                        json += R"====(})====" + (String)"\n";
+
+                        if (i < 9) {
+                            json += R"====(,)====";
+                        };
+                    }
+                    json += R"====(])====";
+                    json += R"====(})====";
+                    request->send(200, "application/json", json); 
+                    json = ""; });
         server.onNotFound(notFound);
         /* server.onFileUpload(onUpload); */
         server.begin();

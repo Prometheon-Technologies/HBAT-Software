@@ -111,7 +111,7 @@ void loop()
 {
     timedTasks.ScanI2CBus();
     timedTasks.accumulateSensorData();
-    timedTasks.checkNetwork();
+    //timedTasks.checkNetwork();
     timedTasks.updateCurrentData();
 
     if (ENABLE_MQTT_SUPPORT)

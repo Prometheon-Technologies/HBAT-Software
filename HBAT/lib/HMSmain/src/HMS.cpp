@@ -127,10 +127,10 @@ void HMS::setupSensor()
 }
 
 /******************************************************************************
- * Function: Read Amps for stack
+ * Function: Read MilliAmps for stack
  * Description: This function reads the current from the ACS712 sensor and returns the value
  * Parameters: None
- * Return: String
+ * Return: Integer
  ******************************************************************************/
 int HMS::readAmps()
 {
@@ -141,12 +141,13 @@ int HMS::readAmps()
         mux_enabled_amps = true;
         digitalWrite(power_mux_pin_amps, HIGH);
         int mA = ACS.mA_DC();
+        String amps = String(mA);
         digitalWrite(power_mux_pin_amps, LOW);
         mux_enabled_amps = false;
+        Serial.print("Stack mA:");
+        Serial.println(amps);
         my_delay(1000L);
-        Serial.print("Stack Amps:");
-        Serial.println(mA);
-        return mA;
+        return amps.toInt();
     }
 }
 

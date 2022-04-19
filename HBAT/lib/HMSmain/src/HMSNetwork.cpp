@@ -250,7 +250,7 @@ void HMSnetwork::SetupWebServer()
 
                     json += R"====("GraphData":[)====";
                     json +=  "\n";
-                    for (int i = 0; i < 11; i++) 
+                    for (int i = 0; i < 10; i++) 
                     {
                         delay(0);
                         json += R"====({"label": "🌡 )====" + (String)i + "\",\n";

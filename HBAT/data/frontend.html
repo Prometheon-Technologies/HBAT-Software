@@ -101,14 +101,15 @@
         </div>
 
         <div id="⚙widget" class="infoPane" style="text-align: left;">
-            <form method="POST">
+            <form action="/" method="POST">
                 <h2>Settings</h2>
                 <label for="apName">AP Name</label>
                 <input type="text" id="apName" name="apName"><br>
                 <label for="apPass">AP Password</label>
                 <input type="text" id="apPass" name="apPass"><br>
                 <hr>
-                <button onclick="saveSettings()">Save</button>
+                <input type="submit" value="Submit">
+                <!-- <button onclick="saveSettings()">Save</button> -->
                 <label for="mqttIP">MQTT Broker IP</label>
                 <input type="text" id="mqttIP" name="mqttIP"><br>
                 <label for="mqttName">MQTT UserName</label>
@@ -117,7 +118,8 @@
                 <label for="mqttPass">MQTT Password</label>
                 <input type="text" id="mqttPass" name="mqttPass"><br>
                 <hr>
-                <button onclick="saveMQTTSettings()">Save MQTT Data</button>
+                <input type="submit" value="Submit">
+                <!-- <button onclick="saveMQTTSettings()">Save MQTT Data</button> -->
                 <br>
                 <table style="color: ivory;">
                     <tr>
@@ -218,17 +220,17 @@
             }
         }
         async function enableMQTT() {
-            alert(JSON.stringify(await getHTML("./mqttEnable?mqttEnableState=" + document.getElementById("mqttEnableState").value, false)));
+            alert(JSON.stringify(await getHTML("/mqttEnable?mqttEnableState=" + document.getElementById("mqttEnableState").value, false)));
             /* await getHTML("./mqttEnable?mqttEnableState=" + document.getElementById("mqttEnableState").value, false); */
         }
-        async function saveSettings() {
-            alert(JSON.stringify(await getHTML("./wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById("apPass").value, false)));
-            /* await getHTML("./wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById("apPass").value, false); */
+        /* async function saveSettings() {
+            alert(JSON.stringify(await getHTML("/wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById("apPass").value, false)));
+            //await getHTML("./wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById///("apPass").value, false);
         }
         async function saveMQTTSettings() {
-            alert(JSON.stringify(await getHTML("./mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false)));
-            /* await getHTML("./mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false); */
-        }
+            alert(JSON.stringify(await getHTML("/mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false)));
+            //await getHTML("./mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false);
+        } */
         function setMeeterValue(itemId, itemValue, itemTypeString, colorForMeeter) {
             try {
                 document.getElementById(itemId).style.cssText = `--value:` + itemValue + `;--typeOfValue:'` + itemTypeString + `';--fg: ` + colorForMeeter + `;`;
@@ -239,7 +241,7 @@
         async function toggleRelay(relayToToggle) {
             var relayNumberToToggle = relayToToggle.id.replace("relay", "");
             /* await getHTML("/toggle?pin=" + relayNumberToToggle); */
-            alert(JSON.stringify(await getHTML("./toggle?pin=" + relayNumberToToggle)));
+            alert(JSON.stringify(await getHTML("/toggle?pin=" + relayNumberToToggle)));
             grabData();
         }
         /* Navigation menu */

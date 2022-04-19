@@ -109,11 +109,10 @@ void setup()
 
 void loop()
 {
-    // Check for the network stack
-    /* timedTasks.ScanI2CBus();
-    timedTasks.checkNetwork();
+    timedTasks.ScanI2CBus();
     timedTasks.accumulateSensorData();
-    timedTasks.updateCurrentData(); */
+    timedTasks.checkNetwork();
+    timedTasks.updateCurrentData();
 
     if (ENABLE_MQTT_SUPPORT)
     {

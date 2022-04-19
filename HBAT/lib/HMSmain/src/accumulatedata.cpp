@@ -4,6 +4,8 @@ int numSensors = 10;
 
 AccumulateData::AccumulateData()
 {
+    maxVoltage = 24;
+    maxTemp = 100;
 }
 
 AccumulateData::~AccumulateData()
@@ -123,6 +125,57 @@ int AccumulateData::ChargeStatus()
         printf("[DANGER]: Stack is in an unknown state!!");
     }
     return 0;
+}
+
+bool AccumulateData::SendData()
+{
+    // Send the data to the server
+    Serial.println("Sending data to server");
+    String temp;
+    StaticJsonDocument<1024> jsonConfig;
+    JsonObject json = jsonConfig.to<JsonObject>();
+    json["stack_humidity"] = cfg.config.stack_humidity;
+    json["stack_temp"] = cfg.config.stack_temp;
+
+    // Relays
+    JsonArray Relays = json.createNestedArray("relays");
+    for (int i = 0; i < sizeof(cfg.config.relays) / sizeof(cfg.config.relays[0]); i++)
+    {
+        Relays.add(cfg.config.relays[i]);
+    }
+
+    // Stack Voltage
+    json["stack_voltage"] = cfg.config.stack_voltage;
+
+    JsonArray graphdata = json.createNestedArray("GraphData");
+    for (int i = 0; i < 11; i++)
+    {
+        JsonObject graph = graphdata.createNestedObject();
+        graph["label"] = "🌡" + (String)i;
+        graph["type"] = "temp";
+        graph["value"] = cfg.config.cell_temp[i];
+        graph["maxValue"] = (String)maxTemp;
+
+        JsonObject graph2 = graphdata.createNestedObject();
+        graph2["label"] = "⚡" + (String)i;
+        graph2["type"] = "volt";
+        graph2["value"] = cfg.config.cell_voltage[i];
+        graph2["maxValue"] = (String)maxVoltage;
+    }
+
+    if (serializeJson(json, temp) == 0)
+    {
+        SERIAL_DEBUG_LN(F("[Upload JSON data to Webserver]: Failed to serialize document"));
+        return false;
+    }
+    else
+    {
+        SERIAL_DEBUG_LN(F("[Upload JSON data to Webserver]: Successfully serialized document"));
+        SERIAL_DEBUG_LN(temp);
+        return true;
+
+        cfg.config.data_json_string = temp;
+    }
 }
 
 AccumulateData accumulatedata;

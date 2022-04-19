@@ -101,53 +101,49 @@
         </div>
 
         <div id="⚙widget" class="infoPane" style="text-align: left;">
-            <form method="POST">
-                <h2>Settings</h2>
-                <label for="apName">AP Name</label>
-                <input type="text" id="apName" name="apName"><br>
-                <label for="apPass">AP Password</label>
-                <input type="text" id="apPass" name="apPass"><br>
-                <hr>
-                <input type="submit" value="Save">
-                <!-- <button onclick="saveSettings()">Save</button> -->
-                <label for="mqttIP">MQTT Broker IP</label>
-                <input type="text" id="mqttIP" name="mqttIP"><br>
-                <label for="mqttName">MQTT UserName</label>
-                <input type="text" id="mqttName" name="mqttName"><br>
-                <hr>
-                <label for="mqttPass">MQTT Password</label>
-                <input type="text" id="mqttPass" name="mqttPass"><br>
-                <hr>
-                <input type="submit" value="Save">
-                <!-- <button onclick="saveMQTTSettings()">Save MQTT Data</button> -->
-                <br>
-                <table style="color: ivory;">
-                    <tr>
-                        <td>Relay 0</td>
-                        <td id="relay0" onclick="toggleRelay(this);"></td>
-                    </tr>
-                    <tr>
-                        <td>Relay 1</td>
-                        <td id="relay1" onclick="toggleRelay(this);"></td>
-                    </tr>
-                    <tr>
-                        <td>Relay 2</td>
-                        <td id="relay2" onclick="toggleRelay(this);"></td>
-                    </tr>
-                    <tr>
-                        <td>Relay 3</td>
-                        <td id="relay3" onclick="toggleRelay(this);"></td>
-                    </tr>
-                    <tr>
-                        <td>Relay 4</td>
-                        <td id="relay4" onclick="toggleRelay(this);"></td>
-                    </tr>
-                    <tr>
-                        <td>Enable MQTT</td>
-                        <td id="relay5" onclick="toggleRelay(this);"></td>
-                    </tr>
-                </table>
-            </form>
+            <h2>Settings</h2>
+            <label>AP Name</label>
+            <input id="apName"><br>
+            <label>AP Password</label>
+            <input id="apPass"><br>
+            <hr>
+            <button onclick="saveSettings()">Save</button>
+            <label>MQTT Broker IP</label>
+            <input id="mqttIP"><br>
+            <label for="mqttName">MQTT UserName</label>
+            <input id="mqttName"><br>
+            <hr>
+            <label>MQTT Password</label>
+            <input id="mqttPass"><br>
+            <hr>
+            <button onclick="saveMQTTSettings()">Save MQTT Data</button>
+            <br>
+            <table style="color: ivory;">
+                <tr>
+                    <td>Relay 0</td>
+                    <td id="relay0" onclick="toggleRelay(this);"></td>
+                </tr>
+                <tr>
+                    <td>Relay 1</td>
+                    <td id="relay1" onclick="toggleRelay(this);"></td>
+                </tr>
+                <tr>
+                    <td>Relay 2</td>
+                    <td id="relay2" onclick="toggleRelay(this);"></td>
+                </tr>
+                <tr>
+                    <td>Relay 3</td>
+                    <td id="relay3" onclick="toggleRelay(this);"></td>
+                </tr>
+                <tr>
+                    <td>Relay 4</td>
+                    <td id="relay4" onclick="toggleRelay(this);"></td>
+                </tr>
+                <tr>
+                    <td>Enable MQTT</td>
+                    <td id="relay5" onclick="toggleRelay(this);"></td>
+                </tr>
+            </table>
         </div>
 
         <div id="❔widget" class="infoPane">
@@ -223,14 +219,14 @@
             alert(JSON.stringify(await getHTML("/mqttEnable?mqttEnableState=" + document.getElementById("mqttEnableState").value, false)));
             /* await getHTML("./mqttEnable?mqttEnableState=" + document.getElementById("mqttEnableState").value, false); */
         }
-        /* async function saveSettings() {
+        async function saveSettings() {
             alert(JSON.stringify(await getHTML("/wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById("apPass").value, false)));
             //await getHTML("./wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById///("apPass").value, false);
         }
         async function saveMQTTSettings() {
             alert(JSON.stringify(await getHTML("/mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false)));
             //await getHTML("./mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false);
-        } */
+        }
         function setMeeterValue(itemId, itemValue, itemTypeString, colorForMeeter) {
             try {
                 document.getElementById(itemId).style.cssText = `--value:` + itemValue + `;--typeOfValue:'` + itemTypeString + `';--fg: ` + colorForMeeter + `;`;

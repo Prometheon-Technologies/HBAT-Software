@@ -131,7 +131,8 @@ void HMS::setupSensor()
  * Description: This function reads the current from the ACS712 sensor and returns the value
  * Parameters: None
  * Return: Integer
- ******************************************************************************/
+ *************************
+ *****************************************************/
 int HMS::readAmps()
 {
     // Setup the ACS712 sensor

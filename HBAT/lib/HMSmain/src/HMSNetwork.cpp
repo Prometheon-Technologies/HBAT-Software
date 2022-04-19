@@ -41,8 +41,6 @@ HMSnetwork::HMSnetwork()
     // constructor
     SERIAL_DEBUG_LN("[INFO]: HMSnetwork::HMSnetwork()");
     SERIAL_DEBUG_LN("[INFO]: Creating network object");
-    maxVoltage = 24;
-    maxTemp = 100;
 }
 
 HMSnetwork::~HMSnetwork()
@@ -184,99 +182,63 @@ void HMSnetwork::SetupWebServer()
 
         server.on("/wifiUpdate", HTTP_POST, [&](AsyncWebServerRequest *request)
                   {
-        int params = request->params();
-        for(int i=0;i<params;i++){
-            AsyncWebParameter* p = request->getParam(i);
-            if(p->isPost()){
-                // HTTP POST ssid value
-                if (p->name() == PARAM_INPUT_3) {
-                    String ssID; 
-                    ssID = p->value().c_str();
-                    SERIAL_DEBUG_ADD("SSID set to: ");
-                    SERIAL_DEBUG_LN(ssID);
-                    // Write file to save value
-                    heapStr(&cfg.config.WIFISSID, ssID.c_str());
-                    cfg.setConfigChanged();
-                }
-                // HTTP POST pass value
-                if (p->name() == PARAM_INPUT_4) {
-                    String passWord; 
-                    passWord = p->value().c_str();
-                    SERIAL_DEBUG_ADD("Password set to: ");
-                    SERIAL_DEBUG_LN(passWord);
-                    // Write file to save value
-                    heapStr(&cfg.config.WIFIPASS, passWord.c_str());
-                    cfg.setConfigChanged();
-                }
-            SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-            }
-        request->send(200, "application/json", "Done. ESP will restart and connect to your router. To access it go to IP address: " +  WiFi.localIP().toString());
-        }
-        my_delay(3000000L);
-        ESP.restart(); });
+                    int params = request->params();
+                    for(int i=0;i<params;i++){
+                        AsyncWebParameter* p = request->getParam(i);
+                        if(p->isPost()){
+                            // HTTP POST ssid value
+                            if (p->name() == PARAM_INPUT_3) {
+                                String ssID; 
+                                ssID = p->value().c_str();
+                                SERIAL_DEBUG_ADD("SSID set to: ");
+                                SERIAL_DEBUG_LN(ssID);
+                                // Write file to save value
+                                heapStr(&cfg.config.WIFISSID, ssID.c_str());
+                            }
+                            // HTTP POST pass value
+                            if (p->name() == PARAM_INPUT_4) {
+                                String passWord; 
+                                passWord = p->value().c_str();
+                                SERIAL_DEBUG_ADD("Password set to: ");
+                                SERIAL_DEBUG_LN(passWord);
+                                // Write file to save value
+                                heapStr(&cfg.config.WIFIPASS, passWord.c_str());
+                            }
+                            cfg.setConfigChanged();
+                            SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                        }
+                        request->send(200, "application/json", "Done. ESP will restart and connect to your router. To access it go to IP address: " +  WiFi.localIP().toString());
+                    }
+                    my_delay(30000L);
+                    ESP.restart(); });
 
         // Route to set GPIO state to LOW
         server.on("/toggle", HTTP_GET, [&](AsyncWebServerRequest *request)
                   {
-        int params = request->params();
-        for(int i=0;i<params;i++){
-            AsyncWebParameter* p = request->getParam(i);
-            if(p->isPost()){
-                // HTTP POST Relay Value
-                if (p->name() == "pin") {
-                    String relay = p->value().c_str();
-                    Serial.print("switching state of pin :");
-                    Serial.println(relay);
-                    cfg.config.relays[relay.toInt()] = (cfg.config.relays[relay.toInt()] == true) ? false : true;
-                }
-            SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-            }
-        }
-        request->send(200, "application/json", "toggled"); });
+                    int params = request->params();
+                    for(int i=0;i<params;i++){
+                        AsyncWebParameter* p = request->getParam(i);
+                        if(p->isPost()){
+                            // HTTP POST Relay Value
+                            if (p->name() == "pin") {
+                                String relay = p->value().c_str();
+                                Serial.print("switching state of pin :");
+                                Serial.println(relay);
+                                cfg.config.relays[relay.toInt()] = (cfg.config.relays[relay.toInt()] == true) ? false : true;
+                            }
+                            SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                        }
+                    }
+                    request->send(200, "application/json", "toggled"); });
 
         server.on("/data.json", HTTP_GET, [&](AsyncWebServerRequest *request)
                   {
-        String temp;
-        StaticJsonDocument<1024> jsonConfig;
-        JsonObject json = jsonConfig.to<JsonObject>();
-        json["stack_humidity"] = cfg.config.stack_humidity;
-        json["stack_temp"] = cfg.config.stack_temp;
-        
-        // Relays
-        JsonArray Relays = json.createNestedArray("relays");
-        for (int i = 0; i < sizeof(cfg.config.relays) / sizeof(cfg.config.relays[0]); i++)
-        {
-            Relays.add(cfg.config.relays[i]);
-        }
-
-        // Stack Voltage
-        json["stack_voltage"] = cfg.config.stack_voltage;
-
-        JsonArray graphdata = json.createNestedArray("GraphData");
-        for (int i = 0; i < 11; i++)
-        {
-            JsonObject graph = graphdata.createNestedObject();
-            graph["label"] = "🌡" + (String)i;
-            graph["type"] = "temp";
-            graph["value"] = cfg.config.cell_temp[i];
-            graph["maxValue"] = (String)maxTemp;
-
-            JsonObject graph2 = graphdata.createNestedObject();
-            graph2["label"] = "⚡" + (String)i;
-            graph2["type"] = "volt";
-            graph2["value"] = cfg.config.cell_voltage[i];
-            graph2["maxValue"] = (String)maxVoltage;
-        }
-
-        if (serializeJson(json, temp) == 0)
-        {
-            SERIAL_DEBUG_LN(F("[Upload JSON data to Webserver]: Failed to serialize document"));
-            return false;
-        }
-        request->send(200, "application/json", temp); });
-
+                    cfg.config.data_json = true;
+                    my_delay(10000L);
+                    String temp = cfg.config.data_json_string;
+                    request->send(200, "application/json", temp); });
         server.onNotFound(notFound);
-        server.onFileUpload(onUpload);
+        /* server.onFileUpload(onUpload); */
         server.begin();
         Serial.println("HBAT HMS server started");
     }
@@ -339,37 +301,37 @@ void HMSnetwork::SetupWebServer()
 
         server.on("/", HTTP_POST, [&](AsyncWebServerRequest *request)
                   {
-        int params = request->params();
-        for(int i=0;i<params;i++){
-            AsyncWebParameter* p = request->getParam(i);
-            if(p->isPost()){
-                // HTTP POST ssid value
-                if (p->name() == PARAM_INPUT_1) {
-                    String ssID; 
-                    ssID = p->value().c_str();
-                    SERIAL_DEBUG_ADD("SSID set to: ");
-                    SERIAL_DEBUG_LN(ssID);
-                    // Write file to save value
-                    heapStr(&cfg.config.WIFISSID, ssID.c_str());
-                    my_delay(100000L);
-                }
-                // HTTP POST pass value
-                if (p->name() == PARAM_INPUT_2) {
-                    String passWord; 
-                    passWord = p->value().c_str();
-                    SERIAL_DEBUG_ADD("Password set to: ");
-                    SERIAL_DEBUG_LN(passWord);
-                    // Write file to save value
-                    heapStr(&cfg.config.WIFIPASS, passWord.c_str());
-                    my_delay(100000L);
-                }
-                cfg.setConfigChanged();
-            SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-        }
-      }
-      request->send(200, "application/json", "Done. ESP will restart, connect to your router and go to IP address: " + String(WiFi.localIP()));
-      my_delay(3000000L);
-      ESP.restart(); });
+                    int params = request->params();
+                    for(int i=0;i<params;i++){
+                        AsyncWebParameter* p = request->getParam(i);
+                        if(p->isPost()){
+                            // HTTP POST ssid value
+                            if (p->name() == PARAM_INPUT_1) {
+                                String ssID; 
+                                ssID = p->value().c_str();
+                                SERIAL_DEBUG_ADD("SSID set to: ");
+                                SERIAL_DEBUG_LN(ssID);
+                                // Write file to save value
+                                heapStr(&cfg.config.WIFISSID, ssID.c_str());
+                                my_delay(100000L);
+                            }
+                            // HTTP POST pass value
+                            if (p->name() == PARAM_INPUT_2) {
+                                String passWord; 
+                                passWord = p->value().c_str();
+                                SERIAL_DEBUG_ADD("Password set to: ");
+                                SERIAL_DEBUG_LN(passWord);
+                                // Write file to save value
+                                heapStr(&cfg.config.WIFIPASS, passWord.c_str());
+                                my_delay(100000L);
+                            }
+                            cfg.setConfigChanged();
+                            SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                        }
+                    }
+                    request->send(200, "application/json", "Done. ESP will restart, connect to your router and go to IP address: " + String(WiFi.localIP()));
+                    my_delay(30000L);
+                    ESP.restart(); });
         server.onNotFound(notFound);
         server.begin();
     }

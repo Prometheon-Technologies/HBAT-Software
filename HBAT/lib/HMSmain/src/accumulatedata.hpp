@@ -10,9 +10,12 @@ public:
 
     void InitAccumulateData();
     int ChargeStatus();
+    bool SendData();
 
 private:
     // Stack Data to send
+    int maxVoltage;
+    int maxTemp;
 };
 
 extern AccumulateData accumulatedata;

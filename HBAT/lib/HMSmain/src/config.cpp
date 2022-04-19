@@ -89,6 +89,8 @@ void Config::CreateDefaultConfig()
     config.MQTTTopic = NULL;
     config.MQTTSetTopic = NULL;
     config.MQTTDeviceName = NULL;
+    config.data_json = false;
+    config.data_json_string = "";
     config.last_mqtt_connect_attempt = 0;
     config.last_mqtt_publish_attempt = 0;
     config.lastMillis = 0;

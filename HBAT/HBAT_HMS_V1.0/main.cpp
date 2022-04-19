@@ -111,8 +111,21 @@ void loop()
 {
     timedTasks.ScanI2CBus();
     timedTasks.accumulateSensorData();
-    //timedTasks.checkNetwork();
+    timedTasks.checkNetwork();
     timedTasks.updateCurrentData();
+
+    if (cfg.config.data_json)
+    {
+        cfg.config.data_json = false;
+        if (accumulatedata.SendData())
+        {
+            Serial.println("Data Sent");
+        }
+        else
+        {
+            Serial.println("Data Not Sent");
+        }
+    }
 
     if (ENABLE_MQTT_SUPPORT)
     {

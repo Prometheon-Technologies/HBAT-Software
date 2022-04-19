@@ -42,7 +42,9 @@ public:
         char *NTPTIMEOFFSET;
         char *MDNS;
         char *DHCPCHECK;
-        boolean relays[5];
+        bool data_json;
+        String data_json_string;
+        bool relays[5];
         int relays_pin[5];
         float stack_humidity;
         float stack_temp;

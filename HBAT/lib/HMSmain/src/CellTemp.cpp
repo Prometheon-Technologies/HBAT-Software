@@ -22,7 +22,7 @@ CellTemp::~CellTemp()
 
 int setSensorCount()
 {
-    sensors_count = sensors.getDeviceCount(); // returns the number of sensors found
+    return sensors_count = sensors.getDeviceCount(); // returns the number of sensors found
 }
 
 /******************************************************************************

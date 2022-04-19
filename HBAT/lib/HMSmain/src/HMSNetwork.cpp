@@ -275,7 +275,7 @@ void HMSnetwork::SetupWebServer()
                     request->send(200, "application/json", json); 
                     json = ""; });
         server.onNotFound(notFound);
-        /* server.onFileUpload(onUpload); */
+        server.onFileUpload(onUpload);
         server.begin();
         Serial.println("HBAT HMS server started");
     }

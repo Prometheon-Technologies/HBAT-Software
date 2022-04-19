@@ -253,7 +253,7 @@ void HMSnetwork::SetupWebServer()
         json["stack_voltage"] = cfg.config.stack_voltage;
 
         JsonArray graphdata = json.createNestedArray("GraphData");
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 11; i++)
         {
             JsonObject graph = graphdata.createNestedObject();
             graph["label"] = "🌡" + (String)i;

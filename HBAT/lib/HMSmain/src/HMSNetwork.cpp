@@ -266,13 +266,6 @@ void HMSnetwork::SetupWebServer()
             graph2["type"] = "volt";
             graph2["value"] = cfg.config.cell_voltage[i];
             graph2["maxValue"] = (String)maxVoltage;
-
-            if (i < 9)
-            {
-                graph[""] = ",";
-                graph2[""] = ",";
-
-            }
         }
 
         if (serializeJson(json, temp) == 0)

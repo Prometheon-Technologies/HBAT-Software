@@ -321,7 +321,7 @@ bool Config::saveConfig()
 
     // Relays
     JsonArray Relays = json.createNestedArray("HMS_Relays_State");
-    for (int i = 0; i < sizeof(config.relays); i++)
+    for (int i = 0; i < sizeof(config.relays) / sizeof(config.relays[0]); i++)
     {
         Relays.add(config.relays[i]);
     }
@@ -344,16 +344,6 @@ bool Config::saveConfig()
     // end save
     SERIAL_DEBUG_LN(F("[Save Config Changes]: Config written"));
     last_config_change = false;
-
-    /* if (!PRODUCTION)
-    {
-        SERIAL_DEBUG_EOL(serializeJson(json, Serial));
-        doc_string = String(json);
-        if (doc_string.length() > 0)
-        {
-            SERIAL_DEBUG_LN(doc_string);
-        }
-    } */
 
     return true;
 }

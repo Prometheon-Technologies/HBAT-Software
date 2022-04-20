@@ -12,22 +12,6 @@ input {
   height: 15vw;
 }
 
-button {
-  width: 100%;
-  height: 15vw;
-  padding: 0vw;
-  background: #009cb8;
-  font-size: 10vw;
-  text-align: center;
-  vertical-align: middle;
-  border-radius: 3vw;
-  border-color: rgb(234, 255, 255);
-
-  border-style: solid;
-  border-width: 1vw;
-  box-shadow: 1vw 1vw 1vw #001729;
-}
-
 .centeredDiv {
   text-align: center;
   justify-content: space-around;
@@ -134,7 +118,6 @@ div[role="progressbar"]::before {
 }
 
 button {
-  border: none;
   color: #fefcfb;
   background-color: #034078;
   padding: 15px 15px;
@@ -142,10 +125,16 @@ button {
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
-  width: 100px;
-  margin-right: 10px;
-  border-radius: 10px;
   transition-duration: 0.4s;
+  width: 100%;
+  height: 15vw;
+  padding: 0vw;
+  background: #009cb8;
+  vertical-align: middle;
+  border-color: rgb(234, 255, 255);
+  border-style: solid;
+  border-width: 1vw;
+  box-shadow: 1vw 1vw 1vw #001729;
 }
 
 button:hover {
@@ -162,4 +151,39 @@ select {
   border: 1px solid #ccc;
   border-radius: 10px;
   box-sizing: border-box;
+}
+
+.mqttPass label {
+  font-size: 1.2rem;
+  width: 100px;
+  display: inline-block;
+  text-align: right;
+}
+
+.mqttPass label {
+  font-size: 1.2rem;
+  width: 100px;
+  display: inline-block;
+  text-align: right;
+}
+
+.mqttIP label {
+  font-size: 1.2rem;
+  width: 100px;
+  display: inline-block;
+  text-align: right;
+}
+
+.apName label {
+  font-size: 1.2rem;
+  width: 70px;
+  display: inline-block;
+  text-align: right;
+}
+
+.apName label {
+  font-size: 1.2rem;
+  width: 70px;
+  display: inline-block;
+  text-align: right;
 }

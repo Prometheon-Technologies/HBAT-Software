@@ -255,12 +255,12 @@ void HMSMqtt::RunMqttService()
 {
   bool mqttConnected = false;
 
-  if (!mqttClient.connected() && cfg.config.MQTTEnabled != 0)
+  if (!mqttClient.connected() && cfg.config.MQTTEnabled)
   {
     SERIAL_DEBUG_LN("MQTT not connected, attempting to reconnect...")
     MQTTLoop();
   }
-  if (mqttClient.connected() && cfg.config.MQTTEnabled != 0)
+  if (mqttClient.connected() && cfg.config.MQTTEnabled)
   {
     SERIAL_DEBUG_BOL
     SERIAL_DEBUG_ADD("Connecting to MQTT...")

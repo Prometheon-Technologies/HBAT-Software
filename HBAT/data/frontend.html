@@ -102,22 +102,22 @@
 
         <div id="⚙widget" class="infoPane" style="text-align: left;">
             <h2>Settings</h2>
-            <label>AP Name</label>
+            <label for="apName">AP Name</labelfor>
             <input type="text" id="apName"><br>
-            <label>AP Password</label>
+            <label for="apPass">AP Password</label>
             <input type="text" id="apPass"><br>
             <hr>
 
             <button onclick="saveSettings()">Save</button>
-            <label>MQTT Broker IP</label>
+            <label for="mqttIP">MQTT Broker IP</label>
             <input type="text" id="mqttIP"><br>
             <label for="mqttName">MQTT UserName</label>
             <input type="text" id="mqttName"><br>
             <hr>
-            <label>MQTT Password</label>
+            <label for="mqttPass">MQTT Password</label>
             <input type="text" id="mqttPass"><br>
             <hr>
-            <button onclick="saveMQTTSettings()">Save MQTT Data</button>
+            <button onclick="saveMQTTSettings()">Save</button>
             <br>
             <table style="color: ivory;">
                 <tr>
@@ -217,16 +217,13 @@
             }
         }
         async function enableMQTT() {
-            alert(JSON.stringify(await getHTML("/mqttEnable?mqttEnableState=" + document.getElementById("mqttEnableState").value, false)));
-            /* await getHTML("./mqttEnable?mqttEnableState=" + document.getElementById("mqttEnableState").value, false); */
+            await getHTML("./mqttEnable?mqttEnableState=" + document.getElementById("mqttEnableState").value, false);
         }
         async function saveSettings() {
-            alert(JSON.stringify(await getHTML("/wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById("apPass").value, false)));
-            //await getHTML("./wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById///("apPass").value, false);
+            await getHTML("./wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById("apPass").value, false);
         }
         async function saveMQTTSettings() {
-            alert(JSON.stringify(await getHTML("/mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false)));
-            //await getHTML("./mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false);
+            await getHTML("./mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false);
         }
         function setMeeterValue(itemId, itemValue, itemTypeString, colorForMeeter) {
             try {

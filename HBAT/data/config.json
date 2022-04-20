@@ -1,7 +1,7 @@
 {
 	"hostname": "HBAT_HMS",
 	"MQTTClientID": "",
-	"MQTTEnabled": 1,
+	"MQTTEnabled": false,
 	"MQTTPort": 1883,
 	"MQTTPort_Secure": 8886,
 	"MQTTUser": "admin",

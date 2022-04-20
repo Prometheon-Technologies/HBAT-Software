@@ -82,7 +82,7 @@ void Config::CreateDefaultConfig()
     config.MQTTClientID = NULL;
     config.MQTTBroker = NULL;
     config.MQTTPort = 0; // Port to use for unsecured MQTT
-    config.MQTTEnabled = 0;     
+    config.MQTTEnabled = false;     
     config.MQTTPort_Secure = 0; // port to use if Secured MQTT is enabled
     config.MQTTUser = NULL;
     config.MQTTPass = NULL;

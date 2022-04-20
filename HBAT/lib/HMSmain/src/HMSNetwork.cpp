@@ -179,73 +179,7 @@ void HMSnetwork::SetupWebServer()
 {
     if (SetupNetworkStack())
     {
-        // Web Server Root URL
-        server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-                  { request->send(SPIFFS, "/frontend.html", "text/html"); });
-
-        server.serveStatic("/", SPIFFS, "/");
-
-        server.on("/upload", HTTP_GET, [&](AsyncWebServerRequest *request)
-                  { request->send(200, "text/plain", "OK"); });
-
-        server.on("/wifiUpdate", HTTP_GET, [&](AsyncWebServerRequest *request)
-                  {
-                    int params = request->params();
-                    for(int i=0;i<params;i++){
-                        AsyncWebParameter* p = request->getParam(i);
-                        // HTTP POST ssid value
-                        if (p->name() == PARAM_INPUT_3) {
-                            String ssID; 
-                            ssID = p->value().c_str();
-                            SERIAL_DEBUG_ADD("SSID set to: ");
-                            SERIAL_DEBUG_LN(ssID);
-                            // Write file to save value
-                            heapStr(&cfg.config.WIFISSID, ssID.c_str());
-                            my_delay(100000L);
-                        }
-                        // HTTP POST pass value
-                        if (p->name() == PARAM_INPUT_4) {
-                            String passWord; 
-                            passWord = p->value().c_str();
-                            // Write file to save value
-                            heapStr(&cfg.config.WIFIPASS, passWord.c_str());
-                            my_delay(100000L);
-                        }
-                        cfg.setConfigChanged();
-                        SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
-                    }
-                    request->send(200, "application/json", "Done. ESP will restart and connect to your router. To access it go to IP address: " +  WiFi.localIP().toString());
-                    my_delay(30000L);
-                    ESP.restart(); });
-
-        // Route to set GPIO state to LOW
-        server.on("/toggle", HTTP_GET, [&](AsyncWebServerRequest *request)
-                  {
-                    int params = request->params();
-                    for(int i=0;i<params;i++){
-                        AsyncWebParameter* p = request->getParam(i);
-                            // HTTP POST Relay Value
-                        if (p->name() == "pin") {
-                            String relay = p->value().c_str();
-                            Serial.print("switching state of pin :");
-                            Serial.println(relay);
-                            cfg.config.relays[relay.toInt()] = (cfg.config.relays[relay.toInt()] == true) ? false : true;
-                        }
-                        /* cfg.setConfigChanged(); */
-                        SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
-                    }
-                    request->send(200, "application/json", "toggled"); });
-
-        server.on("/data.json", HTTP_GET, [&](AsyncWebServerRequest *request)
-                  {
-                    cfg.config.data_json = true;
-                    my_delay(10000L);
-                    String temp = cfg.config.data_json_string;
-                    request->send(200, "application/json", temp); 
-                    temp = ""; });
-        server.onNotFound(notFound);
-        server.onFileUpload(onUpload);
-        server.begin();
+        networkRoutes();
         Serial.println("HBAT HMS server started");
     }
     else
@@ -254,6 +188,7 @@ void HMSnetwork::SetupWebServer()
         // TODO: There should be a reset mode that will reset the device to factory settings and restart the device.
         // TODO: Should be a physical reset button on the PCB itself - not a touch button - hold for 5 seconds to reset. Flash LED to indicate reset per second.
         // Connect to Wi-Fi HMSnetwork with SSID and password
+
         SERIAL_DEBUG_LN("[INFO]: Setting Access Point...");
 
         char *macAddr = StringtoChar(WiFi.macAddress());
@@ -299,85 +234,11 @@ void HMSnetwork::SetupWebServer()
         // free dynamically allocated 16 byte hash from make_hash()
         free(hash);
 
-        // Web Server Root URL
-        server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-                  { request->send(SPIFFS, "/frontend.html", "text/html"); });
-
-        server.serveStatic("/", SPIFFS, "/");
-
-        server.on("/wifimanager", HTTP_GET, [](AsyncWebServerRequest *request)
-                  { request->send(SPIFFS, "/wifimanager.html", "text/html"); });
-
-        server.serveStatic("/wifimanager", SPIFFS, "/");
-
-        server.on("/upload", HTTP_GET, [&](AsyncWebServerRequest *request)
-                  { request->send(200, "text/plain", "OK"); });
-
-        server.on("/wifimanager", HTTP_POST, [&](AsyncWebServerRequest *request)
-                  {
-                    int params = request->params();
-                    for(int i=0;i<params;i++){
-                        AsyncWebParameter* p = request->getParam(i);
-                        if(p->isPost()){
-                            // HTTP POST ssid value
-                            if (p->name() == PARAM_INPUT_1) {
-                                String ssID; 
-                                ssID = p->value().c_str();
-                                SERIAL_DEBUG_ADD("SSID set to: ");
-                                SERIAL_DEBUG_LN(ssID);
-                                // Write file to save value
-                                heapStr(&cfg.config.WIFISSID, ssID.c_str());
-                                my_delay(100000L);
-                            }
-                            // HTTP POST pass value
-                            if (p->name() == PARAM_INPUT_2) {
-                                String passWord; 
-                                passWord = p->value().c_str();
-                                // Write file to save value
-                                heapStr(&cfg.config.WIFIPASS, passWord.c_str());
-                                my_delay(100000L);
-                            }
-                            cfg.setConfigChanged();
-                            SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-                        }
-                    }
-                    request->send(200, "application/json", "Done. ESP will restart, connect to your router and go to IP address");
-                    my_delay(30000L);
-                    ESP.restart(); });
-
-        // Route to set GPIO state to LOW
-        server.on("/toggle", HTTP_GET, [&](AsyncWebServerRequest *request)
-                  {
-                    int params = request->params();
-                    for(int i=0;i<params;i++){
-                        AsyncWebParameter* p = request->getParam(i);
-                            // HTTP POST Relay Value
-                        if (p->name() == "pin") {
-                            String relay = p->value().c_str();
-                            Serial.print("switching state of pin :");
-                            Serial.println(relay);
-                            cfg.config.relays[relay.toInt()] = (cfg.config.relays[relay.toInt()] == true) ? false : true;
-                        }
-                        /* cfg.setConfigChanged(); */
-                        SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
-                    }
-                    request->send(200, "application/json", "toggled"); });
-
-        server.on("/data.json", HTTP_GET, [&](AsyncWebServerRequest *request)
-                  {
-                    cfg.config.data_json = true;
-                    my_delay(10000L);
-                    String temp = cfg.config.data_json_string;
-                    request->send(200, "application/json", temp); 
-                    temp = ""; });
-
-        server.onNotFound(notFound);
-        server.onFileUpload(onUpload);
-        server.begin();
+        networkRoutes();
     }
 }
 
-void networkRoutes()
+void HMSnetwork::networkRoutes()
 {
     // Web Server Root URL
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -385,10 +246,10 @@ void networkRoutes()
 
     server.serveStatic("/", SPIFFS, "/");
 
-    server.on("/wifimanager", HTTP_GET, [](AsyncWebServerRequest *request)
+    server.on("/wifiUpdate", HTTP_GET, [](AsyncWebServerRequest *request)
               { request->send(SPIFFS, "/wifimanager.html", "text/html"); });
 
-    server.serveStatic("/wifimanager", SPIFFS, "/");
+    server.serveStatic("/wifiUpdate", SPIFFS, "/");
 
     server.on("/upload", HTTP_GET, [&](AsyncWebServerRequest *request)
               { request->send(200, "text/plain", "OK"); });
@@ -434,7 +295,7 @@ void networkRoutes()
                             // HTTP POST Relay Value
                         if (p->name() == "pin") {
                             String relay = p->value().c_str();
-                            Serial.print("switching state of pin :");
+                            Serial.print("switching state of pin:");
                             Serial.println(relay);
                             cfg.config.relays[relay.toInt()] = (cfg.config.relays[relay.toInt()] == true) ? false : true;
                         }
@@ -442,13 +303,30 @@ void networkRoutes()
                         SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
                     }
                     request->send(200, "application/json", "toggled"); });
+    
+    server.on("/mqttEnable", HTTP_GET, [&](AsyncWebServerRequest *request)
+              {
+                    int params = request->params();
+                    for(int i=0;i<params;i++){
+                        AsyncWebParameter* p = request->getParam(i);
+                            // HTTP POST Relay Value
+                        if (p->name() == "mqttEnableState") {
+                            bool state = p->value().c_str();
+                            Serial.print("switching state of pin:");
+                            Serial.println(state);
+                            cfg.config.MQTTEnabled = (state == true) ? false : true;
+                        }
+                        /* cfg.setConfigChanged(); */
+                        SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                    }
+                    request->send(200, "application/json", (cfg.config.MQTTEnabled == true) ?  "MQTT Disabled" : "MQTT Enabled"); });
 
     server.on("/data.json", HTTP_GET, [&](AsyncWebServerRequest *request)
               {
                     cfg.config.data_json = true;
                     my_delay(10000L);
                     String temp = cfg.config.data_json_string;
-                    request->send(200, "application/json", temp); 
+                    request->send(200, "application/json", temp);
                     temp = ""; });
 
     server.onNotFound(notFound);

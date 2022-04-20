@@ -1,5 +1,4 @@
 #include "HMSnetwork.hpp"
-#include <index.html.h>
 
 AsyncWebServer server(80);
 IPAddress localIP;
@@ -88,7 +87,7 @@ void onUpload(AsyncWebServerRequest *request, String filename, size_t index, uin
         Serial.printf("WRITE FAIL\n");
     }
     file.close();
-    Serial.printf("UploadEnd: %s, %u B\n", filename.c_str(), index + len);
+    Serial.printf("Upload End: %s, %u B\n", filename.c_str(), index + len);
 }
 
 bool HMSnetwork::SetupNetworkStack()
@@ -180,7 +179,7 @@ void HMSnetwork::SetupWebServer()
         server.on("/upload", HTTP_POST, [&](AsyncWebServerRequest *request)
                   { request->send(200, "text/plain", "OK"); });
 
-        server.on("/wifiUpdate", HTTP_POST, [&](AsyncWebServerRequest *request)
+        server.on("/Update", HTTP_POST, [&](AsyncWebServerRequest *request)
                   {
                     int params = request->params();
                     for(int i=0;i<params;i++){
@@ -207,8 +206,8 @@ void HMSnetwork::SetupWebServer()
                             cfg.setConfigChanged();
                             SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
                         }
-                        request->send(200, "application/json", "Done. ESP will restart and connect to your router. To access it go to IP address: " +  WiFi.localIP().toString());
                     }
+                    request->send(200, "application/json", "Done. ESP will restart and connect to your router. To access it go to IP address: " +  WiFi.localIP().toString());
                     my_delay(30000L);
                     ESP.restart(); });
 
@@ -237,7 +236,7 @@ void HMSnetwork::SetupWebServer()
                     my_delay(10000L);
                     String temp = cfg.config.data_json_string;
                     request->send(200, "application/json", temp); 
-                    temp = "";});
+                    temp = ""; });
         server.onNotFound(notFound);
         /* server.onFileUpload(onUpload); */
         server.begin();

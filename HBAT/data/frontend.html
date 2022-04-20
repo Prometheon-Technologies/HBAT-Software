@@ -124,7 +124,9 @@
                     <hr>
                     <button onclick="saveMQTTSettings()">Save</button>
                     <br>
+                    <br>
                 </section>
+                <br>
                 <table style="color: ivory;">
                     <tr>
                         <td>Relay 0</td>
@@ -148,16 +150,16 @@
                     </tr>
                     <tr>
                         <td>Enable MQTT</td>
-                        <td id="mqttEnableState" onclick="toggleRelay(this);"></td>
+                        <td id="mqttEnableState" onclick="toggleMQTT()"></td>
                     </tr>
                 </table>
                 <br>
                 <hr>
                 <a href="/wifimanager">
-                    <input type="button" value="Wifi Manager"/>
-                 </a>
+                    <input type="button" value="Wifi Manager" />
+                </a>
                 <script>
-                    
+
                 </script>
             </form>
         </div>
@@ -221,6 +223,8 @@
 
             updateToggles(graphData.relays);
 
+            updateMQTT(graphData.mqtt_enable);
+
             buildGraph(graphData.GraphData);
         }
 
@@ -231,8 +235,8 @@
                 (await document.getElementById("relay" + i)).innerHTML = ((togglesToUpdate[i] == 1) ? toggleOnString : toggleOffString);
             }
         }
-        async function enableMQTT() {
-            await getHTML("./mqttEnable?mqttEnableState=" + document.getElementById("mqttEnableState").value, false);
+        async function updateMQTT(mqttToUpdate) {
+            (await document.getElementById("mqttEnableState")).innerHTML = ((mqttToUpdate == 1) ? toggleOnString : toggleOffString);
         }
         async function saveSettings() {
             await getHTML("./wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById("apPass").value, false);
@@ -252,6 +256,19 @@
             await getHTML("/toggle?pin=" + relayNumberToToggle);
             grabData();
         }
+
+        var isClicked = false;
+        async function toggleMQTT() {
+            if (isClicked == false) {
+                isClicked = true;
+            }
+            else {
+                isClicked = false;
+            }
+            await getHTML("/mqttEnable?mqttEnableState=" + isClicked);
+            grabData();
+        };
+        
         /* Navigation menu */
         function showDiv(inputValue) {
             setCSSclass("🔋widget", "infoPane")

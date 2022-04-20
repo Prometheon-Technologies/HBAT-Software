@@ -144,6 +144,9 @@ bool AccumulateData::SendData()
     json += R"====("stack_voltage":)====";
     json += (String)cfg.config.stack_voltage + ",\n";
 
+    json += R"====("mqtt_enable":)====";
+    json += (String)cfg.config.MQTTEnabled + ",\n";
+
     json += R"====("GraphData":[)====";
     json += "\n";
     for (int i = 0; i < 10; i++)

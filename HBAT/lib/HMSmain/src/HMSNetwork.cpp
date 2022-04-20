@@ -448,10 +448,14 @@ void HMSnetwork::networkRoutes()
                     AsyncWebParameter* p = request->getParam(i);
                         // HTTP POST Relay Value
                     if (p->name() == "mqttEnableState") {
-                        bool state = p->value().c_str();
+                        String state = p->value().c_str();
                         Serial.print("switching state of pin:");
-                        Serial.println(state);
-                        cfg.config.MQTTEnabled = (state == true) ? false : true;
+                        //split variable on "?" keeping the first part
+                        String split = state.substring(0, state.indexOf("?"));
+                        Serial.println(split);
+                        bool mqttState = (split == "true") ? true : false;
+                        Serial.println(mqttState);
+                        cfg.config.MQTTEnabled = (mqttState == true) ? false : true;
                     }
                     SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
                 }

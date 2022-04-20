@@ -179,33 +179,31 @@ void HMSnetwork::SetupWebServer()
         server.on("/upload", HTTP_POST, [&](AsyncWebServerRequest *request)
                   { request->send(200, "text/plain", "OK"); });
 
-        server.on("/Update", HTTP_POST, [&](AsyncWebServerRequest *request)
+        server.on("/wifiUpdate", HTTP_GET, [&](AsyncWebServerRequest *request)
                   {
                     int params = request->params();
                     for(int i=0;i<params;i++){
                         AsyncWebParameter* p = request->getParam(i);
-                        if(p->isPost()){
-                            // HTTP POST ssid value
-                            if (p->name() == PARAM_INPUT_3) {
-                                String ssID; 
-                                ssID = p->value().c_str();
-                                SERIAL_DEBUG_ADD("SSID set to: ");
-                                SERIAL_DEBUG_LN(ssID);
-                                // Write file to save value
-                                heapStr(&cfg.config.WIFISSID, ssID.c_str());
-                            }
-                            // HTTP POST pass value
-                            if (p->name() == PARAM_INPUT_4) {
-                                String passWord; 
-                                passWord = p->value().c_str();
-                                SERIAL_DEBUG_ADD("Password set to: ");
-                                SERIAL_DEBUG_LN(passWord);
-                                // Write file to save value
-                                heapStr(&cfg.config.WIFIPASS, passWord.c_str());
-                            }
-                            cfg.setConfigChanged();
-                            SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                        // HTTP POST ssid value
+                        if (p->name() == PARAM_INPUT_3) {
+                            String ssID; 
+                            ssID = p->value().c_str();
+                            SERIAL_DEBUG_ADD("SSID set to: ");
+                            SERIAL_DEBUG_LN(ssID);
+                            // Write file to save value
+                            heapStr(&cfg.config.WIFISSID, ssID.c_str());
                         }
+                        // HTTP POST pass value
+                        if (p->name() == PARAM_INPUT_4) {
+                            String passWord; 
+                            passWord = p->value().c_str();
+                            SERIAL_DEBUG_ADD("Password set to: ");
+                            SERIAL_DEBUG_LN(passWord);
+                            // Write file to save value
+                            heapStr(&cfg.config.WIFIPASS, passWord.c_str());
+                        }
+                        cfg.setConfigChanged();
+                        SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
                     }
                     request->send(200, "application/json", "Done. ESP will restart and connect to your router. To access it go to IP address: " +  WiFi.localIP().toString());
                     my_delay(30000L);

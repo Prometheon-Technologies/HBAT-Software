@@ -133,7 +133,7 @@ div[role="progressbar"]::before {
   content: counter(percentage) var(--typeOfValue);
 }
 
-input[type="submit"] {
+button {
   border: none;
   color: #fefcfb;
   background-color: #034078;
@@ -148,7 +148,7 @@ input[type="submit"] {
   transition-duration: 0.4s;
 }
 
-input[type="submit"]:hover {
+button:hover {
   background-color: #1282a2;
 }
 

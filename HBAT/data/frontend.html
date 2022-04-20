@@ -180,10 +180,14 @@
     <script>
         var graphData = {};
 
-        const toggleOnString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330" style="width:50px;height:auto;"><path stroke="gray" stroke-width="1" fill="blue" d="M 240 0 H 90 c -49.626 0 -90 40.374 -90 90 s 40.374 90 90 90 h 150 c 49.626 0 90 -40.374 90 -90 S 289.626 0 240 0 z M 240 150 c -33.084 0 -60 -26.916 -60 -60 s 26.916 -60 60 -60 s 60 26.916 60 60 S 273.084 150 240 150 z"/></svg>`;
+        const toggleOnString = `<svg viewBox="0 0 330 330" style="width:50px;height:auto">
+        <path stroke="gray" fill="#00f" d="M240 0H90C40.374 0 0 40.374 0 90s40.374 90 90 90h150c49.626 0 90-40.374 90-90S289.626 0 240 0zm0 150c-33.084 0-60-26.916-60-60s26.916-60 60-60 60 26.916 60 60-26.916 60-60 60z"/>
+        </svg>`;
 
 
-        const toggleOffString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330" style="width:50px;height:auto;transform: scale(-1,1)"><path stroke="gray" stroke-width="1" fill="red" d="M 240 0 H 90 c -49.626 0 -90 40.374 -90 90 s 40.374 90 90 90 h 150 c 49.626 0 90 -40.374 90 -90 S 289.626 0 240 0 z M 240 150 c -33.084 0 -60 -26.916 -60 -60 s 26.916 -60 60 -60 s 60 26.916 60 60 S 273.084 150 240 150 z"/></svg>`;
+        const toggleOffString = `<svg viewBox="0 0 330 330" style="width:50px;height:auto;transform:scale(-1,1)">
+        <path stroke="gray" fill="red" d="M240 0H90C40.374 0 0 40.374 0 90s40.374 90 90 90h150c49.626 0 90-40.374 90-90S289.626 0 240 0zm0 150c-33.084 0-60-26.916-60-60s26.916-60 60-60 60 26.916 60 60-26.916 60-60 60z"/>
+        </svg>`;
 
         async function buildGraph(inputValues) {
             graphList = document.getElementById("graphList");

@@ -119,18 +119,21 @@ div[role="progressbar"]::before {
 
 button {
   color: #fefcfb;
-  background-color: #034078;
+  background-color: #009cb8;
   padding: 15px 15px;
-  text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 16px;
+  margin-right: auto;
+  margin-left: auto;
+  border-radius: 10px;
   transition-duration: 0.4s;
-  width: 100%;
+  width: 95%;
   height: 15vw;
   padding: 0vw;
-  background: #009cb8;
+  font-size: 10vw;
+  text-align: center;
   vertical-align: middle;
+  border-radius: 3vw;
   border-color: rgb(234, 255, 255);
   border-style: solid;
   border-width: 1vw;
@@ -138,7 +141,7 @@ button {
 }
 
 button:hover {
-  background-color: #1282a2;
+  background-color: #034078;
 }
 
 input[type="text"],
@@ -153,37 +156,16 @@ select {
   box-sizing: border-box;
 }
 
-.mqttPass label {
+.wificreds label {
   font-size: 1.2rem;
   width: 100px;
   display: inline-block;
   text-align: right;
 }
 
-.mqttPass label {
+.mqttcreds label {
   font-size: 1.2rem;
   width: 100px;
-  display: inline-block;
-  text-align: right;
-}
-
-.mqttIP label {
-  font-size: 1.2rem;
-  width: 100px;
-  display: inline-block;
-  text-align: right;
-}
-
-.apName label {
-  font-size: 1.2rem;
-  width: 70px;
-  display: inline-block;
-  text-align: right;
-}
-
-.apName label {
-  font-size: 1.2rem;
-  width: 70px;
   display: inline-block;
   text-align: right;
 }

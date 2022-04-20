@@ -455,7 +455,7 @@ void HMSnetwork::networkRoutes()
                         Serial.println(split);
                         bool mqttState = (split == "true") ? true : false;
                         Serial.println(mqttState);
-                        cfg.config.MQTTEnabled = (mqttState == true) ? false : true;
+                        cfg.config.MQTTEnabled = mqttState ? true : false;
                     }
                     SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
                 }

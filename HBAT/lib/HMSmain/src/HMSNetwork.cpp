@@ -310,7 +310,6 @@ void HMSnetwork::SetupWebServer()
 
         server.serveStatic("/wifimanager", SPIFFS, "/");
 
-
         server.on("/upload", HTTP_GET, [&](AsyncWebServerRequest *request)
                   { request->send(200, "text/plain", "OK"); });
 
@@ -376,6 +375,85 @@ void HMSnetwork::SetupWebServer()
         server.onFileUpload(onUpload);
         server.begin();
     }
+}
+
+void networkRoutes()
+{
+    // Web Server Root URL
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+              { request->send(SPIFFS, "/frontend.html", "text/html"); });
+
+    server.serveStatic("/", SPIFFS, "/");
+
+    server.on("/wifimanager", HTTP_GET, [](AsyncWebServerRequest *request)
+              { request->send(SPIFFS, "/wifimanager.html", "text/html"); });
+
+    server.serveStatic("/wifimanager", SPIFFS, "/");
+
+    server.on("/upload", HTTP_GET, [&](AsyncWebServerRequest *request)
+              { request->send(200, "text/plain", "OK"); });
+
+    server.on("/wifiUpdate", HTTP_POST, [&](AsyncWebServerRequest *request)
+              {
+                    int params = request->params();
+                    for(int i=0;i<params;i++){
+                        AsyncWebParameter* p = request->getParam(i);
+                        if(p->isPost()){
+                            // HTTP POST ssid value
+                            if (p->name() == PARAM_INPUT_1) {
+                                String ssID; 
+                                ssID = p->value().c_str();
+                                SERIAL_DEBUG_ADD("SSID set to: ");
+                                SERIAL_DEBUG_LN(ssID);
+                                // Write file to save value
+                                heapStr(&cfg.config.WIFISSID, ssID.c_str());
+                                my_delay(100000L);
+                            }
+                            // HTTP POST pass value
+                            if (p->name() == PARAM_INPUT_2) {
+                                String passWord; 
+                                passWord = p->value().c_str();
+                                // Write file to save value
+                                heapStr(&cfg.config.WIFIPASS, passWord.c_str());
+                                my_delay(100000L);
+                            }
+                            cfg.setConfigChanged();
+                            SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                        }
+                    }
+                    request->send(200, "application/json", "Done. ESP will restart, connect to your router and go to IP address");
+                    my_delay(30000L);
+                    ESP.restart(); });
+
+    // Route to set GPIO state to LOW
+    server.on("/toggle", HTTP_GET, [&](AsyncWebServerRequest *request)
+              {
+                    int params = request->params();
+                    for(int i=0;i<params;i++){
+                        AsyncWebParameter* p = request->getParam(i);
+                            // HTTP POST Relay Value
+                        if (p->name() == "pin") {
+                            String relay = p->value().c_str();
+                            Serial.print("switching state of pin :");
+                            Serial.println(relay);
+                            cfg.config.relays[relay.toInt()] = (cfg.config.relays[relay.toInt()] == true) ? false : true;
+                        }
+                        /* cfg.setConfigChanged(); */
+                        SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                    }
+                    request->send(200, "application/json", "toggled"); });
+
+    server.on("/data.json", HTTP_GET, [&](AsyncWebServerRequest *request)
+              {
+                    cfg.config.data_json = true;
+                    my_delay(10000L);
+                    String temp = cfg.config.data_json_string;
+                    request->send(200, "application/json", temp); 
+                    temp = ""; });
+
+    server.onNotFound(notFound);
+    server.onFileUpload(onUpload);
+    server.begin();
 }
 
 // ######################## server functions #########################

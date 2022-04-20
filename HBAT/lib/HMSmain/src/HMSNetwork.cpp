@@ -246,15 +246,15 @@ void HMSnetwork::networkRoutes()
 
     server.serveStatic("/", SPIFFS, "/");
 
-    server.on("/wifiUpdate", HTTP_GET, [](AsyncWebServerRequest *request)
+    server.on("/wifimanager", HTTP_GET, [](AsyncWebServerRequest *request)
               { request->send(SPIFFS, "/wifimanager.html", "text/html"); });
 
-    server.serveStatic("/wifiUpdate", SPIFFS, "/");
+    server.serveStatic("/wifimanager", SPIFFS, "/");
 
     server.on("/upload", HTTP_GET, [&](AsyncWebServerRequest *request)
               { request->send(200, "text/plain", "OK"); });
 
-    server.on("/wifiUpdate", HTTP_POST, [&](AsyncWebServerRequest *request)
+    server.on("/wifimanager", HTTP_POST, [&](AsyncWebServerRequest *request)
               {
                     int params = request->params();
                     for(int i=0;i<params;i++){
@@ -266,7 +266,7 @@ void HMSnetwork::networkRoutes()
                                 ssID = p->value().c_str();
                                 SERIAL_DEBUG_ADD("SSID set to: ");
                                 SERIAL_DEBUG_LN(ssID);
-                                // Write file to save value
+
                                 heapStr(&cfg.config.WIFISSID, ssID.c_str());
                                 my_delay(100000L);
                             }
@@ -274,7 +274,7 @@ void HMSnetwork::networkRoutes()
                             if (p->name() == PARAM_INPUT_2) {
                                 String passWord; 
                                 passWord = p->value().c_str();
-                                // Write file to save value
+
                                 heapStr(&cfg.config.WIFIPASS, passWord.c_str());
                                 my_delay(100000L);
                             }
@@ -285,6 +285,70 @@ void HMSnetwork::networkRoutes()
                     request->send(200, "application/json", "Done. ESP will restart, connect to your router and go to IP address");
                     my_delay(30000L);
                     ESP.restart(); });
+
+    server.on("/wifiUpdate", HTTP_GET, [&](AsyncWebServerRequest *request)
+              {
+                    int params = request->params();
+                    for(int i=0;i<params;i++){
+                        AsyncWebParameter* p = request->getParam(i);
+                        // HTTP POST ssid value
+                        if (p->name() == PARAM_INPUT_1) {
+                            String ssID; 
+                            ssID = p->value().c_str();
+                            SERIAL_DEBUG_ADD("SSID set to: ");
+                            SERIAL_DEBUG_LN(ssID);
+
+                            heapStr(&cfg.config.WIFISSID, ssID.c_str());
+                            my_delay(100000L);
+                        }
+                        // HTTP POST pass value
+                        if (p->name() == PARAM_INPUT_2) {
+                            String passWord; 
+                            passWord = p->value().c_str();
+
+                            heapStr(&cfg.config.WIFIPASS, passWord.c_str());
+                            my_delay(100000L);
+                        }
+                        cfg.setConfigChanged();
+                        SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                    }
+                    request->send(200, "application/json", "Done. ESP will restart and connect to your router");
+                    my_delay(30000L);
+                    ESP.restart(); });
+
+    server.on("/mqttUpdate", HTTP_GET, [&](AsyncWebServerRequest *request)
+              {
+                  int params = request->params();
+                  for(int i=0;i<params;i++){
+                      AsyncWebParameter* p = request->getParam(i);
+                      if (p->name() == "mqttIP") {
+                          String broker;
+                          broker = p->value().c_str();
+                          SERIAL_DEBUG_ADD("SSID set to: ");
+                          SERIAL_DEBUG_LN(broker);
+                          heapStr(&cfg.config.MQTTBroker, broker.c_str());
+                          my_delay(100000L);
+                      }
+                      if (p->name() == "mqttName") {
+                          String user; 
+                          user = p->value().c_str();
+                          SERIAL_DEBUG_ADD("SSID set to: ");
+                          SERIAL_DEBUG_LN(user);
+                          heapStr(&cfg.config.MQTTUser, user.c_str());
+                          my_delay(100000L);
+                      }
+                      if (p->name() == "mqttPass") {
+                          String pass; 
+                          pass = p->value().c_str();
+                          heapStr(&cfg.config.MQTTPass, pass.c_str());
+                          my_delay(100000L);
+                      }
+                      cfg.setConfigChanged();
+                      SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                  }
+                  request->send(200, "application/json", "Done. ESP will now connect to your broker");
+                  my_delay(30000L);
+                  ESP.restart(); });
 
     // Route to set GPIO state to LOW
     server.on("/toggle", HTTP_GET, [&](AsyncWebServerRequest *request)
@@ -303,7 +367,7 @@ void HMSnetwork::networkRoutes()
                         SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
                     }
                     request->send(200, "application/json", "toggled"); });
-    
+
     server.on("/mqttEnable", HTTP_GET, [&](AsyncWebServerRequest *request)
               {
                     int params = request->params();

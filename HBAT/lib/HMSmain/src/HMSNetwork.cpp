@@ -192,18 +192,18 @@ void HMSnetwork::SetupWebServer()
                             SERIAL_DEBUG_LN(ssID);
                             // Write file to save value
                             heapStr(&cfg.config.WIFISSID, ssID.c_str());
+                            my_delay(100000L);
                         }
                         // HTTP POST pass value
                         if (p->name() == PARAM_INPUT_4) {
                             String passWord; 
                             passWord = p->value().c_str();
-                            SERIAL_DEBUG_ADD("Password set to: ");
-                            SERIAL_DEBUG_LN(passWord);
                             // Write file to save value
                             heapStr(&cfg.config.WIFIPASS, passWord.c_str());
+                            my_delay(100000L);
                         }
                         cfg.setConfigChanged();
-                        SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                        SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
                     }
                     request->send(200, "application/json", "Done. ESP will restart and connect to your router. To access it go to IP address: " +  WiFi.localIP().toString());
                     my_delay(30000L);
@@ -316,8 +316,6 @@ void HMSnetwork::SetupWebServer()
                             if (p->name() == PARAM_INPUT_2) {
                                 String passWord; 
                                 passWord = p->value().c_str();
-                                SERIAL_DEBUG_ADD("Password set to: ");
-                                SERIAL_DEBUG_LN(passWord);
                                 // Write file to save value
                                 heapStr(&cfg.config.WIFIPASS, passWord.c_str());
                                 my_delay(100000L);
@@ -326,7 +324,7 @@ void HMSnetwork::SetupWebServer()
                             SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
                         }
                     }
-                    request->send(200, "application/json", "Done. ESP will restart, connect to your router and go to IP address: " + String(WiFi.localIP()));
+                    request->send(200, "application/json", "Done. ESP will restart, connect to your router and go to IP address");
                     my_delay(30000L);
                     ESP.restart(); });
         server.onNotFound(notFound);

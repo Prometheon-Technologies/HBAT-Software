@@ -217,16 +217,15 @@ void HMSnetwork::SetupWebServer()
                     int params = request->params();
                     for(int i=0;i<params;i++){
                         AsyncWebParameter* p = request->getParam(i);
-                        if(p->isPost()){
                             // HTTP POST Relay Value
-                            if (p->name() == "pin") {
-                                String relay = p->value().c_str();
-                                Serial.print("switching state of pin :");
-                                Serial.println(relay);
-                                cfg.config.relays[relay.toInt()] = (cfg.config.relays[relay.toInt()] == true) ? false : true;
-                            }
-                            SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                        if (p->name() == "pin") {
+                            String relay = p->value().c_str();
+                            Serial.print("switching state of pin :");
+                            Serial.println(relay);
+                            cfg.config.relays[relay.toInt()] = (cfg.config.relays[relay.toInt()] == true) ? false : true;
                         }
+                        /* cfg.setConfigChanged(); */
+                        SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
                     }
                     request->send(200, "application/json", "toggled"); });
 

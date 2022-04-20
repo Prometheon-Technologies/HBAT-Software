@@ -241,8 +241,7 @@
         }
         async function toggleRelay(relayToToggle) {
             var relayNumberToToggle = relayToToggle.id.replace("relay", "");
-            /* await getHTML("/toggle?pin=" + relayNumberToToggle); */
-            alert(JSON.stringify(await getHTML("/toggle?pin=" + relayNumberToToggle)));
+            await getHTML("/toggle?pin=" + relayNumberToToggle);
             grabData();
         }
         /* Navigation menu */

@@ -5,11 +5,10 @@
 #pragma once
 #ifndef HMSMDNS_hpp
 #define HMSMDNS_hpp
-
 #include "defines.hpp"
 #include <ESPmDNS.h>
 
-class HMSmdns : public HMSnetwork
+class HMSmdns
 {
 public:
     // constructors
@@ -20,7 +19,6 @@ public:
     bool mDNSLoop();
 
     // variables
-private:
 };
 
 extern HMSmdns Mdns;

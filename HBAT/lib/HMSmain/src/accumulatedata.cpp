@@ -4,6 +4,8 @@ int numSensors = 10;
 
 AccumulateData::AccumulateData()
 {
+    maxVoltage = 24;
+    maxTemp = 100;
 }
 
 AccumulateData::~AccumulateData()
@@ -123,6 +125,121 @@ int AccumulateData::ChargeStatus()
         printf("[DANGER]: Stack is in an unknown state!!");
     }
     return 0;
+}
+
+bool AccumulateData::SendData()
+{
+    String json = "";
+    json += R"====({)====";
+
+    json += R"====("stack_humidity":)====";
+    json += (String)cfg.config.stack_humidity + ",\n";
+
+    json += R"====("stack_temp":)====";
+    json += (String)cfg.config.stack_temp + ",\n";
+
+    json += R"====("relays":[)====";
+    json += (String)cfg.config.relays[0] + "," + (String)cfg.config.relays[1] + "," + (String)cfg.config.relays[2] + "," + (String)cfg.config.relays[3] + "," + (String)cfg.config.relays[4] + "],\n";
+
+    json += R"====("stack_voltage":)====";
+    json += (String)cfg.config.stack_voltage + ",\n";
+
+    json += R"====("mqtt_enable":)====";
+    json += (String)cfg.config.MQTTEnabled + ",\n";
+
+    json += R"====("GraphData":[)====";
+    json += "\n";
+    for (int i = 0; i < 10; i++)
+    {
+        delay(0);
+        json += R"====({"label": "🌡 )====" + (String)i + "\",\n";
+        json += R"====("type": "temp",)====" + (String) "\n";
+        json += R"====("value": )====" + (String)cfg.config.cell_temp[i] + (String) ",\n";
+        json += R"====("maxValue": )====" + (String)maxTemp;
+        json += R"====(})====" + (String) "\n";
+        json += R"====(,)====";
+
+        json += R"====({"label": "⚡ )====" + (String)i + "\",\n";
+        json += R"====("type": "volt",)====" + (String) "\n";
+        json += R"====("value": )====" + (String)cfg.config.cell_voltage[i] + (String) ",\n";
+        json += R"====("maxValue": )====" + (String)maxVoltage;
+        json += R"====(})====" + (String) "\n";
+
+        if (i < 9)
+        {
+            json += R"====(,)====";
+        };
+    }
+    json += R"====(])====";
+    json += R"====(})====";
+
+    if (json.length() > 0)
+    {
+        cfg.config.data_json_string = json;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+
+    /* // Send the data to the server
+    String temp;
+    StaticJsonDocument<1024> jsonConfig;
+    JsonObject json = jsonConfig.to<JsonObject>();
+    json["stack_humidity"] = cfg.config.stack_humidity;
+    json["stack_temp"] = cfg.config.stack_temp;
+
+    // Relays
+    JsonArray Relays = json.createNestedArray("relays");
+    for (int i = 0; i < sizeof(cfg.config.relays) / sizeof(cfg.config.relays[0]); i++)
+    {
+        Relays.add(cfg.config.relays[i]);
+    }
+
+    json["stack_voltage"] = String(cfg.config.stack_voltage);
+    // Stack Voltage
+
+    JsonArray graphdata = json.createNestedArray("GraphData");
+
+    for (int i = 0; i < 10; ++i)
+    {
+        delay(0);
+        JsonObject graph = graphdata.createNestedObject();
+        graph["label"] = "🌡" + String(i);
+        graph["type"] = "temp";
+        graph["value"] = String(cfg.config.cell_temp[i]);
+        graph["maxValue"] = String(maxTemp);
+
+        JsonObject graph2 = graphdata.createNestedObject();
+        graph2["label"] = "⚡" + String(i);
+        graph2["type"] = "volt";
+        graph2["value"] = String(cfg.config.cell_voltage[i]);
+        graph2["maxValue"] = String(maxVoltage);
+    }
+
+    for (int i = 0; i < 10; ++i)
+    {
+        delay(0);
+        JsonObject graph = graphdata.createNestedObject();
+        graph["label"] = "⚡" + String(i);
+        graph["type"] = "volt";
+        graph["value"] = String(cfg.config.cell_voltage[i]);
+        graph["maxValue"] = String(maxVoltage);
+    }
+
+    if (serializeJson(json, temp) == 0)
+    {
+        SERIAL_DEBUG_LN(F("[Upload JSON data to Webserver]: Failed to serialize document"));
+        return false;
+    }
+    else
+    {
+        SERIAL_DEBUG_LN(F("[Upload JSON data to Webserver]: Successfully serialized document"));
+        SERIAL_DEBUG_LN(temp);
+        cfg.config.data_json_string = temp;
+        return true;
+    } */
 }
 
 AccumulateData accumulatedata;

@@ -1,0 +1,134 @@
+{
+    "stack_humidity": 0.00,
+    "stack_temp": 0.00,
+    "relays": [
+        0,
+        0,
+        0,
+        0,
+        0
+    ],
+    "stack_voltage": 1.37,
+    "GraphData": [
+        {
+            "label": "🌡 0",
+            "type": "temp",
+            "value": 0.00,
+            "maxValue": 100
+        },
+        {
+            "label": "⚡ 0",
+            "type": "volt",
+            "value": 1.37,
+            "maxValue": 24
+        },
+        {
+            "label": "🌡 1",
+            "type": "temp",
+            "value": 0.00,
+            "maxValue": 100
+        },
+        {
+            "label": "⚡ 1",
+            "type": "volt",
+            "value": 0.00,
+            "maxValue": 24
+        },
+        {
+            "label": "🌡 2",
+            "type": "temp",
+            "value": 0.00,
+            "maxValue": 100
+        },
+        {
+            "label": "⚡ 2",
+            "type": "volt",
+            "value": 0.00,
+            "maxValue": 24
+        },
+        {
+            "label": "🌡 3",
+            "type": "temp",
+            "value": 0.00,
+            "maxValue": 100
+        },
+        {
+            "label": "⚡ 3",
+            "type": "volt",
+            "value": 0.00,
+            "maxValue": 24
+        },
+        {
+            "label": "🌡 4",
+            "type": "temp",
+            "value": 0.00,
+            "maxValue": 100
+        },
+        {
+            "label": "⚡ 4",
+            "type": "volt",
+            "value": 6.93,
+            "maxValue": 24
+        },
+        {
+            "label": "🌡 5",
+            "type": "temp",
+            "value": 0.00,
+            "maxValue": 100
+        },
+        {
+            "label": "⚡ 5",
+            "type": "volt",
+            "value": 2.50,
+            "maxValue": 24
+        },
+        {
+            "label": "🌡 6",
+            "type": "temp",
+            "value": 0.00,
+            "maxValue": 100
+        },
+        {
+            "label": "⚡ 6",
+            "type": "volt",
+            "value": 0.00,
+            "maxValue": 24
+        },
+        {
+            "label": "🌡 7",
+            "type": "temp",
+            "value": 0.00,
+            "maxValue": 100
+        },
+        {
+            "label": "⚡ 7",
+            "type": "volt",
+            "value": 1.30,
+            "maxValue": 24
+        },
+        {
+            "label": "🌡 8",
+            "type": "temp",
+            "value": 0.00,
+            "maxValue": 100
+        },
+        {
+            "label": "⚡ 8",
+            "type": "volt",
+            "value": 0.00,
+            "maxValue": 24
+        },
+        {
+            "label": "🌡 9",
+            "type": "temp",
+            "value": 0.00,
+            "maxValue": 100
+        },
+        {
+            "label": "⚡ 9",
+            "type": "volt",
+            "value": 0.00,
+            "maxValue": 24
+        }
+    ]
+}

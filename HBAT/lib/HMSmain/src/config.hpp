@@ -17,7 +17,7 @@ public:
     {
         // Variables
         char *hostname;
-        uint8_t MQTTEnabled;
+        bool MQTTEnabled;
         char *MQTTClientID;
         int MQTTPort;        // Port to use for unsecured MQTT
         int MQTTPort_Secure; // port to use if Secured MQTT is enabled
@@ -42,8 +42,9 @@ public:
         char *NTPTIMEOFFSET;
         char *MDNS;
         char *DHCPCHECK;
-        char *configData;
-        boolean relays[5];
+        bool data_json;
+        String data_json_string;
+        bool relays[5];
         int relays_pin[5];
         float stack_humidity;
         float stack_temp;

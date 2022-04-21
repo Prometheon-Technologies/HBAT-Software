@@ -2,9 +2,7 @@
     <title>HBAT Wi-Fi Manager</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    1
-    <link rel="manifest" href="site.webmanifest" />
+    <!-- <link rel="manifest" href="site.webmanifest" /> -->
     <link rel="icon" href="favicon.ico" />
     <style>
         html {
@@ -53,13 +51,14 @@
 
         .card {
             background-color: white;
-            box-shadow: 2px 2px 12px 1px rgba(140, 140, 140, .5);
+            box-shadow: 2px 2px 12px 1px rgba(8, 8, 8, 0.5);
+            border-radius: 10px;
         }
 
         .card-title {
             font-size: 1.2rem;
             font-weight: bold;
-            color: #034078
+            color: #fefcfb;
         }
 
         input[type=submit] {
@@ -201,7 +200,7 @@
         </div>
         <div class="card-grid">
             <div class="card">
-                <form action="/" method="POST">
+                <form action="/wifimanager" method="POST">
                     <section class="wificlient">
                         <p>
                             <large>Wifi Router Details</large>
@@ -285,7 +284,13 @@
             </div>
         </div>
         <p>
-            OTA Updates on the index page
+            OTA Updates are coming soon
+            <br>
+            <br>
+            <br>
+            <a href="/upload">
+                <input type="submit" value="Upload">
+             </a>
             <br>
         </p>
     </div>

@@ -40,6 +40,8 @@
 
 // wifi definitions
 #include "HMSnetwork.hpp"
+#include "mdns.hpp"
+#include "OTA.hpp"
 
 // Accumulate Data
 #include "accumulatedata.hpp"

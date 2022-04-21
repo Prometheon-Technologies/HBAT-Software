@@ -4,6 +4,16 @@
 IPAddress mqttServer;
 String mdnsdotlocalurl = "hmshbat";
 
+HMSmdns::HMSmdns()
+{
+    // constructor
+}
+
+HMSmdns::~HMSmdns()
+{
+    // destructor
+}
+
 int HMSmdns::DiscovermDNSBroker()
 {
     // check if there is a WiFi connection
@@ -73,7 +83,7 @@ void HMSmdns::SetupmDNSServer()
     SERIAL_DEBUG_LN("[INFO]: mDNS responder started");
 
     // Start TCP (HTTP) server
-    SetupWebServer();
+    network.SetupWebServer();
     SERIAL_DEBUG_LN("[INFO]: TCP server started");
 
     // Add service to MDNS-SD
@@ -135,3 +145,5 @@ bool HMSmdns::mDNSLoop()
     }
     return false;
 }
+
+HMSmdns Mdns;

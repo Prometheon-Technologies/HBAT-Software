@@ -82,13 +82,15 @@ void Config::CreateDefaultConfig()
     config.MQTTClientID = NULL;
     config.MQTTBroker = NULL;
     config.MQTTPort = 0; // Port to use for unsecured MQTT
-    config.MQTTEnabled = 0;     
+    config.MQTTEnabled = false;     
     config.MQTTPort_Secure = 0; // port to use if Secured MQTT is enabled
     config.MQTTUser = NULL;
     config.MQTTPass = NULL;
     config.MQTTTopic = NULL;
     config.MQTTSetTopic = NULL;
     config.MQTTDeviceName = NULL;
+    config.data_json = false;
+    config.data_json_string = "";
     config.last_mqtt_connect_attempt = 0;
     config.last_mqtt_publish_attempt = 0;
     config.lastMillis = 0;
@@ -100,11 +102,12 @@ void Config::CreateDefaultConfig()
     config.WIFISSID = NULL;
     config.WIFIPASS = NULL;
     config.MQTTConnectedState = false;
-    config.configData = NULL;
     config.NTPTIME = NULL;
     config.NTPTIMEOFFSET = NULL;
     config.MDNS = NULL;
     config.DHCPCHECK = NULL;
+    config.numSensors = 0;
+    config.cell_count_max = 0;
 
     for (int i = 0; i < 5; i++)
     {
@@ -248,11 +251,12 @@ bool Config::loadConfig()
     heapStr(&config.WIFISSID, jsonBuffer["WIFISSID"]);
     heapStr(&config.WIFIPASS, jsonBuffer["WIFIPASS"]);
     config.MQTTConnectedState = jsonBuffer["MQTTConnectedState"];
-    heapStr(&config.configData, jsonBuffer["configData"]);
     heapStr(&config.NTPTIME, jsonBuffer["NTPTIME"]);
     heapStr(&config.NTPTIMEOFFSET, jsonBuffer["NTPTIMEOFFSET"]);
     heapStr(&config.MDNS, jsonBuffer["MDNS"]);
     heapStr(&config.DHCPCHECK, jsonBuffer["DHCPCHECK"]);
+    config.numSensors = jsonBuffer["Number_of_Sensors"];
+    config.cell_count_max = jsonBuffer["Max_Cell_Count"];
 
     for (int i = 0; i < sizeof(config.relays); i++)
     {
@@ -311,17 +315,16 @@ bool Config::saveConfig()
     json["WIFISSID"] = config.WIFISSID;
     json["WIFIPASS"] = config.WIFIPASS;
     json["MQTTConnectedState"] = config.MQTTConnectedState;
-    json["configData"] = config.configData;
     json["NTPTIME"] = config.NTPTIME;
     json["NTPTIMEOFFSET"] = config.NTPTIMEOFFSET;
     json["MDNS"] = config.MDNS;
     json["DHCPCHECK"] = config.DHCPCHECK;
-    json["Number of Sensors"] = config.numSensors;
-    json["Max Cell Count"] = config.cell_count_max;
+    json["Number_of_Sensors"] = config.numSensors;
+    json["Max_Cell_Count"] = config.cell_count_max;
 
     // Relays
     JsonArray Relays = json.createNestedArray("HMS_Relays_State");
-    for (int i = 0; i < sizeof(config.relays); i++)
+    for (int i = 0; i < sizeof(config.relays) / sizeof(config.relays[0]); i++)
     {
         Relays.add(config.relays[i]);
     }
@@ -344,16 +347,6 @@ bool Config::saveConfig()
     // end save
     SERIAL_DEBUG_LN(F("[Save Config Changes]: Config written"));
     last_config_change = false;
-
-    /* if (!PRODUCTION)
-    {
-        SERIAL_DEBUG_EOL(serializeJson(json, Serial));
-        doc_string = String(json);
-        if (doc_string.length() > 0)
-        {
-            SERIAL_DEBUG_LN(doc_string);
-        }
-    } */
 
     return true;
 }

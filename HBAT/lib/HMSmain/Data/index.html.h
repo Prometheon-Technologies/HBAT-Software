@@ -1,4 +1,8 @@
-const char *indexHtml = R"====(
+#pragma once
+#ifndef INDEX_HTML_H
+#define INDEX_HTML_H
+
+const char *frontEnd = R"====(
 <title>HBAT - Powering the future</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
@@ -47,7 +51,6 @@ const char *indexHtml = R"====(
     <meta charset="UTF-8">
     <title>HBAT - Powering the future</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link href="https://fonts.cdnfonts.com/css/roboto" rel="stylesheet">
     <style>
         html {
             font-family: 'Roboto', monospace, monospace;
@@ -433,3 +436,5 @@ const toggleOffString = `<svg version="1.1" x="0px" y="0px" viewBox="0 0 330 330
 
 
 )====";
+
+#endif

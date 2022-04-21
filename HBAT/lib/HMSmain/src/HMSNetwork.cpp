@@ -9,14 +9,21 @@ WiFiClient espClient;
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 0, 0);
 
+const size_t MAX_FILESIZE = 1024 * 1024 * 2; // 2MB
+
 const char *PARAM_INPUT_1 = "ssid";
 const char *PARAM_INPUT_2 = "password";
+const char *PARAM_INPUT_3 = "apName";
+const char *PARAM_INPUT_4 = "apPass";
 const char *mdnsPath = "/mdns.txt";
 const char *dhcpcheckPath = "/dhcpcheck.txt";
 const char *ssidPath = "/ssid.txt";
 const char *passPath = "/pass.txt";
 const char *ntptimePath = "/ntptime.txt";
 const char *ntptimeoffsetPath = "/ntptimeoffset.txt";
+
+const char *HTTP_USERNAME = "admin";
+const char *HTTP_PASSWORD = "admin";
 
 // char* create_mDNS_hostname = StringtoChar(MQTTCreateHostName(MQTT_HOSTNAME, ".local"));
 
@@ -31,15 +38,13 @@ String ledState;
 
 // Timer variables
 unsigned long previousMillis = 0;
-const long interval = 10000; // interval to wait for Wi-Fi connection (milliseconds)
+const long interval = 30000; // interval to wait for Wi-Fi connection (milliseconds)
 
 HMSnetwork::HMSnetwork()
 {
     // constructor
     SERIAL_DEBUG_LN("[INFO]: HMSnetwork::HMSnetwork()");
     SERIAL_DEBUG_LN("[INFO]: Creating network object");
-    maxVoltage = 24;
-    maxTemp = 100;
 }
 
 HMSnetwork::~HMSnetwork()
@@ -49,9 +54,40 @@ HMSnetwork::~HMSnetwork()
     SERIAL_DEBUG_LN("[INFO]: Destroying network object");
 }
 
+/* format bytes as KB, MB or GB string */
+String humanReadableSize(const size_t bytes)
+{
+    if (bytes < 1024)
+        return String(bytes) + " B";
+    else if (bytes < (1024 * 1024))
+        return String(bytes / 1024.0) + " KB";
+    else if (bytes < (1024 * 1024 * 1024))
+        return String(bytes / 1024.0 / 1024.0) + " MB";
+    else
+        return String(bytes / 1024.0 / 1024.0 / 1024.0) + " GB";
+}
+
 void notFound(AsyncWebServerRequest *request)
 {
-    request->send(404, "text/plain", "Not found");
+    Serial.printf("NOT_FOUND: ");
+    if (request->method() == HTTP_GET)
+        Serial.printf("GET");
+    else if (request->method() == HTTP_POST)
+        Serial.printf("POST");
+    else if (request->method() == HTTP_DELETE)
+        Serial.printf("DELETE");
+    else if (request->method() == HTTP_PUT)
+        Serial.printf("PUT");
+    else if (request->method() == HTTP_PATCH)
+        Serial.printf("PATCH");
+    else if (request->method() == HTTP_HEAD)
+        Serial.printf("HEAD");
+    else if (request->method() == HTTP_OPTIONS)
+        Serial.printf("OPTIONS");
+    else
+        Serial.printf("UNKNOWN");
+    Serial.printf(" http://%s%s\n", request->host().c_str(), request->url().c_str());
+    request->send(404, "text/plain", "Not found.");
 }
 
 bool HMSnetwork::SetupNetworkStack()
@@ -96,14 +132,25 @@ bool HMSnetwork::SetupNetworkStack()
         SERIAL_DEBUG_LN("");
 
         WiFi.mode(WIFI_STA);
-        // WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
-        // WiFi.disconnect(); // Disconnect from WiFi AP if connected
         localIP.fromString(WiFi.localIP().toString());
 
-        if (!WiFi.config(localIP, gateway, subnet))
+        if (dhcpcheck == "on")
         {
-            SERIAL_DEBUG_LN("[INFO]: STA Failed to configure");
-            return false;
+            SERIAL_DEBUG_LN("[INFO]: DHCP Check is on");
+            if (!WiFi.config(localIP, gateway, subnet))
+            {
+                SERIAL_DEBUG_LN("[INFO]: STA Failed to configure");
+                return false;
+            }
+        }
+        else
+        {
+            SERIAL_DEBUG_LN("[INFO]: DHCP Check is off");
+            if (!WiFi.config(localIP, gateway, subnet))
+            {
+                SERIAL_DEBUG_LN("[INFO]: STA Failed to configure");
+                return false;
+            }
         }
         WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
 
@@ -124,10 +171,6 @@ bool HMSnetwork::SetupNetworkStack()
         SERIAL_DEBUG_ADD("IP address: ");
         SERIAL_DEBUG_LN(WiFi.localIP());
         return true;
-        if (dhcpcheck == "on")
-        {
-            SERIAL_DEBUG_LN("[INFO]: DHCP Check is on");
-        }
     }
     return 0;
 }
@@ -136,112 +179,7 @@ void HMSnetwork::SetupWebServer()
 {
     if (SetupNetworkStack())
     {
-        // Web Server Root URL
-        server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-                  { request->send(SPIFFS, "/frontend.html", "text/html"); });
-
-        server.serveStatic("/", SPIFFS, "/");
-
-        server.on("/wifiUpdate", HTTP_POST, [&](AsyncWebServerRequest *request)
-                  {
-        int params = request->params();
-        for(int i=0;i<params;i++){
-            AsyncWebParameter* p = request->getParam(i);
-            if(p->isPost()){
-                // HTTP POST ssid value
-                if (p->name() == "apName") {
-                    String ssID; 
-                    ssID = p->value().c_str();
-                    SERIAL_DEBUG_ADD("SSID set to: ");
-                    SERIAL_DEBUG_LN(ssID);
-                    // Write file to save value
-                    heapStr(&cfg.config.WIFISSID, ssID.c_str());
-                    cfg.setConfigChanged();
-                    cfg.writeFile(SPIFFS, ssidPath, ssID.c_str());
-                }
-                // HTTP POST pass value
-                if (p->name() == "apPass") {
-                    String passWord; 
-                    passWord = p->value().c_str();
-                    SERIAL_DEBUG_ADD("Password set to: ");
-                    SERIAL_DEBUG_LN(passWord);
-                    // Write file to save value
-                    heapStr(&cfg.config.WIFIPASS, passWord.c_str());
-                    cfg.setConfigChanged();
-                    cfg.writeFile(SPIFFS, passPath, passWord.c_str());
-                }
-            SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-            }
-        request->send(200, "text/plain", "Done. ESP will restart and connect to your router. To access it go to IP address: " + String(WiFi.localIP()));
-        }
-      my_delay(30000000L);
-      ESP.restart(); });
-
-        // Route to set GPIO state to LOW
-        server.on("/toggle", HTTP_GET, [&](AsyncWebServerRequest *request)
-                  {
-        int params = request->params();
-        for(int i=0;i<params;i++){
-            AsyncWebParameter* p = request->getParam(i);
-            if(p->isPost()){
-                // HTTP POST Relay Value
-                if (p->name() == "pin") {
-                    String relay = p->value().c_str();
-                    Serial.print("switching state of pin :");
-                    Serial.println(relay);
-                    cfg.config.relays[relay.toInt()] = (cfg.config.relays[relay.toInt()] == true) ? false : true;
-                }
-            SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-            }
-        }
-      request->send(200, "application/json", "toggled"); });
-
-        server.on("/data.json", HTTP_GET, [&](AsyncWebServerRequest *request)
-                  {
-        String json = "";
-        json += R"====({)====";
-
-        json += R"====("stack_humidity":)====";
-        json += (String)cfg.config.stack_humidity + ",\n";
-
-        json += R"====("stack_temp":)====";
-        json += (String)cfg.config.stack_temp + ",\n";
-
-        json += R"====("relays":[)====";
-        json += (String)cfg.config.relays[0] + "," + (String)cfg.config.relays[1] + "," + (String)cfg.config.relays[2] + "," + (String)cfg.config.relays[3] + "," + (String)cfg.config.relays[4] + "],\n";
-
-        json += R"====("stack_voltage":)====";
-        json += (String)cfg.config.stack_voltage + ",\n";
-
-        json += R"====("GraphData":[)====";
-        json += "\n";
-        for (int i = 0; i < 10; i++)
-        {
-            json += R"====({"label": "🌡 )====" + (String)i + "\",\n";
-            json += R"====("type": "temp",)====" + (String) "\n";
-            json += R"====("value": )====" + (String)cfg.config.cell_temp[i] + (String) ",\n";
-            json += R"====("maxValue": )====" + (String)maxTemp;
-            json += R"====(})====" + (String) "\n";
-            json += R"====(,)====";
-
-            json += R"====({"label": "⚡ )====" + (String)i + "\",\n";
-            json += R"====("type": "volt",)====" + (String) "\n";
-            json += R"====("value": )====" + (String)cfg.config.cell_voltage[i] + (String) ",\n";
-            json += R"====("maxValue": )====" + (String)maxVoltage;
-            json += R"====(})====" + (String) "\n";
-
-            if (i < 9)
-            {
-                json += R"====(,)====";
-            }
-        }
-        json += R"====(])====";
-        json += R"====(})====";
-        json += "";
-        request->send(200, "application/json", json); });
-
-        server.onNotFound(notFound);
-        server.begin();
+        networkRoutes();
         Serial.println("HBAT HMS server started");
     }
     else
@@ -250,6 +188,7 @@ void HMSnetwork::SetupWebServer()
         // TODO: There should be a reset mode that will reset the device to factory settings and restart the device.
         // TODO: Should be a physical reset button on the PCB itself - not a touch button - hold for 5 seconds to reset. Flash LED to indicate reset per second.
         // Connect to Wi-Fi HMSnetwork with SSID and password
+
         SERIAL_DEBUG_LN("[INFO]: Setting Access Point...");
 
         char *macAddr = StringtoChar(WiFi.macAddress());
@@ -269,7 +208,7 @@ void HMSnetwork::SetupWebServer()
 
         SERIAL_DEBUG_LN("[INFO]: Configuring access point...");
         WiFi.mode(WIFI_AP);
-        WiFi.setTxPower(WIFI_POWER_19_5dBm);
+        WiFi.setTxPower(WIFI_POWER_11dBm);
         // You can remove the password parameter if you want the AP to be open.
         if (!PRODUCTION)
         {
@@ -295,74 +234,248 @@ void HMSnetwork::SetupWebServer()
         // free dynamically allocated 16 byte hash from make_hash()
         free(hash);
 
-        // Web Server Root URL
-        server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-                  { request->send(SPIFFS, "/wifimanager.html", "text/html"); });
-
-        server.serveStatic("/", SPIFFS, "/");
-
-        server.on("/", HTTP_POST, [&](AsyncWebServerRequest *request)
-                  {
-        int params = request->params();
-        for(int i=0;i<params;i++){
-            AsyncWebParameter* p = request->getParam(i);
-            if(p->isPost()){
-                // HTTP POST ssid value
-                if (p->name() == PARAM_INPUT_1) {
-                    String ssID; 
-                    ssID = p->value().c_str();
-                    SERIAL_DEBUG_ADD("SSID set to: ");
-                    SERIAL_DEBUG_LN(ssID);
-                    // Write file to save value
-                    heapStr(&cfg.config.WIFISSID, ssID.c_str());
-                    my_delay(100000L);
-                    //cfg.writeFile(SPIFFS, ssidPath, ssID.c_str());
-                }
-                // HTTP POST pass value
-                if (p->name() == PARAM_INPUT_2) {
-                    String passWord; 
-                    passWord = p->value().c_str();
-                    SERIAL_DEBUG_ADD("Password set to: ");
-                    SERIAL_DEBUG_LN(passWord);
-                    // Write file to save value
-                    heapStr(&cfg.config.WIFIPASS, passWord.c_str());
-                    my_delay(100000L);
-                    //cfg.writeFile(SPIFFS, passPath, passWord.c_str());
-                }
-                cfg.setConfigChanged();
-            SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
-        }
-      }
-      request->send(200, "text/plain", "Done. ESP will restart, connect to your router and go to IP address: " + String(cfg.config.clientIP));
-      my_delay(30000000L);
-      ESP.restart(); });
-        server.onNotFound(notFound);
-        server.begin();
+        networkRoutes();
     }
+}
+
+void HMSnetwork::networkRoutes()
+{
+    static const char *MIMETYPE_HTML{MIMETYPE_HTML};
+    static const char *MIMETYPE_CSS{"text/css"};
+    static const char *MIMETYPE_JS{"application/javascript"};
+    static const char *MIMETYPE_PNG{"image/png"};
+    static const char *MIMETYPE_JPG{"image/jpeg"};
+    static const char *MIMETYPE_ICO{"image/x-icon"};
+    static const char *MIMETYPE_JSON{MIMETYPE_JS};
+
+    // Web Server Root URL
+    server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request)
+              { request->send(SPIFFS, "/frontend.html", MIMETYPE_HTML); });
+
+    server.serveStatic("/", SPIFFS, "/");
+
+    server.on("/wifimanager", HTTP_GET, [&](AsyncWebServerRequest *request)
+              { request->send(SPIFFS, "/wifimanager.html", MIMETYPE_HTML); });
+
+    server.serveStatic("/wifimanager", SPIFFS, "/");
+
+    // preflight cors check
+    server.on("/", HTTP_OPTIONS, [&](AsyncWebServerRequest *request)
+              {
+        AsyncWebServerResponse* response = request->beginResponse(204);
+        response->addHeader("Access-Control-Allow-Methods", "PUT,POST,GET,OPTIONS");
+        response->addHeader("Access-Control-Allow-Headers", "Accept, Content-Type, Authorization, FileSize");
+        response->addHeader("Access-Control-Allow-Credentials", "true");
+        request->send(response); });
+
+    server.on("/upload", HTTP_GET, [&](AsyncWebServerRequest *request)
+              { request->send(SPIFFS, "/upload.html", MIMETYPE_HTML); });
+
+    server.serveStatic("/upload.html", SPIFFS, "/");
+
+    server.on(
+        "/api/upload", HTTP_POST, [&](AsyncWebServerRequest *request)
+        {
+        if (request->authenticate(HTTP_USERNAME, HTTP_PASSWORD))
+            request->send(200);
+        else {
+            request->send(401);
+            request->client()->close();
+        } },
+        [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
+        {
+            if (!request->authenticate(HTTP_USERNAME, HTTP_PASSWORD))
+            {
+                request->send(401);
+                request->client()->close();
+                return;
+            }
+
+            static unsigned long startTimer;
+            if (!index)
+            {
+                startTimer = millis();
+                const char *FILESIZE_HEADER{"FileSize"};
+
+                Serial.printf("UPLOAD: Receiving: '%s'\n", filename.c_str());
+
+                if (!request->hasHeader(FILESIZE_HEADER))
+                {
+                    request->send(400, MIMETYPE_HTML, "No filesize header present!");
+                    request->client()->close();
+                    Serial.printf("UPLOAD: Aborted upload because missing filesize header.\n");
+                    return;
+                }
+
+                Serial.printf("UPLOAD: fileSize: %s\n", request->header(FILESIZE_HEADER));
+
+                if (request->header(FILESIZE_HEADER).toInt() >= MAX_FILESIZE)
+                {
+                    request->send(400, MIMETYPE_HTML,
+                                  "Too large. (" + humanReadableSize(request->header(FILESIZE_HEADER).toInt()) +
+                                      ") Max size is " + humanReadableSize(MAX_FILESIZE) + ".");
+
+                    request->client()->close();
+                    Serial.printf("UPLOAD: Aborted upload because filesize limit.\n");
+                    return;
+                }
+            }
+
+            if (final)
+                Serial.printf("UPLOAD: Done. Received %i bytes in %.2fs which is %.2f kB/s.\n",
+                              index + len,
+                              (millis() - startTimer) / 1000.0,
+                              1.0 * (index + len) / (millis() - startTimer));
+        });
+
+    server.on("/wifimanager", HTTP_POST, [&](AsyncWebServerRequest *request)
+              {
+                int params = request->params();
+                for(int i=0;i<params;i++){
+                    AsyncWebParameter* p = request->getParam(i);
+                    if(p->isPost()){
+                        // HTTP POST ssid value
+                        if (p->name() == PARAM_INPUT_1) {
+                            String ssID; 
+                            ssID = p->value().c_str();
+                            SERIAL_DEBUG_ADD("SSID set to: ");
+                            SERIAL_DEBUG_LN(ssID);
+
+                            heapStr(&cfg.config.WIFISSID, ssID.c_str());
+                            my_delay(100000L);
+                        }
+                        // HTTP POST pass value
+                        if (p->name() == PARAM_INPUT_2) {
+                            String passWord; 
+                            passWord = p->value().c_str();
+
+                            heapStr(&cfg.config.WIFIPASS, passWord.c_str());
+                            my_delay(100000L);
+                        }
+                        cfg.setConfigChanged();
+                        SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                    }
+                }
+                request->send(200, MIMETYPE_JS, "Done. ESP will restart, connect to your router and go to IP address");
+                my_delay(30000L);
+                ESP.restart(); });
+
+    server.on("/wifiUpdate", HTTP_GET, [&](AsyncWebServerRequest *request)
+              {
+                int params = request->params();
+                for(int i=0;i<params;i++){
+                    AsyncWebParameter* p = request->getParam(i);
+                    // HTTP POST ssid value
+                    if (p->name() == PARAM_INPUT_1) {
+                        String ssID; 
+                        ssID = p->value().c_str();
+                        SERIAL_DEBUG_ADD("SSID set to: ");
+                        SERIAL_DEBUG_LN(ssID);
+
+                        heapStr(&cfg.config.WIFISSID, ssID.c_str());
+                        my_delay(100000L);
+                    }
+                    // HTTP POST pass value
+                    if (p->name() == PARAM_INPUT_2) {
+                        String passWord; 
+                        passWord = p->value().c_str();
+
+                        heapStr(&cfg.config.WIFIPASS, passWord.c_str());
+                        my_delay(100000L);
+                    }
+                    cfg.setConfigChanged();
+                    SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                }
+                request->send(200, MIMETYPE_JS, "Done. ESP will restart and connect to your router");
+                my_delay(30000L);
+                ESP.restart(); });
+
+    server.on("/mqttUpdate", HTTP_GET, [&](AsyncWebServerRequest *request)
+              {
+                int params = request->params();
+                for(int i=0;i<params;i++){
+                    AsyncWebParameter* p = request->getParam(i);
+                    if (p->name() == "mqttIP") {
+                        String broker;
+                        broker = p->value().c_str();
+                        SERIAL_DEBUG_ADD("SSID set to: ");
+                        SERIAL_DEBUG_LN(broker);
+                        heapStr(&cfg.config.MQTTBroker, broker.c_str());
+                        my_delay(100000L);
+                    }
+                    if (p->name() == "mqttName") {
+                        String user; 
+                        user = p->value().c_str();
+                        SERIAL_DEBUG_ADD("SSID set to: ");
+                        SERIAL_DEBUG_LN(user);
+                        heapStr(&cfg.config.MQTTUser, user.c_str());
+                        my_delay(100000L);
+                    }
+                    if (p->name() == "mqttPass") {
+                        String pass; 
+                        pass = p->value().c_str();
+                        heapStr(&cfg.config.MQTTPass, pass.c_str());
+                        my_delay(100000L);
+                    }
+                    cfg.setConfigChanged();
+                    SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                }
+                request->send(200, MIMETYPE_JS, "Done. ESP will now connect to your broker");
+                my_delay(30000L);
+                ESP.restart(); });
+
+    // Route to set GPIO state to LOW
+    server.on("/toggle", HTTP_GET, [&](AsyncWebServerRequest *request)
+              {
+                    int params = request->params();
+                    for(int i=0;i<params;i++){
+                        AsyncWebParameter* p = request->getParam(i);
+                            // HTTP POST Relay Value
+                        if (p->name() == "pin") {
+                            String relay = p->value().c_str();
+                            Serial.print("switching state of pin:");
+                            Serial.println(relay);
+                            cfg.config.relays[relay.toInt()] = (cfg.config.relays[relay.toInt()] == true) ? false : true;
+                        }
+                        SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                    }
+                    request->send(200, MIMETYPE_JS, "toggled"); });
+
+    server.on("/mqttEnable", HTTP_GET, [&](AsyncWebServerRequest *request)
+              {
+                int params = request->params();
+                for(int i=0;i<params;i++){
+                    AsyncWebParameter* p = request->getParam(i);
+                        // HTTP POST Relay Value
+                    if (p->name() == "mqttEnableState") {
+                        String state = p->value().c_str();
+                        Serial.print("switching state of pin:");
+                        //split variable on "?" keeping the first part
+                        String split = state.substring(0, state.indexOf("?"));
+                        Serial.println(split);
+                        bool mqttState = (split == "true") ? true : false;
+                        Serial.println(mqttState);
+                        cfg.config.MQTTEnabled = mqttState ? true : false;
+                    }
+                    SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                }
+                request->send(200, MIMETYPE_JS, (cfg.config.MQTTEnabled == true) ?  "MQTT Disabled" : "MQTT Enabled"); });
+
+    server.on("/data.json", HTTP_GET, [&](AsyncWebServerRequest *request)
+              {
+                  cfg.config.data_json = true;
+                  my_delay(10000L);
+                  String temp = cfg.config.data_json_string;
+                  request->send(200, MIMETYPE_JS, temp);
+                  temp = ""; });
+
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+
+    server.onNotFound(notFound);
+    server.begin();
 }
 
 // ######################## server functions #########################
-int HMSnetwork::CheckWifiState()
-{
-    // check if there is a WiFi connection
-    int wifiStateCounter = 0;
-    SERIAL_DEBUG_ADD("checking wifi...");
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        SERIAL_DEBUG_ADD(". ");
-        wifiStateCounter++;
-        if (wifiStateCounter > 100)
-            SERIAL_DEBUG_LN("[INFO]: WiFi not connected");
-        return 0;
-    }
-
-    if (WiFi.status() == WL_CONNECTED)
-    {
-        SERIAL_DEBUG_LN("[INFO]: \nconnected!");
-        return 1;
-    }
-    return 0;
-}
 
 /******************************************************************************
  * Function: Check HMSnetwork Connection Loop
@@ -383,8 +496,7 @@ void HMSnetwork::CheckNetworkLoop()
         wifiConnected = true;
         SERIAL_DEBUG_LN(F("Wifi is connected"));
         SERIAL_DEBUG_ADD("[INFO]: WiFi Connected! Open http://");
-        SERIAL_DEBUG_LN(WiFi.localIP());
-        Serial.print("[INFO]:  in your browser");
+        Serial.println(String(WiFi.localIP()) + " in your browser");
     }
 }
 
@@ -397,6 +509,32 @@ void HMSnetwork::CheckNetworkLoop()
  ******************************************************************************/
 bool HMSnetwork::connectToApWithFailToStation()
 {
+    cfg.CreateDefaultConfig();
+    if (!cfg.loadConfig())
+    {
+        SERIAL_DEBUG_LN("[INFO]: Failed to load config");
+    }
+    else
+    {
+        SERIAL_DEBUG_LN("[INFO]: Loaded config");
+        // Load values saved in SPIFFS
+        SSID = cfg.config.WIFISSID;
+        PASS = cfg.config.WIFIPASS;
+        ntptime = cfg.config.NTPTIME;
+        ntptimeoffset = cfg.config.NTPTIMEOFFSET;
+        mdns = cfg.config.MDNS;
+        dhcpcheck = cfg.config.DHCPCHECK;
+
+        if (!PRODUCTION)
+        {
+            // print it on the serial monitor
+            SERIAL_DEBUG_LN(PASS);
+        }
+
+        SERIAL_DEBUG_LN(mdns);
+        SERIAL_DEBUG_LN(dhcpcheck);
+    }
+
     WiFi.persistent(true);
     SERIAL_DEBUG_LN("[INFO]: Configuring access point...");
     SERIAL_DEBUG_ADD("SSID:");
@@ -432,9 +570,7 @@ bool HMSnetwork::connectToApWithFailToStation()
             break;
         }
     }
-    SERIAL_DEBUG_LN("[INFO]: ");
-    SERIAL_DEBUG_ADD("Connected! IP address: ");
-    SERIAL_DEBUG_LN(WiFi.localIP());
+    SERIAL_DEBUG_LN("[INFO]: Connected! IP address: " + String(WiFi.localIP()));
     return true;
 }
 

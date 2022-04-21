@@ -338,6 +338,61 @@ Hum Humidity::ReadSensor()
  * Return: None
  * ADD IN CODE TO READ PRESSURE SENSORS
  ******************************************************************************/
+
+uint8_t Humidity::crc8(const uint8_t result, uint8_t crc)
+{
+  crc ^= result;
+
+  for (uint8_t i = 8; i; --i)
+  {
+    crc = (crc & 0x80) ? (crc << 1) ^ 0x31 : (crc << 1);
+  }
+  return crc;
+}
+
+int Humidity::loopSFM3003()
+{
+  auto device = 0x28;
+  unsigned long timed_event = 500;
+  unsigned long current_time = millis(); // millis() function
+  unsigned long start_time = current_time;
+  // delay(500); // blocking delay, not needed
+  if (current_time - start_time >= timed_event)
+  {
+    Wire.beginTransmission(byte(device)); // transmit to device (0x28)
+    Wire.write(byte(0x10));               //
+    Wire.write(byte(0x00));               //
+    Wire.endTransmission();
+    Wire.requestFrom(device, 3); // read 3 bytes from device with address 0x28
+    while (Wire.available())
+    {                            // slave may send less than requested
+      uint16_t a = Wire.read();  // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
+      uint8_t b = Wire.read();   // second received byte stored here
+      uint8_t crc = Wire.read(); // crc value stored here
+      uint8_t mycrc = 0xFF;      // initialize crc variable
+      mycrc = crc8(a, mycrc);    // let first byte through CRC calculation
+      mycrc = crc8(b, mycrc);    // and the second byte too
+      if (mycrc != crc)
+      { // check if the calculated and the received CRC byte matches
+        Serial.println("Error: wrong CRC");
+      }
+      Serial.println('p');
+      Serial.println(a);
+      Serial.println(b);
+      Serial.println(crc);
+      Serial.println('h');
+      a = (a << 8) | b; // combine the two received bytes to a 16bit integer value
+      // a >>= 2; // remove the two least significant bits
+      int Flow = (a - _offset) / _scale;
+      // Serial.println(a); // print the raw result from the sensor to the serial interface
+      Serial.println(Flow); // print the calculated flow to the serial interface
+      start_time = current_time;
+      return Flow;
+    }
+  }
+  return 0;
+}
+
 /* int Humidity::SetupSFM3003()
 {
   const char *driver_version = sfm_common_get_driver_version();
@@ -447,59 +502,5 @@ int Humidity::SFM3003()
    Wire.endTransmission();
    delay(5);
 } */
-
-uint8_t Humidity::crc8(const uint8_t result, uint8_t crc)
-{
-  crc ^= result;
-
-  for (uint8_t i = 8; i; --i)
-  {
-    crc = (crc & 0x80) ? (crc << 1) ^ 0x31 : (crc << 1);
-  }
-  return crc;
-}
-
-int Humidity::loopSFM3003()
-{
-  auto device = 0x28;
-  unsigned long timed_event = 500;
-  unsigned long current_time = millis(); // millis() function
-  unsigned long start_time = current_time;
-  // delay(500); // blocking delay, not needed
-  if (current_time - start_time >= timed_event)
-  {
-    Wire.beginTransmission(byte(device)); // transmit to device (0x28)
-    Wire.write(byte(0x10));               //
-    Wire.write(byte(0x00));               //
-    Wire.endTransmission();
-    Wire.requestFrom(device, 3); // read 3 bytes from device with address 0x28
-    while (Wire.available())
-    {                            // slave may send less than requested
-      uint16_t a = Wire.read();  // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
-      uint8_t b = Wire.read();   // second received byte stored here
-      uint8_t crc = Wire.read(); // crc value stored here
-      uint8_t mycrc = 0xFF;      // initialize crc variable
-      mycrc = crc8(a, mycrc);    // let first byte through CRC calculation
-      mycrc = crc8(b, mycrc);    // and the second byte too
-      if (mycrc != crc)
-      { // check if the calculated and the received CRC byte matches
-        Serial.println("Error: wrong CRC");
-      }
-      Serial.println('p');
-      Serial.println(a);
-      Serial.println(b);
-      Serial.println(crc);
-      Serial.println('h');
-      a = (a << 8) | b; // combine the two received bytes to a 16bit integer value
-      // a >>= 2; // remove the two least significant bits
-      int Flow = (a - _offset) / _scale;
-      // Serial.println(a); // print the raw result from the sensor to the serial interface
-      Serial.println(Flow); // print the calculated flow to the serial interface
-      start_time = current_time;
-      return Flow;
-    }
-  }
-  return 0;
-}
 
 Humidity humidity;

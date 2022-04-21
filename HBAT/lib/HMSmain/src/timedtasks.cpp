@@ -31,6 +31,10 @@ void TimedTasks::ScanI2CBus()
       Timer_5s_2.start();
     }
   }
+  else
+  {
+    return;
+  }
 }
 
 void TimedTasks::accumulateSensorData()

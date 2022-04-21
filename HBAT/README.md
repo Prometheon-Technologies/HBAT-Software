@@ -1,16 +1,34 @@
-# HBAT-Software Private repo
+<p align="center">
+   <img width="250px" height="120px" title="HBAT Logo" src="img/logo.png">
+</p>
 
-Custom Software Stack files are located in lib and src.
+---
+
+# HBAT-Software Public repo
+
+- [HBAT-Software Public repo](#hbat-software-public-repo)
+  - [Main Library](#main-library)
+  - [Source Files](#source-files)
+  - [Note to Voxdale](#note-to-voxdale)
+  - [Mapping Bezier curve to voltage readings](#mapping-bezier-curve-to-voltage-readings)
+  - [Current Network Flow-Chart](#current-network-flow-chart)
+  - [MQTT Broker Configuration and Connection](#mqtt-broker-configuration-and-connection)
+  - [Project Configuration](#project-configuration)
+
+Custom Software Stack files are located in `HMSmain_Back_End/lib` and `HMSmain_Back_End/HBAT_HMS_V1.0`.
 
 main.cpp runs the control script, HMSmain library does the heavy lifting.
 
-## LIB
+## Main Library
 
 [HMSmain Library](HMSmain_Back_End/lib/HMSmain)
 
-## SRC
+## Source Files
 
-[HMSmain](HMSmain_Back_End/src)
+[HMSmain](HMSmain_Back_End/HBAT_HMS_V1.0)
+
+<details>
+<summary></summary>
 
 ## Note to Voxdale
 
@@ -25,7 +43,6 @@ The product of this subtraction is then divided by the realtime measured voltage
 and multiplied by 100.
 
 ```python
-
 def percentage_calc:
  Vmin # minimum possible voltage for the load to function
  Vmax # maximum voltage of the battery when in a fully charged state
@@ -43,9 +60,9 @@ An alternative approach is to correctly map the voltage readings. Such as the ex
 According to this paper: [PEMFC Discharge Curve](https://github.com/Prometheon-Technologies/HBAT-Software/blob/main/sustainability-12-08127-v2.pdf)
 the discharge curve matches a very predictable Bezier curve.
 
-![Curve](/imgs/curve.png)
+![Curve](img/curve.png)
 
-![Curve+Math](/imgs/curve%2Bmath.png)
+![Curve+Math](img/curve%2Bmath.png)
 
 Currently, i am not able to correctly implement this approach into the software stack. Is Voxdale capable of doing this? Does voxdale have an alternative approach in mind?
 
@@ -97,6 +114,10 @@ For this to work, the MQTT service needs to be advertised. On a Linux host syste
   </service>
 </service-group>
 ```
+
+[Top](#hbat-software-private-repo)
+
+</details>
 
 ## Project Configuration
 

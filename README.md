@@ -72,19 +72,27 @@ My current thoughts were to map the voltage readings to an array, and set that a
 
 ```mermaid
 graph TD;
-          A[Device hosts local AP] -->|Local SSID and Pass embedded into a QR Code| B(User Scans QR Code);
+          A(Device hosts local AP) -->|Local SSID and Pass embedded into a QR Code| B(User Scans QR Code);
           B --> C{Web interface prompts user for local SSID and Pass}-->|User enters SSID and Pass| D(User clicks connect);
           C --> G[/User does not have a local network/];
           G --> H[/User Connects to AP to interface/];
-          D -->|Device writes new credentials to config file| E[config.h];
-          E -->|Device Reboots from Config| F[fa:fa-power-off Reboot];
-          subgraph section;
+          D -->|Device writes new credentials to config file| E(config.json);
+          E -->|Device Reboots from Config| F( fa:fa-power-off );
+          I(fa:fa-wifi Device Connects to Wifi ) -->|Device does mDNS lookup for MQTT| J(Device connects to MQTT Broker);
+          F --> I;
+          J -->|User navigates to browser using mDNS| L( fa:fa-chrome );
+          click B href "https://github.com/Prometheon-Technologies/HBAT-Software-Public/blob/main/HBAT/extras/HBAT_HMS-qrcode.png" "HMS QR CODE"
+          click E href "https://github.com/Prometheon-Technologies/HBAT-Software-Public/blob/main/HBAT/data/config.json" "JSON Config File"
+          subgraph 1;
             C;
             D;
             E;
             F;
             G;
             H;
+            I;
+            J;
+            L;
           end;
 ```
 

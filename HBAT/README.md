@@ -97,3 +97,23 @@ For this to work, the MQTT service needs to be advertised. On a Linux host syste
   </service>
 </service-group>
 ```
+
+## Project Configuration
+
+- [ ] Implement a way to read the battery's discharge curve from a file.
+- [x] Implement Wifi server with fail to AP mode.
+- [x] Implement Error Correct Code for sensors.
+- [x] Implement I2C Scanner.
+- [x] Implement Humidity and Temperature sensors.
+- [ ] Implement Relay Logic. //TODO: Interface with UI
+- [x] Implement UI.
+- [ ] Implement MQTT. //TODO: Full implementation still needs to be done.
+- [x] Implement MQTT discovery.
+- [x] Implement mDNS.
+- [ ] Implement OTA. //TODO: Interface with UI and test current implementation.
+- [x] Implement file upload.
+- [x] Implement Voltage and Current Sensors.
+- [ ] Implement Battery Discharge Curve.
+- [ ] Implement Battery Charge Curve.
+- [ ] Implement Battery Capacity measurements.
+- [x] Implement config file stored in flash.

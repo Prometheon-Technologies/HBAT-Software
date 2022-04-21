@@ -138,4 +138,3 @@ For this to work, the MQTT service needs to be advertised. On a Linux host syste
 - [ ] Implement Battery Charge Curve.
 - [ ] Implement Battery Capacity measurements.
 - [x] Implement config file stored in flash.
-

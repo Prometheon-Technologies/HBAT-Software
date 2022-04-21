@@ -496,8 +496,7 @@ void HMSnetwork::CheckNetworkLoop()
         wifiConnected = true;
         SERIAL_DEBUG_LN(F("Wifi is connected"));
         SERIAL_DEBUG_ADD("[INFO]: WiFi Connected! Open http://");
-        Serial.println(WiFi.localIP());
-        Serial.print("[INFO]:  in your browser");
+        Serial.println(String(WiFi.localIP()) + " in your browser");
     }
 }
 
@@ -571,9 +570,7 @@ bool HMSnetwork::connectToApWithFailToStation()
             break;
         }
     }
-    SERIAL_DEBUG_LN("[INFO]: ");
-    SERIAL_DEBUG_ADD("Connected! IP address: ");
-    SERIAL_DEBUG_LN(WiFi.localIP());
+    SERIAL_DEBUG_LN("[INFO]: Connected! IP address: " + String(WiFi.localIP()));
     return true;
 }
 

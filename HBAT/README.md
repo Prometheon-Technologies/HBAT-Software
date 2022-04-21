@@ -15,17 +15,17 @@
   - [MQTT Broker Configuration and Connection](#mqtt-broker-configuration-and-connection)
   - [Project Configuration](#project-configuration)
 
-Custom Software Stack files are located in `HMSmain_Back_End/lib` and `HMSmain_Back_End/HBAT_HMS_V1.0`.
+Custom Software Stack files are located in `HBAT/lib` and `HBAT/HBAT_HMS_V1.0`.
 
 main.cpp runs the control script, HMSmain library does the heavy lifting.
 
 ## Main Library
 
-[HMSmain Library](HMSmain_Back_End/lib/HMSmain)
+[HMSmain Library](HBAT/lib/HMSmain)
 
 ## Source Files
 
-[HMSmain](HMSmain_Back_End/HBAT_HMS_V1.0)
+[HMSmain](HBAT/HBAT_HMS_V1.0)
 
 <details>
 <summary></summary>

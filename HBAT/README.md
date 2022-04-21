@@ -51,25 +51,6 @@ Currently, i am not able to correctly implement this approach into the software 
 
 My current thoughts were to map the voltage readings to an array, and set that array equal to the results of a mapping function containing the formula for the curve we wish to fit our data to.
 
-## Current Project Flow-Chart
-
-```mermaid
-graph TD;
-          A[Christmas] -->|Get money| B(Go shopping);
-          B --> C{Let me think};
-          B --> G[/Another/];
-          C ==>|One| D[Laptop];
-          C -->|Two| E[iPhone];
-          C -->|Three| F[fa:fa-car Car];
-          subgraph section;
-            C;
-            D;
-            E;
-            F;
-            G;
-          end;
-```
-
 ## Current Network Flow-Chart
 
 ```mermaid

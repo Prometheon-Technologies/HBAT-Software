@@ -2,28 +2,30 @@
    <img width="250px" height="120px" title="HBAT Logo" src="img/logo.png">
 </p>
 
-
 ---
 
-# HBAT-Software Private repo
+# HBAT-Software Public repo
 
-- [HBAT-Software Private repo](#hbat-software-private-repo)
-	- [Main Library](#main-library)
-	- [Source Files](#source-files)
-	- [Note to Voxdale](#note-to-voxdale)
-	- [Mapping Bezier curve to voltage readings](#mapping-bezier-curve-to-voltage-readings)
+- [HBAT-Software Public repo](#hbat-software-public-repo)
+  - [Main Library](#main-library)
+  - [Source Files](#source-files)
+  - [Note to Voxdale](#note-to-voxdale)
+  - [Mapping Bezier curve to voltage readings](#mapping-bezier-curve-to-voltage-readings)
+  - [Current Network Flow-Chart](#current-network-flow-chart)
+  - [MQTT Broker Configuration and Connection](#mqtt-broker-configuration-and-connection)
+  - [Project Configuration](#project-configuration)
 
-Custom Software Stack files are located in `HMSmain_Back_End/lib` and `HMSmain_Back_End/HBAT_HMS_V1.0`.
+Custom Software Stack files are located in `HBAT/lib` and `HBAT/HBAT_HMS_V1.0`.
 
 main.cpp runs the control script, HMSmain library does the heavy lifting.
 
 ## Main Library
 
-[HMSmain Library](HMSmain_Back_End/lib/HMSmain)
+[HMSmain Library](HBAT/lib/HMSmain)
 
 ## Source Files
 
-[HMSmain](HMSmain_Back_End/HBAT_HMS_V1.0)
+[HMSmain](HBAT/HBAT_HMS_V1.0)
 
 <details>
 <summary></summary>
@@ -66,6 +68,74 @@ Currently, i am not able to correctly implement this approach into the software 
 
 My current thoughts were to map the voltage readings to an array, and set that array equal to the results of a mapping function containing the formula for the curve we wish to fit our data to.
 
+## Current Network Flow-Chart
+
+```mermaid
+graph TD;
+          A[Device hosts local AP] -->|Local SSID and Pass embedded into a QR Code| B(User Scans QR Code);
+          B --> C{Web interface prompts user for local SSID and Pass}-->|User enters SSID and Pass| D(User clicks connect);
+          C --> G[/User does not have a local network/];
+          G --> H[/User Connects to AP to interface/];
+          D -->|Device writes new credentials to config file| E[config.h];
+          E -->|Device Reboots from Config| F[fa:fa-power-off Reboot];
+          subgraph section;
+            C;
+            D;
+            E;
+            F;
+            G;
+            H;
+          end;
+```
+
+## MQTT Broker Configuration and Connection
+
+The MQTT Broker is a free service that allows you to publish and subscribe to MQTT messages.
+To automate the connection process, we will use Multi-Cast DNS (mDNS/Zeroconf) to find the broker.
+For this to work, you must have a broker on your local network, and you must have only **_1_** MQTT broker within the range of the client, otherwise the client will simply connect to the first broker it finds.
+
+Using a Zeroconf approach we can avoid having to hard code the broker's IP address or hostname into the client device's firmware. Instead we can use **_DNS-SD_** and Avahi/Bonjour to discover the server hosting the MQTT broker.
+
+To enable MQTT discovery on the broker, simply install avahi-daemon. For a Raspberry Pi, use the following command:
+
+```bash
+sudo apt-get install avahi-daemon
+```
+
+For this to work, the MQTT service needs to be advertised. On a Linux host system, Avahi can be configured to do this by including the following in /etc/avahi/services/mqtt.service:
+
+```xml
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<service-group>
+ <name replace-wildcards="yes">MQTT on %h</name>
+  <service>
+   <type>_mqtt._tcp</type>
+   <port>1883</port>
+  </service>
+</service-group>
+```
+
 [Top](#hbat-software-private-repo)
 
 </details>
+
+## Project Configuration
+
+- [ ] Implement a way to read the battery's discharge curve from a file.
+- [x] Implement Wifi server with fail to AP mode.
+- [x] Implement Error Correct Code for sensors.
+- [x] Implement I2C Scanner.
+- [x] Implement Humidity and Temperature sensors.
+- [ ] Implement Relay Logic. //TODO: Interface with UI
+- [x] Implement UI.
+- [ ] Implement MQTT. //TODO: Full implementation still needs to be done.
+- [x] Implement MQTT discovery.
+- [x] Implement mDNS.
+- [ ] Implement OTA. //TODO: Interface with UI and test current implementation.
+- [x] Implement file upload.
+- [x] Implement Voltage and Current Sensors.
+- [ ] Implement Battery Discharge Curve.
+- [ ] Implement Battery Charge Curve.
+- [ ] Implement Battery Capacity measurements.
+- [x] Implement config file stored in flash.
+

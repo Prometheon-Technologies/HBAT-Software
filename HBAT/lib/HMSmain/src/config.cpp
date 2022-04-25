@@ -94,7 +94,9 @@ void Config::CreateDefaultConfig()
     config.last_mqtt_connect_attempt = 0;
     config.last_mqtt_publish_attempt = 0;
     config.lastMillis = 0;
-    config.clientIP = NULL;
+    config.IP = NULL;
+    config.netmask = NULL;
+    config.gateway = NULL;
     config.MQTTSecureState = false;
     config.lastMsg = 0;
     config.msg = NULL;
@@ -242,7 +244,9 @@ bool Config::loadConfig()
     config.last_mqtt_connect_attempt = jsonBuffer["last_mqtt_connect_attempt"];
     config.last_mqtt_publish_attempt = jsonBuffer["last_mqtt_publish_attempt"];
     config.lastMillis = jsonBuffer["lastMillis"];
-    heapStr(&config.clientIP, jsonBuffer["clientIP"]);
+    heapStr(&config.IP, jsonBuffer["IP"]);
+    heapStr(&config.netmask, jsonBuffer["netmask"]);
+    heapStr(&config.gateway, jsonBuffer["gateway"]);
     config.MQTTSecureState = jsonBuffer["MQTTSecureState"];
     heapStr(&config.MQTTBroker, jsonBuffer["MQTTBroker"]);
     config.lastMsg = jsonBuffer["lastMsg"];
@@ -306,7 +310,9 @@ bool Config::saveConfig()
     json["last_mqtt_connect_attempt"] = config.last_mqtt_connect_attempt;
     json["last_mqtt_publish_attempt"] = config.last_mqtt_publish_attempt;
     json["lastMillis"] = config.lastMillis;
-    json["clientIP"] = config.clientIP;
+    json["clientIP"] = config.IP;
+    json["netmask"] = config.netmask;
+    json["gateway"] = config.gateway;
     json["MQTTSecureState"] = config.MQTTSecureState;
     json["MQTTBroker"] = config.MQTTBroker;
     json["lastMsg"] = config.lastMsg;

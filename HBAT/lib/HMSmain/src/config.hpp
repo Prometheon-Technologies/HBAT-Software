@@ -29,7 +29,9 @@ public:
         int last_mqtt_connect_attempt;
         int last_mqtt_publish_attempt;
         unsigned long lastMillis;
-        char *clientIP;
+        char *IP;
+        char *netmask;
+        char *gateway;
         bool MQTTSecureState;
         char *MQTTBroker;
         long lastMsg;

@@ -1,20 +1,10 @@
 #include "HMSnetwork.hpp"
 
 AsyncWebServer server(80);
-IPAddress localIP;
 
 WiFiClient espClient;
 
-// Set your Gateway IP address
-IPAddress gateway(192, 168, 1, 1);
-IPAddress subnet(255, 255, 0, 0);
-
 const size_t MAX_FILESIZE = 1024 * 1024 * 2; // 2MB
-
-const char *PARAM_INPUT_1 = "ssid";
-const char *PARAM_INPUT_2 = "password";
-const char *PARAM_INPUT_3 = "apName";
-const char *PARAM_INPUT_4 = "apPass";
 const char *mdnsPath = "/mdns.txt";
 const char *dhcpcheckPath = "/dhcpcheck.txt";
 const char *ssidPath = "/ssid.txt";
@@ -26,13 +16,6 @@ const char *HTTP_USERNAME = "admin";
 const char *HTTP_PASSWORD = "admin";
 
 // char* create_mDNS_hostname = StringtoChar(MQTTCreateHostName(MQTT_HOSTNAME, ".local"));
-
-String SSID;
-String PASS;
-String ntptime;
-String ntptimeoffset;
-String mdns;
-String dhcpcheck;
 
 String ledState;
 
@@ -90,8 +73,46 @@ void notFound(AsyncWebServerRequest *request)
     request->send(404, "text/plain", "Not found.");
 }
 
+std::vector<String> splitStringToVector(String msg)
+{
+    std::vector<String> subStrings;
+    int j = 0;
+    for (int i = 0; i < msg.length(); i++)
+    {
+        if (msg.charAt(i) == '.')
+        {
+            subStrings.push_back(msg.substring(j, i));
+            j = i + 1;
+        }
+    }
+    subStrings.push_back(msg.substring(j, msg.length())); // to grab the last value of the string
+    for (int x = 0; x < subStrings.size(); x++)
+    {
+        SERIAL_DEBUG_LN("[INFO]:" + String(subStrings[x]));
+    }
+    return subStrings;
+}
+
 bool HMSnetwork::SetupNetworkStack()
 {
+    String SSID;
+    String PASS;
+    String ntptime;
+    String ntptimeoffset;
+    String mdns;
+    String dhcpcheck;
+
+    String IP = cfg.config.IP;
+    String gateway = cfg.config.gateway;
+    String subnet = cfg.config.netmask;
+    std::vector<String> subStrings_ip = splitStringToVector(IP);
+    std::vector<String> subStrings_gateway = splitStringToVector(gateway);
+    std::vector<String> subStrings_subnet = splitStringToVector(subnet);
+
+    IPAddress _ip(subStrings_ip[0].toInt(), subStrings_ip[1].toInt(), subStrings_ip[2].toInt(), subStrings_ip[3].toInt());
+    IPAddress _gateway(subStrings_gateway[0].toInt(), subStrings_gateway[1].toInt(), subStrings_gateway[2].toInt(), subStrings_gateway[3].toInt());
+    IPAddress _subnet(subStrings_subnet[0].toInt(), subStrings_subnet[1].toInt(), subStrings_subnet[2].toInt(), subStrings_subnet[3].toInt());
+
     cfg.CreateDefaultConfig();
     if (!cfg.loadConfig())
     {
@@ -131,10 +152,15 @@ bool HMSnetwork::SetupNetworkStack()
         SERIAL_DEBUG_LN(SSID);
         SERIAL_DEBUG_LN("");
 
+        // Set your Gateway IP address
+        IPAddress localIP;
+        IPAddress gateway(192, 168, 1, 1);
+        IPAddress subnet(255, 255, 0, 0);
+
         WiFi.mode(WIFI_STA);
         localIP.fromString(WiFi.localIP().toString());
 
-        if (dhcpcheck == "on")
+        if (dhcpcheck == "true")
         {
             SERIAL_DEBUG_LN("[INFO]: DHCP Check is on");
             if (!WiFi.config(localIP, gateway, subnet))
@@ -146,7 +172,7 @@ bool HMSnetwork::SetupNetworkStack()
         else
         {
             SERIAL_DEBUG_LN("[INFO]: DHCP Check is off");
-            if (!WiFi.config(localIP, gateway, subnet))
+            if (!WiFi.config(_ip, _gateway, _subnet))
             {
                 SERIAL_DEBUG_LN("[INFO]: STA Failed to configure");
                 return false;
@@ -240,13 +266,13 @@ void HMSnetwork::SetupWebServer()
 
 void HMSnetwork::networkRoutes()
 {
-    static const char *MIMETYPE_HTML{MIMETYPE_HTML};
+    static const char *MIMETYPE_HTML{"text/html"};
     static const char *MIMETYPE_CSS{"text/css"};
     static const char *MIMETYPE_JS{"application/javascript"};
     static const char *MIMETYPE_PNG{"image/png"};
     static const char *MIMETYPE_JPG{"image/jpeg"};
     static const char *MIMETYPE_ICO{"image/x-icon"};
-    static const char *MIMETYPE_JSON{MIMETYPE_JS};
+    static const char *MIMETYPE_JSON{"application/json"};
 
     // Web Server Root URL
     server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request)
@@ -331,60 +357,81 @@ void HMSnetwork::networkRoutes()
     server.on("/wifimanager", HTTP_POST, [&](AsyncWebServerRequest *request)
               {
                 int params = request->params();
-                for(int i=0;i<params;i++){
-                    AsyncWebParameter* p = request->getParam(i);
-                    if(p->isPost()){
+                for (int i = 0; i < params; i++)
+                {
+                    AsyncWebParameter *p = request->getParam(i);
+                    if (p->isPost())
+                    {
                         // HTTP POST ssid value
-                        if (p->name() == PARAM_INPUT_1) {
-                            String ssID; 
-                            ssID = p->value().c_str();
+                        if (p->name() == "ssid" && !p->value().isEmpty())
+                        {
+                            String _ssid;
+                            _ssid = p->value().c_str();
                             SERIAL_DEBUG_ADD("SSID set to: ");
-                            SERIAL_DEBUG_LN(ssID);
+                            SERIAL_DEBUG_LN(_ssid);
 
-                            heapStr(&cfg.config.WIFISSID, ssID.c_str());
+                            heapStr(&cfg.config.WIFISSID, _ssid.c_str());
                             my_delay(100000L);
                         }
-                        // HTTP POST pass value
-                        if (p->name() == PARAM_INPUT_2) {
-                            String passWord; 
-                            passWord = p->value().c_str();
 
-                            heapStr(&cfg.config.WIFIPASS, passWord.c_str());
+                        // HTTP POST pass value
+                        if (p->name() == "password" && !p->value().isEmpty())
+                        {
+                            String _password;
+                            _password = p->value().c_str();
+
+                            heapStr(&cfg.config.WIFIPASS, _password.c_str());
+                            my_delay(100000L);
+                        }
+
+                        // HTTP DHCP VALUES
+                        if (p->name() == "dhcp" && !p->value().isEmpty())
+                        {
+                            String _dhcp;
+                            _dhcp = p->value().c_str();
+
+                            heapStr(&cfg.config.DHCPCHECK, _dhcp.c_str());
+                            my_delay(100000L);
+                        }
+                        if (cfg.config.DHCPCHECK == "true")
+                        {
+                            if (p->name() == "ip" && !p->value().isEmpty())
+                            {
+                                String _ip;
+                                _ip = p->value().c_str();
+
+                                heapStr(&cfg.config.IP, _ip.c_str());
+                                my_delay(100000L);
+                            }
+                            if (p->name() == "subnet" && !p->value().isEmpty())
+                            {
+                                String _netmask;
+                                _netmask = p->value().c_str();
+
+                                heapStr(&cfg.config.netmask, _netmask.c_str());
+                                my_delay(100000L);
+                            }
+                            if (p->name() == "gateway" && !p->value().isEmpty())
+                            {
+                                String _gateway;
+                                _gateway = p->value().c_str();
+
+                                heapStr(&cfg.config.gateway, _gateway.c_str());
+                                my_delay(100000L);
+                            }
+                        }
+
+                        // MDNS VALUES
+                        if (p->name() == "mdns" && !p->value().isEmpty())
+                        {
+                            String _mdns;
+                            _mdns = p->value().c_str();
+                            heapStr(&cfg.config.MDNS, _mdns.c_str());
                             my_delay(100000L);
                         }
                         cfg.setConfigChanged();
                         SERIAL_DEBUG_ADDF("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
                     }
-                }
-                request->send(200, MIMETYPE_JS, "Done. ESP will restart, connect to your router and go to IP address");
-                my_delay(30000L);
-                ESP.restart(); });
-
-    server.on("/wifiUpdate", HTTP_GET, [&](AsyncWebServerRequest *request)
-              {
-                int params = request->params();
-                for(int i=0;i<params;i++){
-                    AsyncWebParameter* p = request->getParam(i);
-                    // HTTP POST ssid value
-                    if (p->name() == PARAM_INPUT_1) {
-                        String ssID; 
-                        ssID = p->value().c_str();
-                        SERIAL_DEBUG_ADD("SSID set to: ");
-                        SERIAL_DEBUG_LN(ssID);
-
-                        heapStr(&cfg.config.WIFISSID, ssID.c_str());
-                        my_delay(100000L);
-                    }
-                    // HTTP POST pass value
-                    if (p->name() == PARAM_INPUT_2) {
-                        String passWord; 
-                        passWord = p->value().c_str();
-
-                        heapStr(&cfg.config.WIFIPASS, passWord.c_str());
-                        my_delay(100000L);
-                    }
-                    cfg.setConfigChanged();
-                    SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
                 }
                 request->send(200, MIMETYPE_JS, "Done. ESP will restart and connect to your router");
                 my_delay(30000L);
@@ -452,9 +499,7 @@ void HMSnetwork::networkRoutes()
                         Serial.print("switching state of pin:");
                         //split variable on "?" keeping the first part
                         String split = state.substring(0, state.indexOf("?"));
-                        Serial.println(split);
                         bool mqttState = (split == "true") ? true : false;
-                        Serial.println(mqttState);
                         cfg.config.MQTTEnabled = mqttState ? true : false;
                     }
                     SERIAL_DEBUG_ADDF("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
@@ -468,6 +513,17 @@ void HMSnetwork::networkRoutes()
                   String temp = cfg.config.data_json_string;
                   request->send(200, MIMETYPE_JS, temp);
                   temp = ""; });
+
+    server.on("/api/reset/config", HTTP_GET, [&](AsyncWebServerRequest *request)
+              {
+                  cfg.resetConfig();
+                  request->send(200, MIMETYPE_JS, "Config has been Reset"); });
+
+    server.on("/api/reset/device", HTTP_GET, [&](AsyncWebServerRequest *request)
+              {
+                  request->send(200, MIMETYPE_JS, "Resetting Device");
+                  my_delay(10000L);
+                  ESP.restart(); });
 
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
 
@@ -518,12 +574,12 @@ bool HMSnetwork::connectToApWithFailToStation()
     {
         SERIAL_DEBUG_LN("[INFO]: Loaded config");
         // Load values saved in SPIFFS
-        SSID = cfg.config.WIFISSID;
-        PASS = cfg.config.WIFIPASS;
-        ntptime = cfg.config.NTPTIME;
-        ntptimeoffset = cfg.config.NTPTIMEOFFSET;
-        mdns = cfg.config.MDNS;
-        dhcpcheck = cfg.config.DHCPCHECK;
+        String SSID = cfg.config.WIFISSID;
+        String PASS = cfg.config.WIFIPASS;
+        String ntptime = cfg.config.NTPTIME;
+        String ntptimeoffset = cfg.config.NTPTIMEOFFSET;
+        String mdns = cfg.config.MDNS;
+        String dhcpcheck = cfg.config.DHCPCHECK;
 
         if (!PRODUCTION)
         {

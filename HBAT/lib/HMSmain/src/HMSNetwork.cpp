@@ -109,9 +109,9 @@ bool HMSnetwork::SetupNetworkStack()
     std::vector<String> subStrings_gateway = splitStringToVector(gateway);
     std::vector<String> subStrings_subnet = splitStringToVector(subnet);
 
-    IPAddress _ip(subStrings_ip[0].toInt(), subStrings_ip[1].toInt(), subStrings_ip[2].toInt(), subStrings_ip[3].toInt());
-    IPAddress _gateway(subStrings_gateway[0].toInt(), subStrings_gateway[1].toInt(), subStrings_gateway[2].toInt(), subStrings_gateway[3].toInt());
-    IPAddress _subnet(subStrings_subnet[0].toInt(), subStrings_subnet[1].toInt(), subStrings_subnet[2].toInt(), subStrings_subnet[3].toInt());
+    IPAddress _ip(subStrings_ip.at(0).toInt(), subStrings_ip.at(1).toInt(), subStrings_ip.at(2).toInt(), subStrings_ip.at(3).toInt());
+    IPAddress _gateway(subStrings_gateway.at(0).toInt(), subStrings_gateway.at(1).toInt(), subStrings_gateway.at(2).toInt(), subStrings_gateway.at(3).toInt());
+    IPAddress _subnet(subStrings_subnet.at(0).toInt(), subStrings_subnet.at(1).toInt(), subStrings_subnet.at(2).toInt(), subStrings_subnet.at(3).toInt());
 
     cfg.CreateDefaultConfig();
     if (!cfg.loadConfig())
@@ -137,68 +137,66 @@ bool HMSnetwork::SetupNetworkStack()
 
         SERIAL_DEBUG_LN(mdns);
         SERIAL_DEBUG_LN(dhcpcheck);
-    }
 
-    if (SSID[0] == '\0' || PASS[0] == '\0')
-    {
-        SERIAL_DEBUG_LN("[INFO]: No SSID or password has been set.");
-        SERIAL_DEBUG_LN("[INFO]: Please configure the Wifi Manager by scanning the QR code on your device.");
-        SERIAL_DEBUG_LN("");
-        return false;
-    }
-    else
-    {
-        SERIAL_DEBUG_ADD("[INFO]: Configured SSID: ");
-        SERIAL_DEBUG_LN(SSID);
-        SERIAL_DEBUG_LN("");
-
-        // Set your Gateway IP address
-        IPAddress localIP;
-        IPAddress gateway(192, 168, 1, 1);
-        IPAddress subnet(255, 255, 0, 0);
-
-        WiFi.mode(WIFI_STA);
-        localIP.fromString(WiFi.localIP().toString());
-
-        if (dhcpcheck == "true")
+        if (SSID[0] == '\0' || PASS[0] == '\0')
         {
-            SERIAL_DEBUG_LN("[INFO]: DHCP Check is on");
-            if (!WiFi.config(localIP, gateway, subnet))
-            {
-                SERIAL_DEBUG_LN("[INFO]: STA Failed to configure");
-                return false;
-            }
+            SERIAL_DEBUG_LN("[INFO]: No SSID or password has been set.");
+            SERIAL_DEBUG_LN("[INFO]: Please configure the Wifi Manager by scanning the QR code on your device.\r\n");
+            return false;
         }
         else
         {
-            SERIAL_DEBUG_LN("[INFO]: DHCP Check is off");
-            if (!WiFi.config(_ip, _gateway, _subnet))
+            SERIAL_DEBUG_ADD("[INFO]: Configured SSID: " + SSID + "\r\n");
+
+            // Set your Gateway IP address
+            IPAddress localIP;
+            IPAddress gateway;
+            IPAddress subnet;
+
+            WiFi.mode(WIFI_STA);
+            localIP.fromString(WiFi.localIP().toString());
+            gateway.fromString(WiFi.gatewayIP().toString());
+            subnet.fromString(WiFi.subnetMask().toString());
+
+            if (dhcpcheck == "true")
             {
-                SERIAL_DEBUG_LN("[INFO]: STA Failed to configure");
-                return false;
+                SERIAL_DEBUG_LN("[INFO]: DHCP is on");
+                if (!WiFi.config(localIP, gateway, subnet))
+                {
+                    SERIAL_DEBUG_LN("[INFO]: STA Failed to configure");
+                    return false;
+                }
             }
-        }
-        WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
-
-        unsigned long currentMillis = millis();
-        previousMillis = currentMillis;
-
-        while (WiFi.status() != WL_CONNECTED)
-        {
-            currentMillis = millis();
-            if (currentMillis - previousMillis >= interval)
+            else
             {
-                SERIAL_DEBUG_LN("[INFO]: WiFi connection timed out.");
-                return false;
+                SERIAL_DEBUG_LN("[INFO]: DHCP Check is off");
+                if (!WiFi.config(_ip, _gateway, _subnet))
+                {
+                    SERIAL_DEBUG_LN("[INFO]: STA Failed to configure");
+                    return false;
+                }
             }
-        }
+            WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
 
-        SERIAL_DEBUG_LN("[INFO]: Connected to WiFi.");
-        SERIAL_DEBUG_ADD("IP address: ");
-        SERIAL_DEBUG_LN(WiFi.localIP());
-        return true;
+            unsigned long currentMillis = millis();
+            previousMillis = currentMillis;
+
+            while (WiFi.status() != WL_CONNECTED)
+            {
+                currentMillis = millis();
+                if (currentMillis - previousMillis >= interval)
+                {
+                    SERIAL_DEBUG_LN("[INFO]: WiFi connection timed out.");
+                    return false;
+                }
+            }
+
+            SERIAL_DEBUG_LN("[INFO]: Connected to WiFi.");
+            SERIAL_DEBUG_ADD("IP address: " + WiFi.localIP().toString());
+            return true;
+        }
     }
-    return 0;
+    return false;
 }
 
 void HMSnetwork::SetupWebServer()
@@ -235,32 +233,28 @@ void HMSnetwork::SetupWebServer()
         SERIAL_DEBUG_LN("[INFO]: Configuring access point...");
         WiFi.mode(WIFI_AP);
         WiFi.setTxPower(WIFI_POWER_11dBm);
+
         // You can remove the password parameter if you want the AP to be open.
+        SERIAL_DEBUG_ADD("Wifi Connection Failed. \r\nStarting AP. \r\nAP IP address: ");
+        IPAddress IP = WiFi.softAPIP();
+        SERIAL_DEBUG_ADD("[INFO]: AP IP address: " + IP.toString() + ".\r\n");
+
         if (!PRODUCTION)
         {
-            SERIAL_DEBUG_ADD("Wifi Connection Failed. \r\nStarting AP. \r\nAP IP address: ");
-            IPAddress IP = WiFi.softAPIP();
-            SERIAL_DEBUG_ADD("[INFO]: AP IP address: ");
-            Serial.println(IP);
-            SERIAL_DEBUG_LN("");
-            WiFi.softAP(WIFI_SSID, WIFI_PASS, 10, 0, 3); // MAC address is used as password for the AP - Unique to each device - MD5 hash of MAC address
+            WiFi.softAP(WIFI_SSID, WIFI_PASS, 10, 0, 3); // AP mode with password
         }
         else
         {
-            SERIAL_DEBUG_ADD("Wifi Connection Failed. \r\nStarting AP. \r\nAP IP address: ");
-            IPAddress IP = WiFi.softAPIP();
-            SERIAL_DEBUG_ADD("[INFO]: AP IP address: ");
-            Serial.println(IP);
             WiFi.softAP("HMS-WIFI", md5str, 10, 1, 2); // MAC address is used as password for the AP - Unique to each device - MD5 hash of MAC address
         }
 
-        // Give the Memory back to the System if you run the md5 Hash generation in a loop
+        // Give the Memory back to the System
         free(md5str);
 
         // free dynamically allocated 16 byte hash from make_hash()
         free(hash);
 
-        networkRoutes();
+        networkRoutes(); // call the network routes function to setup the routes
     }
 }
 

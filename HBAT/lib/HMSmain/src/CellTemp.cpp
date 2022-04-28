@@ -38,16 +38,14 @@ void CellTemp::SetupSensors()
     setSensorCount();
 
     // handle the case where no sensors are connected
+    log_i("Locating devices...");
     if (sensors_count == 0)
     {
-        Serial.println("No temperature sensors found - please connect them and restart the device");
+        log_e("No temperature sensors found - please connect them and restart the device");
         return;
     }
     // locate devices on the bus
-    SERIAL_DEBUG_LN("Locating devices...");
-    SERIAL_DEBUG_LN("Found ");
-    Serial.print(sensors_count, DEC);
-    SERIAL_DEBUG_LN(" devices.");
+    log_i("Found %d devices", sensors_count, DEC);
 
     // Loop through each device, print out address
     for (int i = 0; i < sensors_count; i++)
@@ -55,17 +53,13 @@ void CellTemp::SetupSensors()
         // Search the wire for address
         if (sensors.getAddress(temp_sensor_addresses, i))
         {
-            SERIAL_DEBUG_LN("Found device ");
-            Serial.print(i, DEC);
-            SERIAL_DEBUG_LN(" with address: ");
+            log_i("Found device %d with address:", i, DEC);
             printAddress(temp_sensor_addresses);
-            SERIAL_DEBUG_BOL;
+            log_i("\n");
         }
         else
         {
-            SERIAL_DEBUG_LN("Found ghost device at ");
-            Serial.print(i, DEC);
-            SERIAL_DEBUG_LN(" but could not detect address. Check power and cabling");
+            log_w("Found ghost device at %d but could not detect address. Check power and cabling", i, DEC);
         }
     }
 }
@@ -82,8 +76,8 @@ void CellTemp::printAddress(DeviceAddress deviceAddress)
     for (uint8_t i = 0; i < sensors_count; i++)
     {
         if (deviceAddress[i] < 16)
-            SERIAL_DEBUG_LN("0");
-        Serial.print(deviceAddress[i], HEX);
+            Serial.println("0");
+        Serial.println(deviceAddress[i], HEX);
     }
 }
 
@@ -103,25 +97,22 @@ Temp CellTemp::ReadTempSensorData()
         {
             cell_temp_sensor_results.temp[i] = no_sensors[i];
         }
-        Serial.println("No temperature sensors found - please connect them and restart the device");
+        log_i("No temperature sensors found - please connect them and restart the device");
         return cell_temp_sensor_results;
     }
-    // Allocate memory for the temperatures
+
     for (int i = 0; i < sensors_count; i++)
     {
         // Search the wire for address
         if (sensors.getAddress(temp_sensor_addresses, i))
         {
             cell_temp_sensor_results.temp[i] = sensors.getTempC(temp_sensor_addresses);
-
             printAddress(temp_sensor_addresses);
-            SERIAL_DEBUG_BOL;
+            log_i("\n");
         }
         else
         {
-            SERIAL_DEBUG_LN("Found ghost device at ");
-            Serial.print(i, DEC);
-            SERIAL_DEBUG_LN(" but could not detect address. Check power and cabling");
+            log_w("Found ghost device at %d but could not detect address. Check power and cabling", i, DEC);
         }
     }
     return cell_temp_sensor_results;

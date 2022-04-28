@@ -19,41 +19,38 @@ int HMSmdns::DiscovermDNSBroker()
     // check if there is a WiFi connection
     if (WiFi.status() == WL_CONNECTED)
     {
-        SERIAL_DEBUG_LN("[mDNS Broker Discovery]: \nconnected!");
+        log_i("[mDNS Broker Discovery]: connected!\n");
 
-        SERIAL_DEBUG_ADD("[mDNS Broker Discovery]: Setting up mDNS: ");
+        log_i("[mDNS Broker Discovery]: Setting up mDNS: ");
         if (!MDNS.begin(mqtt_mDNS_clientId))
         {
-            SERIAL_DEBUG_LN("[mDNS Broker Discovery]: [Fail]");
+            log_i("[Fail]\n");
         }
         else
         {
-            SERIAL_DEBUG_LN("[mDNS Broker Discovery]: [OK]");
-            SERIAL_DEBUG_ADD("Querying MQTT broker: ");
+            log_i("[OK]\n");
+            log_i("[mDNS Broker Discovery]: Querying MQTT broker: ");
 
             int n = MDNS.queryService("mqtt", "tcp");
 
             if (n == 0)
             {
                 // No service found
-                SERIAL_DEBUG_LN("[mDNS Broker Discovery]: [Fail]");
+                log_i("[Fail]\n");
                 return 0;
             }
             else
             {
                 int mqttPort;
                 // Found one or more MQTT service - use the first one.
-                SERIAL_DEBUG_LN("[mDNS Broker Discovery]: [OK]");
+                log_i("[OK]\n");
                 mqttServer = MDNS.IP(0);
                 mqttPort = MDNS.port(0);
                 heapStr(&(cfg.config.MQTTBroker), mqttServer.toString().c_str());
-                SERIAL_DEBUG_ADDF("[mDNS Broker Discovery]: The port is:%d", mqttPort);
+                log_i("[mDNS Broker Discovery]: The port is:%d\n", mqttPort);
                 cfg.config.MQTTPort = mqttPort;
-                SERIAL_DEBUG_ADD("[mDNS Broker Discovery]: MQTT broker found at: ");
-                SERIAL_DEBUG_ADD(mqttServer);
-                SERIAL_DEBUG_ADD(cfg.config.MQTTBroker);
-                SERIAL_DEBUG_ADD(":");
-                SERIAL_DEBUG_LN(mqttPort);
+                log_i("[mDNS Broker Discovery]: MQTT broker found at: %s\n", mqttServer.toString().c_str());
+                log_i("%s", cfg.config.MQTTBroker);
                 return 1;
             }
         }
@@ -66,7 +63,7 @@ int HMSmdns::DiscovermDNSBroker()
 void HMSmdns::SetupmDNSServer()
 {
     // ######################## Multicast DNS #########################
-    SERIAL_DEBUG_ADD("Setting up mDNS: ");
+    log_i("Setting up mDNS: \n");
     // Set up mDNS responder:
     // - first argument is the domain name, in this example
     //   the fully-qualified domain name is "esp32.local"
@@ -74,17 +71,17 @@ void HMSmdns::SetupmDNSServer()
     //   we send our IP address on the WiFi HMSmdns
     if (!MDNS.begin(mdnsdotlocalurl.c_str()))
     {
-        SERIAL_DEBUG_LN("[INFO]: Error setting up MDNS responder!");
+        log_i("[INFO]: Error setting up MDNS responder!\n");
         while (1)
         {
             delay(1000);
         }
     }
-    SERIAL_DEBUG_LN("[INFO]: mDNS responder started");
+    log_i("[INFO]: mDNS responder started\n");
 
     // Start TCP (HTTP) server
     network.SetupWebServer();
-    SERIAL_DEBUG_LN("[INFO]: TCP server started");
+    log_i("[INFO]: TCP server started\n");
 
     // Add service to MDNS-SD
     MDNS.addService("http", "tcp", 80);
@@ -115,13 +112,11 @@ bool HMSmdns::mDNSLoop()
         int addr_end = req.indexOf(' ', addr_start + 1);
         if (addr_start == -1 || addr_end == -1)
         {
-            SERIAL_DEBUG_ADD("Invalid request: ");
-            SERIAL_DEBUG_LN(req);
+            log_i("Invalid request: %s\n", req.c_str());
             return false;
         }
         req = req.substring(addr_start + 1, addr_end);
-        SERIAL_DEBUG_ADD("Request: ");
-        SERIAL_DEBUG_LN(req);
+        log_i("Request: %s\n", req.c_str());
 
         String s;
         if (req == "/")
@@ -131,17 +126,17 @@ bool HMSmdns::mDNSLoop()
             s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>Hello from ESP32 at ";
             s += ipStr;
             s += "</html>\r\n\r\n";
-            SERIAL_DEBUG_LN("[INFO]: Sending 200");
+            log_i("[INFO]: Sending 200\n");
         }
         else
         {
             s = "HTTP/1.1 404 Not Found\r\n\r\n";
-            SERIAL_DEBUG_LN("[INFO]: Sending 404");
+            log_i("[INFO]: Sending 404\n");
         }
         espClient.print(s);
 
         espClient.stop();
-        SERIAL_DEBUG_LN("[INFO]: Done with espClient");
+        log_i("[INFO]: Done with espClient\n");
     }
     return false;
 }

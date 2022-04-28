@@ -22,7 +22,6 @@
 #include <SPIFFS.h>
 
 // data Struct
-#include "globaldebug.hpp"
 #include "config.hpp"
 
 // IO

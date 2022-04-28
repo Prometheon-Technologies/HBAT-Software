@@ -96,33 +96,33 @@ int AccumulateData::ChargeStatus()
     if (cfg.config.stack_voltage < 8.00 && cfg.config.stack_voltage >= 0.00)
     {
         return 1;
-        printf("Stack is fully discharged");
+        log_i("Stack is fully discharged");
     }
     else if (cfg.config.stack_voltage < 10.00 && cfg.config.stack_voltage >= 8.00)
     {
         return 2;
-        printf("Stack needs to be charged");
+        log_i("Stack needs to be charged");
     }
     else if (cfg.config.stack_voltage < 13.00 && cfg.config.stack_voltage >= 11.0)
     {
         return 3;
-        printf("Stack has a full charge");
+        log_i("Stack has a full charge");
     }
     else if (cfg.config.stack_voltage < 14.0 && cfg.config.stack_voltage >= 12.0)
     {
         return 4;
-        printf("Stack is charging");
+        log_i("Stack is charging");
     }
     else if (cfg.config.stack_voltage < 16.0 && cfg.config.stack_voltage >= 14.0)
     {
         return 5;
-        printf("[DANGER]: Stack has encountered an overcharge condition");
+        log_w("[DANGER]: Stack has encountered an overcharge condition");
     }
 
     else
     {
         return 0;
-        printf("[DANGER]: Stack is in an unknown state!!");
+        log_w("[DANGER]: Stack is in an unknown state!!");
     }
     return 0;
 }
@@ -182,64 +182,6 @@ bool AccumulateData::SendData()
     {
         return false;
     }
-
-    /* // Send the data to the server
-    String temp;
-    StaticJsonDocument<1024> jsonConfig;
-    JsonObject json = jsonConfig.to<JsonObject>();
-    json["stack_humidity"] = cfg.config.stack_humidity;
-    json["stack_temp"] = cfg.config.stack_temp;
-
-    // Relays
-    JsonArray Relays = json.createNestedArray("relays");
-    for (int i = 0; i < sizeof(cfg.config.relays) / sizeof(cfg.config.relays[0]); i++)
-    {
-        Relays.add(cfg.config.relays[i]);
-    }
-
-    json["stack_voltage"] = String(cfg.config.stack_voltage);
-    // Stack Voltage
-
-    JsonArray graphdata = json.createNestedArray("GraphData");
-
-    for (int i = 0; i < 10; ++i)
-    {
-        delay(0);
-        JsonObject graph = graphdata.createNestedObject();
-        graph["label"] = "🌡" + String(i);
-        graph["type"] = "temp";
-        graph["value"] = String(cfg.config.cell_temp[i]);
-        graph["maxValue"] = String(maxTemp);
-
-        JsonObject graph2 = graphdata.createNestedObject();
-        graph2["label"] = "⚡" + String(i);
-        graph2["type"] = "volt";
-        graph2["value"] = String(cfg.config.cell_voltage[i]);
-        graph2["maxValue"] = String(maxVoltage);
-    }
-
-    for (int i = 0; i < 10; ++i)
-    {
-        delay(0);
-        JsonObject graph = graphdata.createNestedObject();
-        graph["label"] = "⚡" + String(i);
-        graph["type"] = "volt";
-        graph["value"] = String(cfg.config.cell_voltage[i]);
-        graph["maxValue"] = String(maxVoltage);
-    }
-
-    if (serializeJson(json, temp) == 0)
-    {
-        SERIAL_DEBUG_LN(F("[Upload JSON data to Webserver]: Failed to serialize document"));
-        return false;
-    }
-    else
-    {
-        SERIAL_DEBUG_LN(F("[Upload JSON data to Webserver]: Successfully serialized document"));
-        SERIAL_DEBUG_LN(temp);
-        cfg.config.data_json_string = temp;
-        return true;
-    } */
 }
 
 AccumulateData accumulatedata;

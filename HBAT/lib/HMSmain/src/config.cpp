@@ -133,22 +133,22 @@ bool Config::initSPIFFS()
 {
     if (!SPIFFS.begin(false))
     {
-        SERIAL_DEBUG_LN("An error has occurred while mounting SPIFFS");
+        log_e("An error has occurred while mounting SPIFFS");
         return false;
     }
-    SERIAL_DEBUG_LN("SPIFFS mounted successfully");
+    log_i("SPIFFS mounted successfully");
     return true;
 }
 
 // Read File from SPIFFS
 String Config::readFile(fs::FS &fs, const char *path)
 {
-    SERIAL_DEBUG_ADDF("Reading file: %s\r\n", path);
+    log_i("Reading file: %s\r\n", path);
 
     File file = fs.open(path);
     if (!file || file.isDirectory())
     {
-        SERIAL_DEBUG_LN("[INFO]: Failed to open file for reading");
+        log_e("[INFO]: Failed to open file for reading");
         return String();
     }
 
@@ -164,46 +164,45 @@ String Config::readFile(fs::FS &fs, const char *path)
 // Write file to SPIFFS
 void Config::writeFile(fs::FS &fs, const char *path, const char *message)
 {
-    SERIAL_DEBUG_ADDF("[Writing File]: Writing file: %s\r\n", path);
+    log_i("[Writing File]: Writing file: %s\r\n", path);
     my_delay(100L);
 
     File file = fs.open(path, FILE_WRITE);
     if (!file)
     {
-        SERIAL_DEBUG_LN("[Writing File]: failed to open file for writing");
+        log_i("[Writing File]: failed to open file for writing");
         return;
     }
     if (file.print(message))
     {
-        SERIAL_DEBUG_LN("[Writing File]: file written");
+        log_i("[Writing File]: file written");
     }
     else
     {
-        SERIAL_DEBUG_LN("[Writing File]: file write failed");
+        log_i("[Writing File]: file write failed");
     }
 }
 
 bool Config::loadConfig()
 {
-    SERIAL_DEBUG_LN("[Load config]: Loading Config File");
+    log_i("[Load config]: Loading Config File");
 
     // load the config file
     initSPIFFS();
     File configFile = SPIFFS.open("/config.json", "r");
     if (!configFile)
     {
-        SERIAL_DEBUG_LN("[Load config]: Failed to open config file");
+        log_e("[Load config]: Failed to open config file");
         CreateDefaultConfig();
         return false;
     }
 
     size_t size = configFile.size();
-    Serial.print("[Load config]: Config file size: ");
-    SERIAL_DEBUG_LN(size);
+    log_i("[Load config]: Config file size: %s", String(size).c_str());
 
     if (size > 1024)
     {
-        SERIAL_DEBUG_LN("[Load config]: Config file size is too large");
+        log_e("[Load config]: Config file size is too large");
         CreateDefaultConfig();
         return false;
     }
@@ -214,19 +213,16 @@ bool Config::loadConfig()
     // to be mutable. If you don't use ArduinoJson, you may as well
     // use configFile.readString instead.
     configFile.readBytes(buf.get(), size);
-    SERIAL_DEBUG_LN(F("[Load config]: Config file content:"));
-    SERIAL_DEBUG_LN(buf.get());
+    log_i("[Load config]: Config file content: %s", buf.get());
 
     // Parse the buffer into an object
-
     StaticJsonDocument<1024> jsonBuffer;
     // Deserialize the JSON document
     auto error = deserializeJson(jsonBuffer, buf.get());
     if (error)
     {
-        SERIAL_DEBUG_LN(F("[Load config]: Failed to parse config file"));
-        Serial.print(F("[Load config]: deserializeJson() failed with code "));
-        SERIAL_DEBUG_LN(error.c_str());
+        log_e("[Load config]: Failed to parse config file");
+        log_e("[Load config]: deserializeJson() failed with code %s", error.c_str());
         CreateDefaultConfig();
         return false;
     }
@@ -275,7 +271,7 @@ bool Config::setConfigChanged()
 {
     last_config_change = true;
     saveConfig();
-    SERIAL_DEBUG_LN(F("[Set Config Changed]: Config save set to true"));
+    log_i("[Set Config Changed]: Config save set to true");
     return true;
 }
 
@@ -284,14 +280,14 @@ bool Config::saveConfig()
     // check if the data in config is different from the data in the file
     if (!last_config_change)
     {
-        SERIAL_DEBUG_LN(F("[Save Config Changes]: Config has not changed because it is the same as the file"));
+        log_i("[Save Config Changes]: Config has not changed because it is the same as the file");
         return false;
     }
 
-    SERIAL_DEBUG_LN(F("[Save Config Changes]: Saving Config"));
+    log_i("[Save Config Changes]: Saving Config");
 
     // create a json file from the config struct and save it using SPIFFs
-    SERIAL_DEBUG_LN(F("[Save Config Changes]: Writing config"));
+    log_i("[Save Config Changes]: Writing config");
     // create a json file from the config struct
     StaticJsonDocument<1024> jsonConfig;
     JsonObject json = jsonConfig.to<JsonObject>();
@@ -339,19 +335,19 @@ bool Config::saveConfig()
     File configFile = SPIFFS.open("/config.json", "w");
     if (!configFile)
     {
-        SERIAL_DEBUG_LN(F("[Save Config Changes]: Failed to open config file for writing"));
+        log_e("[Save Config Changes]: Failed to open config file for writing");
         return false;
     }
     if (serializeJson(json, configFile) == 0)
     {
-        SERIAL_DEBUG_LN(F("[Save Config Changes]: Failed to write to file"));
+        log_e("[Save Config Changes]: Failed to write to file");
         return false;
     }
 
     configFile.print("\r\n");
     configFile.close();
     // end save
-    SERIAL_DEBUG_LN(F("[Save Config Changes]: Config written"));
+    log_i("[Save Config Changes]: Config written");
     last_config_change = false;
 
     return true;
@@ -362,13 +358,13 @@ bool Config::updateCurrentData()
     // check if the data in config is different from the data in the file
     if (!last_config_change)
     {
-        SERIAL_DEBUG_LN(F("[Update Current Data]: Config has not changed because it is the same as the file"));
+        log_i("[Update Current Data]: Config has not changed because it is the same as the file");
         return false;
     }
-    SERIAL_DEBUG_LN(F("[Update Current Data]: Updating Config"));
+    log_i("[Update Current Data]: Updating Config");
     // call to save config if config has changed
     saveConfig();
-    SERIAL_DEBUG_LNF("[INFO - FREE HEAP SIZE]: Heap: %d", ESP.getFreeHeap());
+    log_i("[INFO - FREE HEAP SIZE]: Heap: %d", ESP.getFreeHeap());
     return true;
 }
 

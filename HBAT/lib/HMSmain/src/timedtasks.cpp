@@ -60,7 +60,7 @@ void TimedTasks::updateCurrentData() // check to see if the data has changed
   if (Timer_10s_2.ding())
   {
     cfg.updateCurrentData();
-    SERIAL_DEBUG_LNF("Heap: %d", ESP.getFreeHeap());
+    log_i("Heap: %d", ESP.getFreeHeap());
     Timer_10s_2.start();
   }
 }

@@ -88,7 +88,7 @@ std::vector<String> splitStringToVector(String msg)
     subStrings.push_back(msg.substring(j, msg.length())); // to grab the last value of the string
     for (int x = 0; x < subStrings.size(); x++)
     {
-        log_i("[INFO]: %s\n", String(subStrings[x]));
+        log_i("[INFO]: %s\n", subStrings[x].c_str());
     }
     return subStrings;
 }
@@ -101,17 +101,9 @@ bool HMSnetwork::SetupNetworkStack()
     String ntptimeoffset;
     String mdns;
     String dhcpcheck;
-
-    String IP = cfg.config.IP;
-    String gateway = cfg.config.gateway;
-    String subnet = cfg.config.netmask;
-    std::vector<String> subStrings_ip = splitStringToVector(IP);
-    std::vector<String> subStrings_gateway = splitStringToVector(gateway);
-    std::vector<String> subStrings_subnet = splitStringToVector(subnet);
-
-    IPAddress _ip(subStrings_ip.at(0).toInt(), subStrings_ip.at(1).toInt(), subStrings_ip.at(2).toInt(), subStrings_ip.at(3).toInt());
-    IPAddress _gateway(subStrings_gateway.at(0).toInt(), subStrings_gateway.at(1).toInt(), subStrings_gateway.at(2).toInt(), subStrings_gateway.at(3).toInt());
-    IPAddress _subnet(subStrings_subnet.at(0).toInt(), subStrings_subnet.at(1).toInt(), subStrings_subnet.at(2).toInt(), subStrings_subnet.at(3).toInt());
+    String IP;
+    String _gateway_;
+    String _subnet_;
 
     cfg.CreateDefaultConfig();
     if (!cfg.loadConfig())
@@ -128,6 +120,9 @@ bool HMSnetwork::SetupNetworkStack()
         ntptimeoffset = cfg.config.NTPTIMEOFFSET;
         mdns = cfg.config.MDNS;
         dhcpcheck = cfg.config.DHCPCHECK;
+        IP = cfg.config.IP;
+        _gateway_ = cfg.config.gateway;
+        _subnet_ = cfg.config.netmask;
 
         if (!PRODUCTION)
         {
@@ -153,12 +148,16 @@ bool HMSnetwork::SetupNetworkStack()
             IPAddress gateway;
             IPAddress subnet;
 
+            IPAddress _ip;
+            IPAddress _gateway;
+            IPAddress _subnet;
+
             WiFi.mode(WIFI_STA);
             localIP.fromString(WiFi.localIP().toString());
             gateway.fromString(WiFi.gatewayIP().toString());
             subnet.fromString(WiFi.subnetMask().toString());
 
-            if (dhcpcheck == "true")
+            if (dhcpcheck == "on")
             {
                 log_i("[INFO]: DHCP is on\n");
                 if (!WiFi.config(localIP, gateway, subnet))
@@ -169,7 +168,11 @@ bool HMSnetwork::SetupNetworkStack()
             }
             else
             {
+                _ip.fromString(IP);
+                _gateway.fromString(_gateway_);
+                _subnet.fromString(_subnet_);
                 log_i("[INFO]: DHCP Check is off\n");
+                log_i("[INFO]: Using custom configuration\n");
                 if (!WiFi.config(_ip, _gateway, _subnet))
                 {
                     log_e("[INFO]: STA Failed to configure.\n");
@@ -243,7 +246,7 @@ void HMSnetwork::SetupWebServer()
         }
         else
         {
-            WiFi.softAP("HMS-WIFI", md5str, 10, 1, 2); // MAC address is used as password for the AP - Unique to each device - MD5 hash of MAC address
+            WiFi.softAP("HBAT_HMS", md5str, 10, 1, 2); // MAC address is used as password for the AP - Unique to each device - MD5 hash of MAC address
         }
 
         // Give the Memory back to the System
@@ -384,7 +387,7 @@ void HMSnetwork::networkRoutes()
                             heapStr(&cfg.config.DHCPCHECK, _dhcp.c_str());
                             my_delay(0.1L);
                         }
-                        if (String(cfg.config.DHCPCHECK) == "true")
+                        if (String(cfg.config.DHCPCHECK) == "on")
                         {
                             if (p->name() == "ip" && !p->value().isEmpty())
                             {
@@ -420,10 +423,10 @@ void HMSnetwork::networkRoutes()
                             heapStr(&cfg.config.MDNS, _mdns.c_str());
                             my_delay(0.1L);
                         }
-                        cfg.setConfigChanged();
                         log_i("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
                     }
                 }
+                cfg.setConfigChanged();
                 request->send(200, MIMETYPE_JSON, "Done. ESP will restart and connect to your router");
                 my_delay(0.03L);
                 ESP.restart(); });
@@ -453,9 +456,9 @@ void HMSnetwork::networkRoutes()
                         heapStr(&cfg.config.MQTTPass, pass.c_str());
                         my_delay(0.1L);
                     }
-                    cfg.setConfigChanged();
                     log_i("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
                 }
+                cfg.setConfigChanged();
                 request->send(200, MIMETYPE_JSON, "Done. ESP will now connect to your broker");
                 my_delay(0.03L);
                 ESP.restart(); });
@@ -539,8 +542,7 @@ void HMSnetwork::CheckNetworkLoop()
     {
         wifiConnected = true;
         log_i("Wifi is connected\n");
-        log_i("[INFO]: WiFi Connected! Open http://");
-        log_i("%s in your browser\n", WiFi.localIP().toString().c_str());
+        log_i("[INFO]: WiFi Connected! Open http://%s in your browser\n", WiFi.localIP().toString().c_str());
     }
 }
 
@@ -635,9 +637,8 @@ void HMSnetwork::SetupServer()
     log_i("[INFO]: System Information Sent\n");
     log_i("\n");
 
-// FS debug information
-// THIS NEEDS TO BE PAST THE WIFI SETUP!! OTHERWISE WIFI SETUP WILL BE DELAYED
-#if HMS_DEBUG != 0
+    // FS debug information
+    // THIS NEEDS TO BE PAST THE WIFI SETUP!! OTHERWISE WIFI SETUP WILL BE DELAYED
     log_i("SPIFFS contents:\n");
 #ifdef ESP32
     File root = SPIFFS.open("/");
@@ -658,7 +659,6 @@ void HMSnetwork::SetupServer()
           totalBytes, usedBytes,
           (float)100 / totalBytes * usedBytes);
     log_i("\n");
-#endif
 #endif
 }
 

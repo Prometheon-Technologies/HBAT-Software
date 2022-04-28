@@ -306,7 +306,7 @@ bool Config::saveConfig()
     json["last_mqtt_connect_attempt"] = config.last_mqtt_connect_attempt;
     json["last_mqtt_publish_attempt"] = config.last_mqtt_publish_attempt;
     json["lastMillis"] = config.lastMillis;
-    json["clientIP"] = config.IP;
+    json["IP"] = config.IP;
     json["netmask"] = config.netmask;
     json["gateway"] = config.gateway;
     json["MQTTSecureState"] = config.MQTTSecureState;

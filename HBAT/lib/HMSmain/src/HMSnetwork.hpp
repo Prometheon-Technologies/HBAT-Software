@@ -12,7 +12,6 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncTCP.h>
-#include <vector>
 
 extern AsyncWebServer server;
 extern WiFiClient espClient;

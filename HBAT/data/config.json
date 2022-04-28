@@ -26,7 +26,7 @@
 	"NTPTIME": 0,
 	"NTPTIMEOFFSET": 0,
 	"MDNS": "",
-	"DHCPCHECK": "true",
+	"DHCPCHECK": "on",
 	"Number_of_Sensors": 0,
 	"Max_Cell_Count": 0,
 	"relays": [

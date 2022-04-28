@@ -88,7 +88,7 @@ void AccumulateData::InitAccumulateData()
     for (int i = 0; i < sizeof(cfg.config.relays_pin) / sizeof(cfg.config.relays_pin[0]); i++)
     {
         Relay.RelayOnOff(cfg.config.relays_pin[i], cfg.config.relays[i]);
-        log_d("Relay: %d is %s", cfg.config.relays_pin[i], cfg.config.relays[i] ? "on" : "off");
+        log_d("Relay on pin: %d is %s", cfg.config.relays_pin[i], cfg.config.relays[i] ? "on" : "off");
     }
 }
 

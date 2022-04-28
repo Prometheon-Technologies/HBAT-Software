@@ -134,7 +134,7 @@ For this to work, the MQTT service needs to be advertised. On a Linux host syste
 - [x] Implement Error Correct Code for sensors.
 - [x] Implement I2C Scanner.
 - [x] Implement Humidity and Temperature sensors.
-- [ ] Implement Relay Logic. //TODO: Interface with UI
+- [x] Implement Relay Logic. //TODO: Interface with UI
 - [x] Implement UI.
 - [ ] Implement MQTT. //TODO: Full implementation still needs to be done.
 - [x] Implement MQTT discovery.

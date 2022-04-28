@@ -157,6 +157,10 @@ bool HMSnetwork::SetupNetworkStack()
             gateway.fromString(WiFi.gatewayIP().toString());
             subnet.fromString(WiFi.subnetMask().toString());
 
+            _ip.fromString(IP);
+            _gateway.fromString(_gateway_);
+            _subnet.fromString(_subnet_);
+
             if (dhcpcheck == "on")
             {
                 log_i("[INFO]: DHCP is on\n");
@@ -168,9 +172,6 @@ bool HMSnetwork::SetupNetworkStack()
             }
             else
             {
-                _ip.fromString(IP);
-                _gateway.fromString(_gateway_);
-                _subnet.fromString(_subnet_);
                 log_i("[INFO]: DHCP Check is off\n");
                 log_i("[INFO]: Using custom configuration\n");
                 if (!WiFi.config(_ip, _gateway, _subnet))
@@ -387,7 +388,7 @@ void HMSnetwork::networkRoutes()
                             heapStr(&cfg.config.DHCPCHECK, _dhcp.c_str());
                             my_delay(0.1L);
                         }
-                        if (String(cfg.config.DHCPCHECK) == "on")
+                        if (String(cfg.config.DHCPCHECK) != "on")
                         {
                             if (p->name() == "ip" && !p->value().isEmpty())
                             {

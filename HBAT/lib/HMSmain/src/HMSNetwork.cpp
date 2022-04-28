@@ -259,11 +259,11 @@ void HMSnetwork::SetupWebServer()
 void HMSnetwork::networkRoutes()
 {
     static const char *MIMETYPE_HTML{"text/html"};
-    static const char *MIMETYPE_CSS{"text/css"};
-    static const char *MIMETYPE_JS{"application/javascript"};
-    static const char *MIMETYPE_PNG{"image/png"};
-    static const char *MIMETYPE_JPG{"image/jpeg"};
-    static const char *MIMETYPE_ICO{"image/x-icon"};
+    /* static const char *MIMETYPE_CSS{"text/css"}; */
+    /* static const char *MIMETYPE_JS{"application/javascript"}; */
+    /* static const char *MIMETYPE_PNG{"image/png"}; */
+    /* static const char *MIMETYPE_JPG{"image/jpeg"}; */
+    /* static const char *MIMETYPE_ICO{"image/x-icon"}; */
     static const char *MIMETYPE_JSON{"application/json"};
 
     // Web Server Root URL
@@ -384,7 +384,7 @@ void HMSnetwork::networkRoutes()
                             heapStr(&cfg.config.DHCPCHECK, _dhcp.c_str());
                             my_delay(0.1L);
                         }
-                        if (cfg.config.DHCPCHECK == "true")
+                        if (String(cfg.config.DHCPCHECK) == "true")
                         {
                             if (p->name() == "ip" && !p->value().isEmpty())
                             {
@@ -424,7 +424,7 @@ void HMSnetwork::networkRoutes()
                         log_i("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
                     }
                 }
-                request->send(200, MIMETYPE_JS, "Done. ESP will restart and connect to your router");
+                request->send(200, MIMETYPE_JSON, "Done. ESP will restart and connect to your router");
                 my_delay(0.03L);
                 ESP.restart(); });
 
@@ -456,7 +456,7 @@ void HMSnetwork::networkRoutes()
                     cfg.setConfigChanged();
                     log_i("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
                 }
-                request->send(200, MIMETYPE_JS, "Done. ESP will now connect to your broker");
+                request->send(200, MIMETYPE_JSON, "Done. ESP will now connect to your broker");
                 my_delay(0.03L);
                 ESP.restart(); });
 
@@ -474,7 +474,7 @@ void HMSnetwork::networkRoutes()
                         }
                         log_i("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
                     }
-                    request->send(200, MIMETYPE_JS, "toggled"); });
+                    request->send(200, MIMETYPE_JSON, "toggled"); });
 
     server.on("/mqttEnable", HTTP_GET, [&](AsyncWebServerRequest *request)
               {
@@ -492,24 +492,24 @@ void HMSnetwork::networkRoutes()
                     }
                     log_i("GET[%s]: %s\n", p->name().c_str(), p->value().c_str());
                 }
-                request->send(200, MIMETYPE_JS, (cfg.config.MQTTEnabled == true) ?  "MQTT Disabled" : "MQTT Enabled"); });
+                request->send(200, MIMETYPE_JSON, (cfg.config.MQTTEnabled == true) ?  "MQTT Disabled" : "MQTT Enabled"); });
 
     server.on("/data.json", HTTP_GET, [&](AsyncWebServerRequest *request)
               {
                   cfg.config.data_json = true;
                   my_delay(1L);
                   String temp = cfg.config.data_json_string;
-                  request->send(200, MIMETYPE_JS, temp);
+                  request->send(200, MIMETYPE_JSON, temp);
                   temp = ""; });
 
     server.on("/api/reset/config", HTTP_GET, [&](AsyncWebServerRequest *request)
               {
                   cfg.resetConfig();
-                  request->send(200, MIMETYPE_JS, "Config has been Reset"); });
+                  request->send(200, MIMETYPE_JSON, "Config has been Reset"); });
 
     server.on("/api/reset/device", HTTP_GET, [&](AsyncWebServerRequest *request)
               {
-                  request->send(200, MIMETYPE_JS, "Resetting Device");
+                  request->send(200, MIMETYPE_JSON, "Resetting Device");
                   my_delay(1L);
                   ESP.restart(); });
 

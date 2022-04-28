@@ -165,7 +165,7 @@ String Config::readFile(fs::FS &fs, const char *path)
 void Config::writeFile(fs::FS &fs, const char *path, const char *message)
 {
     log_i("[Writing File]: Writing file: %s\r\n", path);
-    my_delay(100L);
+    my_delay(0.1L);
 
     File file = fs.open(path, FILE_WRITE);
     if (!file)

@@ -104,7 +104,7 @@ void setup()
 
     Serial.print("\n===================================\n");
     Serial.println("Setup Complete");
-    my_delay(1000L);
+    my_delay(1L);
 }
 
 void loop()
@@ -139,5 +139,5 @@ void loop()
     {
         Mdns.mDNSLoop();
     }
-    my_delay(1000L);
+    my_delay(1L);
 }

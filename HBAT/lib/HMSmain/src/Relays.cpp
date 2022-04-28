@@ -16,7 +16,7 @@ Relays::~Relays()
 /******************************************************************************
  * Function: Controll the Relays
  * Description: This function turns the relays in the stack on and off.
- * Parameters: int, bool, long
+ * Parameters: int, bool, long (in seconds)
  * Return: None
  ******************************************************************************/
 void Relays::RelayOnOff(int relay, bool on, long delay)

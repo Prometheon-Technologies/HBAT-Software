@@ -64,7 +64,7 @@ int Humidity::setupSensor()
     HUMIDITY_SENSORS_ACTIVE = 3;
     return 3;
   }
-  my_delay(1000L * 1000L); // delay in between reads for stability
+  my_delay(2L); // delay in between reads for stability
 }
 
 bool Humidity::checkHeaterEnabled()
@@ -227,7 +227,7 @@ Hum Humidity::ReadSensor()
     {
       Serial.println("Failed to read humidity");
     }
-    my_delay(1000L); // delay in between reads for stability
+    my_delay(0.1L); // delay in between reads for stability
 
     // Toggle heater enabled state every 30 seconds
     // An ~3.0 degC _temperature increase can be noted when heater is enabled
@@ -261,7 +261,7 @@ Hum Humidity::ReadSensor()
     {
       Serial.println("Failed to read humidity");
     }
-    my_delay(1000L); // delay in between reads for stability
+    my_delay(0.1L); // delay in between reads for stability
 
     // Toggle heater enabled state every 30 seconds
     // An ~3.0 degC _temperature increase can be noted when heater is enabled
@@ -319,7 +319,7 @@ Hum Humidity::ReadSensor()
     {
       Serial.println("Failed to read humidity");
     }
-    my_delay(1000L); // delay in between reads for stability
+    my_delay(0.1L); // delay in between reads for stability
     result = {temp_1, hum_1, temp_2, hum_2};
     return result;
     break;

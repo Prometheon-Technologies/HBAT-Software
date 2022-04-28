@@ -59,7 +59,7 @@ float *HMS::readSensAndCondition()
             cell_voltage[4] = readVoltage(32);
 
             digitalWrite(power_mux_pin_amps, LOW);
-            my_delay(1000L);
+            my_delay(0.1L);
             if (!mux_enabled_amps && !POWER_MUX_ENABLED_AMPS)
             {
                 mux_enabled_voltage = true;
@@ -67,7 +67,7 @@ float *HMS::readSensAndCondition()
                 cell_voltage[5] = readVoltage(33);
             }
             digitalWrite(power_mux_pin_voltage, LOW);
-            my_delay(1000L);
+            my_delay(0.1L);
             mux_enabled_voltage = false;
         }
         else
@@ -82,7 +82,7 @@ float *HMS::readSensAndCondition()
             cell_voltage[7] = readVoltage(8);
             cell_voltage[8] = readVoltage(9);
             digitalWrite(power_mux_pin_amps, LOW);
-            my_delay(1000L);
+            my_delay(0.1L);
             if (!mux_enabled_amps && !POWER_MUX_ENABLED_AMPS)
             {
                 mux_enabled_voltage = true;
@@ -90,7 +90,7 @@ float *HMS::readSensAndCondition()
                 cell_voltage[9] = readVoltage(10);
             }
             digitalWrite(power_mux_pin_voltage, LOW);
-            my_delay(1000L);
+            my_delay(0.1L);
             mux_enabled_voltage = false;
         }
     }
@@ -120,7 +120,7 @@ void HMS::setupSensor()
         mux_enabled_amps = true;
         digitalWrite(power_mux_pin_amps, HIGH);
         ACS.autoMidPoint();
-        my_delay(1000L);
+        my_delay(0.1L);
         digitalWrite(power_mux_pin_amps, LOW);
         mux_enabled_amps = false;
     }
@@ -147,7 +147,7 @@ int HMS::readAmps()
         mux_enabled_amps = false;
         Serial.print("Stack mA:");
         Serial.println(amps);
-        my_delay(1000L);
+        my_delay(0.1L);
         return amps.toInt();
     }
     return 0;
@@ -193,10 +193,10 @@ void HMS::calibrateAmps()
                 Serial.println("No input detected");
             }
         }
-        my_delay(10000L);
+        my_delay(0.01L);
         digitalWrite(power_mux_pin_amps, LOW);
         mux_enabled_amps = false;
-        my_delay(1000L);
+        my_delay(0.1L);
     }
 }
 

@@ -468,10 +468,12 @@ void HMSnetwork::networkRoutes()
     server.on("/toggle", HTTP_GET, [&](AsyncWebServerRequest *request)
               {
                     int params = request->params();
-                    for(int i=0;i<params;i++){
+                    for(int i=0;i<params;i++)
+                    {
                         AsyncWebParameter* p = request->getParam(i);
                             // HTTP POST Relay Value
-                        if (p->name() == "pin") {
+                        if (p->name() == "pin") 
+                        {
                             String relay = p->value().c_str();
                             log_i("switching state of pin: %s\n", relay.c_str());
                             cfg.config.relays[relay.toInt()] = (cfg.config.relays[relay.toInt()] == true) ? false : true;

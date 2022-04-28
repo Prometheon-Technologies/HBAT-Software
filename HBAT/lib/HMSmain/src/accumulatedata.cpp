@@ -83,6 +83,12 @@ void AccumulateData::InitAccumulateData()
     {
         cfg.config.cell_temp[i] = cell_temp_sensor_results.temp[i];
     }
+
+    // Relays
+    for (int i = 0; i <= 5; i++)
+    {
+        Relay.RelayOnOff(cfg.config.relays_pin[i], cfg.config.relays[i]);
+    }
 }
 
 /******************************************************************************

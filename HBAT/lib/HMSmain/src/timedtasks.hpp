@@ -18,6 +18,8 @@ public:
   void checkNetwork();
 
 private:
+  // Timers
+  timeObj Timer_1s;
   timeObj Timer_5s;
   timeObj Timer_5s_2;
   timeObj Timer_10s;

@@ -11,6 +11,7 @@ TimedTasks::~TimedTasks()
 
 void TimedTasks::setupTimers()
 {
+  Timer_1s.setTime(1000);
   Timer_5s.setTime(5000);
   Timer_5s_2.setTime(5000);
   Timer_10s.setTime(10000);
@@ -39,10 +40,10 @@ void TimedTasks::ScanI2CBus()
 
 void TimedTasks::accumulateSensorData()
 {
-  if (Timer_5s.ding())
+  if (Timer_1s.ding())
   {
     accumulatedata.InitAccumulateData();
-    Timer_5s.start();
+    Timer_1s.start();
   }
 }
 

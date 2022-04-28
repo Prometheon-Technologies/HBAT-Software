@@ -19,7 +19,7 @@ Relays::~Relays()
  * Parameters: int, bool, long (in seconds)
  * Return: None
  ******************************************************************************/
-void Relays::RelayOnOff(int relay, bool on, long delay)
+void Relays::RelayOnOff(int relay, bool on, long double delay)
 {
     if (on)
     {

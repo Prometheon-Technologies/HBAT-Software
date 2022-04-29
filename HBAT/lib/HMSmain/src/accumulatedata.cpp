@@ -21,7 +21,7 @@ AccumulateData::~AccumulateData()
 void AccumulateData::InitAccumulateData()
 {
     // Initialize the library
-    // humidity.ReadSensor();
+    humidity.ReadSensor();
     if (numSensors > maxCellCount)
     {
         numSensors = maxCellCount;

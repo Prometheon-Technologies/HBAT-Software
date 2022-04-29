@@ -35,32 +35,32 @@ Humidity::~Humidity()
  ******************************************************************************/
 int Humidity::setupSensor()
 {
-  Serial.println("SHT31 Sensors Setup Beginning....");
+  log_i("SHT31 Sensors Setup Beginning....");
   // Set to 0x45 for alternate i2c address
   if (!sht31.begin(0x44) && !sht31_2.begin(0x45))
   {
-    Serial.println("Couldn't find SHT31 sensors");
-    Serial.println("SHT31 Sensors Setup did not complete successfully, check your wiring or the addresses and try again");
+    log_i("Couldn't find SHT31 sensors");
+    log_i("SHT31 Sensors Setup did not complete successfully, check your wiring or the addresses and try again");
     HUMIDITY_SENSORS_ACTIVE = 0;
     return 0;
   }
   else if (!sht31.begin(0x44) && sht31_2.begin(0x45))
   {
-    Serial.println("Couldn't find SHT31 sensor #1");
-    Serial.println("SHT31 Sensors Setup did not complete successfully, check your wiring and try again");
+    log_i("Couldn't find SHT31 sensor #1");
+    log_i("SHT31 Sensors Setup did not complete successfully, check your wiring and try again");
     HUMIDITY_SENSORS_ACTIVE = 1;
     return 1;
   }
   else if (!sht31_2.begin(0x45) && sht31.begin(0x44))
   {
-    Serial.println("Couldn't find SHT31 sensor #2");
-    Serial.println("SHT31 Sensors Setup did not complete successfully, check your wiring and try again");
+    log_i("Couldn't find SHT31 sensor #2");
+    log_i("SHT31 Sensors Setup did not complete successfully, check your wiring and try again");
     HUMIDITY_SENSORS_ACTIVE = 2;
     return 2;
   }
   else
   {
-    Serial.println("SHT31 Sensors Setup Complete");
+    log_i("SHT31 Sensors Setup Complete");
     HUMIDITY_SENSORS_ACTIVE = 3;
     return 3;
   }
@@ -72,6 +72,7 @@ bool Humidity::checkHeaterEnabled()
   switch (HUMIDITY_SENSORS_ACTIVE)
   {
   case 0:
+    log_d("No humidity sensors active");
     return false;
     break;
   case 1:
@@ -82,16 +83,15 @@ bool Humidity::checkHeaterEnabled()
     {
       enableHeater = !enableHeater;
       sht31.heater(enableHeater);
-      Serial.print("Heater Enabled State: ");
-      Serial.println(enableHeater);
+      log_i("Heater Enabled State: %s", enableHeater ? "ENABLED" : "DISABLED");
       if (_sensor1)
       {
-        Serial.println("Sensor 1 Heater Heater ENABLED");
+        log_i("Sensor 1 Heater Heater ENABLED");
         heaterenabled = true;
       }
       else
       {
-        Serial.println("Sensor 1 Heater Disabled");
+        log_i("Sensor 1 Heater Disabled");
         heaterenabled = false;
       }
       loopCnt = 0;
@@ -108,16 +108,15 @@ bool Humidity::checkHeaterEnabled()
     {
       enableHeater = !enableHeater;
       sht31_2.heater(enableHeater);
-      Serial.print("Heater Enabled State: ");
-      Serial.println(enableHeater);
+      log_i("Heater Enabled State: %s", enableHeater ? "ENABLED" : "DISABLED");
       if (_sensor2)
       {
-        Serial.println("Sensors have Heater ENABLED");
+        log_i("Sensor 2 Heater ENABLED");
         heaterenabled = true;
       }
       else
       {
-        Serial.println("Sensor 1 Heater Disabled");
+        log_i("Sensor 2 Heater Disabled");
         heaterenabled = false;
       }
       loopCnt = 0;
@@ -136,16 +135,15 @@ bool Humidity::checkHeaterEnabled()
       enableHeater = !enableHeater;
       sht31.heater(enableHeater);
       sht31_2.heater(enableHeater);
-      Serial.print("Heater Enabled State: ");
-      Serial.println(enableHeater);
+      log_i("Heater Enabled State: %s\t\t", enableHeater ? "ENABLED" : "DISABLED");
       if (_sensor1 != _sensor2)
       {
-        Serial.println("Sensors have Heater ENABLED");
+        log_i("Sensors have Heater ENABLED");
         heaterenabled = true;
       }
       else
       {
-        Serial.println("Sensor 1 Heater Disabled");
+        log_i("Sensors have Heater Disabled");
         heaterenabled = false;
       }
       loopCnt = 0;
@@ -199,6 +197,7 @@ Hum Humidity::ReadSensor()
   case 0:
   {
     result = {0, 0, 0, 0};
+    log_d("No Humidity Sensors Active");
     return result;
     break;
   }
@@ -209,23 +208,20 @@ Hum Humidity::ReadSensor()
     // check if 'is not a number
     if (!isnan(temp))
     { // check if 'is not a number'
-      Serial.print("Temp *C = ");
-      Serial.print(temp);
-      Serial.print("\t\t");
+      log_i("Temp *C = %.3f\t\t", temp);
     }
     else
     {
-      Serial.println("Failed to read temperature");
+      log_i("Failed to read temperature");
     }
 
     if (!isnan(hum))
     { // check if 'is not a number'
-      Serial.print("Hum. % = ");
-      Serial.println(hum);
+      log_i("Hum. % = %.3f\t\t", hum);
     }
     else
     {
-      Serial.println("Failed to read humidity");
+      log_i("Failed to read humidity");
     }
     my_delay(0.1L); // delay in between reads for stability
 
@@ -243,23 +239,20 @@ Hum Humidity::ReadSensor()
     float hum_2 = sht31_2.readHumidity();
     if (!isnan(temp_2))
     { // check if 'is not a number'
-      Serial.print("Temp *C = ");
-      Serial.print(temp_2);
-      Serial.print("\t\t");
+      log_i("Temp *C = %.3f\t\t", temp_2);
     }
     else
     {
-      Serial.println("Failed to read temperature");
+      log_i("Failed to read temperature");
     }
 
     if (!isnan(hum_2))
     { // check if 'is not a number'
-      Serial.print("Hum. % = ");
-      Serial.println(hum_2);
+      log_i("Hum. % = %.3f\t\t", hum_2);
     }
     else
     {
-      Serial.println("Failed to read humidity");
+      log_i("Failed to read humidity");
     }
     my_delay(0.1L); // delay in between reads for stability
 
@@ -277,23 +270,20 @@ Hum Humidity::ReadSensor()
     float temp_2 = sht31_2.readTemperature();
     if (!isnan(temp_1))
     { // check if 'is not a number'
-      Serial.print("Temp 1 *C = ");
-      Serial.print(temp_1);
-      Serial.print("\t\t");
+      log_i("Temp 1 *C = %.3f\t\t", temp_1);
     }
     else
     {
-      Serial.println("Failed to read temperature");
+      log_i("Failed to read temperature");
     }
 
     if (!isnan(temp_2))
     { // check if 'is not a number'
-      Serial.print("Temp 2 *C = ");
-      Serial.println(temp_2);
+      log_i("Temp 2 *C = %.3f", temp_2);
     }
     else
     {
-      Serial.println("Failed to read humidity");
+      log_i("Failed to read humidity");
     }
 
     // check if 'is not a number'
@@ -301,23 +291,20 @@ Hum Humidity::ReadSensor()
     float hum_2 = sht31_2.readHumidity();
     if (!isnan(hum_1))
     { // check if 'is not a number'
-      Serial.print("Temp 1 *C = ");
-      Serial.print(hum_1);
-      Serial.print("\t\t");
+      log_i("Temp 1 *C = %.3f\t\t", hum_1);
     }
     else
     {
-      Serial.println("Failed to read temperature");
+      log_i("Failed to read temperature");
     }
 
     if (!isnan(hum_2))
     { // check if 'is not a number'
-      Serial.print("Temp 2 *C = ");
-      Serial.println(hum_2);
+      log_i("Temp 2 *C = %.3f", hum_2);
     }
     else
     {
-      Serial.println("Failed to read humidity");
+      log_i("Failed to read humidity");
     }
     my_delay(0.1L); // delay in between reads for stability
     result = {temp_1, hum_1, temp_2, hum_2};
@@ -374,18 +361,14 @@ int Humidity::loopSFM3003()
       mycrc = crc8(b, mycrc);    // and the second byte too
       if (mycrc != crc)
       { // check if the calculated and the received CRC byte matches
-        Serial.println("Error: wrong CRC");
+        log_i("Error: wrong CRC");
       }
-      Serial.println('p');
-      Serial.println(a);
-      Serial.println(b);
-      Serial.println(crc);
-      Serial.println('h');
+      log_i("p %d %d %d h", a, b, crc);
       a = (a << 8) | b; // combine the two received bytes to a 16bit integer value
       // a >>= 2; // remove the two least significant bits
       int Flow = (a - _offset) / _scale;
-      // Serial.println(a); // print the raw result from the sensor to the serial interface
-      Serial.println(Flow); // print the calculated flow to the serial interface
+      // log_i(a); // print the raw result from the sensor to the serial interface
+      log_i("%d", Flow); // print the calculated flow to the serial interface
       start_time = current_time;
       return Flow;
     }

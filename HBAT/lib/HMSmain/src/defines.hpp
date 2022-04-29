@@ -70,7 +70,7 @@ void my_delay(volatile long delay_time);
 String generateDeviceID();
 
 /*######################## MQTT Configuration ########################*/
-#ifdef ENABLE_MQTT_SUPPORT
+#if ENABLE_MQTT_SUPPORT
 _Pragma (STR(message (ENABLE_MQTT_SUPPORT)))
 // these are deafault settings which can be changed in the web interface "settings" page
 #define MQTT_SECURE_ENABLED 0

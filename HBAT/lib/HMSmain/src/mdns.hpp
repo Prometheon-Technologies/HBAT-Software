@@ -1,6 +1,6 @@
 /*
  Network.h - HBAT library
- Copyright (c) 2021 Zacariah Austin Heim.
+ Copyright (c) 2021 ZanzyTHEbar
 */
 #pragma once
 #ifndef HMSMDNS_hpp

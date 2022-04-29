@@ -1,6 +1,6 @@
 /*
  defines.hpp - HBAT library
- Copyright (c) 2021 Zacariah Austin Heim.
+ Copyright (c) 2021 ZanzyTHEbar
  */
 #ifndef DEFINES_hpp
 #define DEFINES_hpp

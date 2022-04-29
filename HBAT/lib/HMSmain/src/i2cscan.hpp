@@ -1,6 +1,6 @@
 /*
  i2cscan.h - HBAT library
- Copyright (c) 2021 Zacariah Austin Heim.
+ Copyright (c) 2021 ZanzyTHEbar
  */
 
 #ifndef I2CSCAN_HPP
@@ -15,7 +15,8 @@ public:
     virtual ~Scanner(void);
     void SetupScan();
     void BeginScan();
-    /* private: */
+
+private:
 };
 
 extern Scanner Scan;

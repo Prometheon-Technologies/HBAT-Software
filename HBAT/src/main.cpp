@@ -71,11 +71,10 @@ void setup()
     network.SetupServer();
     Serial.println("Setting up WiFi");
 
-    if (ENABLE_MQTT_SUPPORT)
-    {
-        Serial.println("Setting up MQTT");
-        HMSmqtt.loadMQTTConfig();
-    }
+#if ENABLE_MQTT_SUPPORT
+    Serial.println("Setting up MQTT");
+    HMSmqtt.loadMQTTConfig();
+#endif // ENABLE_MQTT_SUPPORT
 
     if (ENABLE_MDNS_SUPPORT)
     {
@@ -86,10 +85,9 @@ void setup()
         }
     }
 
-    if (ENABLE_MQTT_SUPPORT)
-    {
-        HMSmqtt.MQTTSetup();
-    }
+#if ENABLE_MQTT_SUPPORT
+    HMSmqtt.MQTTSetup();
+#endif // ENABLE_MQTT_SUPPORT
 
     Serial.println("");
     if (network.SetupNetworkStack())
@@ -127,13 +125,12 @@ void loop()
         }
     }
 
-    if (ENABLE_MQTT_SUPPORT)
+#if ENABLE_MQTT_SUPPORT
+    if (WiFi.status() == WL_CONNECTED)
     {
-        if (WiFi.status() == WL_CONNECTED)
-        {
-            HMSmqtt.RunMqttService();
-        }
+        HMSmqtt.RunMqttService();
     }
+#endif // ENABLE_MQTT_SUPPORT
 
     if (ENABLE_MDNS_SUPPORT)
     {

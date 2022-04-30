@@ -145,8 +145,7 @@ int HMS::readAmps()
         String amps = String(mA);
         digitalWrite(power_mux_pin_amps, LOW);
         mux_enabled_amps = false;
-        Serial.print("Stack mA:");
-        Serial.println(amps);
+        log_i("Stack mA: %s\n", amps.c_str());
         my_delay(0.1L);
         return amps.toInt();
     }
@@ -180,17 +179,17 @@ void HMS::calibrateAmps()
                 break;
             case '0':
                 ACS.setMidPoint(512);
-                Serial.print("," + String(ACS.getMidPoint()));
+                log_i(", %d", ACS.getMidPoint());
                 break;
             case '*':
                 ACS.setmVperAmp(ACS.getmVperAmp() * 1.05);
                 break;
             case '/':
                 ACS.setmVperAmp(ACS.getmVperAmp() / 1.05);
-                Serial.print("," + String(ACS.getmVperAmp()));
+                log_i(", %d", ACS.getmVperAmp());
                 break;
             default:
-                Serial.println("No input detected");
+                log_i("No input detected");
             }
         }
         my_delay(0.01L);

@@ -64,8 +64,7 @@ void AccumulateData::InitAccumulateData()
     {
         sum += array[i];
     }
-    Serial.print("Stack Voltage: ");
-    Serial.println(sum);
+    log_i("Stack Voltage: %.3f", sum);
 
     cfg.config.stack_voltage = sum;
 

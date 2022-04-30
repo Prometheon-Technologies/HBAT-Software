@@ -72,25 +72,9 @@ String generateDeviceID();
 /*######################## MQTT Configuration ########################*/
 #if ENABLE_MQTT_SUPPORT
 _Pragma (STR(message (ENABLE_MQTT_SUPPORT)))
-// these are deafault settings which can be changed in the web interface "settings" page
-#define MQTT_SECURE_ENABLED 0
-#define MQTT_PORT 1883
-#define MQTT_PORT_SECURE 8883
-
-#define MQTT_MAX_TRANSFER_SIZE 1024
 // MQTT includes
 #include "HMSmqtt.hpp"
-
-    // Variables for MQTT
-    extern const char *MQTT_TOPIC;
-extern const String HOMEASSISTANT_MQTT_HOSTNAME;
-extern const String MQTT_USER;
-extern const String MQTT_PASS;
-extern const String MQTT_HOMEASSISTANT_TOPIC_SET; // MQTT Topic to subscribe to for changes(Home Assistant)
-extern const String MQTT_HOMEASSISTANT_TOPIC;     // MQTT Topic to Publish to for state and config (Home Assistant);
-extern String MQTT_DEVICE_NAME;                   // MQTT Topic to Publish to for state and config (Any MQTT Broker)
-extern bool mqttProcessing;
-#endif
+#endif // ENABLE_MQTT_SUPPORT
 /*###################### MQTT Configuration END ######################*/
 
 // Variables

@@ -5,6 +5,27 @@ PubSubClient mqttClient(espClient);
 
 long lastReconnectAttempt = 0;
 
+// Variables for MQTT
+// these are deafault settings which can be changed in the web interface "settings" page
+#define MQTT_SECURE_ENABLED 0
+#define MQTT_PORT 1883
+#define MQTT_PORT_SECURE 8883
+#define MQTT_MAX_TRANSFER_SIZE 1024
+#define MQTT_KEEPALIVE 60
+#define MQTT_RECONNECT_TIMEOUT 5
+#define MQTT_RECONNECT_RETRY_TIMEOUT 5
+#define MQTT_RECONNECT_RETRY_COUNT 3
+
+const char *MQTT_TOPIC = "hms/data/";
+const String HOMEASSISTANT_MQTT_HOSTNAME = "homeassistant.local";
+const String MQTT_USER = "MyUserName";
+const String MQTT_PASS = "";
+const String MQTT_HOMEASSISTANT_TOPIC_SET = "/set";                // MQTT Topic to subscribe to for changes(Home Assistant)
+const String MQTT_HOMEASSISTANT_TOPIC = "homeassistant/HBAT/data"; // MQTT Topic to Publish to for state and config (Home Assistant);
+String MQTT_DEVICE_NAME = "HBAT_HMS";                              // MQTT Topic to Publish to for state and config (Any MQTT Broker)
+bool mqttProcessing = false;
+/*###################### MQTT Configuration END ######################*/
+
 HMSMqtt::HMSMqtt()
 {
 }

@@ -44,17 +44,9 @@ AsyncWebServer server(80);
 WiFiClient espClient;
 
 const size_t MAX_FILESIZE = 1024 * 1024 * 2; // 2MB
-const char *mdnsPath = "/mdns.txt";
-const char *dhcpcheckPath = "/dhcpcheck.txt";
-const char *ssidPath = "/ssid.txt";
-const char *passPath = "/pass.txt";
-const char *ntptimePath = "/ntptime.txt";
-const char *ntptimeoffsetPath = "/ntptimeoffset.txt";
 
 const char *HTTP_USERNAME = "admin";
 const char *HTTP_PASSWORD = "admin";
-
-// char* create_mDNS_hostname = StringtoChar(MQTTCreateHostName(MQTT_HOSTNAME, ".local"));
 
 String ledState;
 

@@ -549,6 +549,20 @@ void HMSnetwork::CheckNetworkLoop()
     }
 }
 
+void HMSnetwork::CheckConnectionLoop_Active()
+{
+    unsigned long currentMillis = millis();
+    // if WiFi is down, try reconnecting
+    if (!wifiConnected && (currentMillis - previousMillis >= interval))
+    {
+        Serial.print(millis());
+        Serial.println("Reconnecting to WiFi...");
+        WiFi.disconnect();
+        WiFi.reconnect();
+        previousMillis = currentMillis;
+    }
+}
+
 // BACKUP LEGACY FUNCTION
 /******************************************************************************
  * Function: Connect to Wifi with fail to AP mode if no connection

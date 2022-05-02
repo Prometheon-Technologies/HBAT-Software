@@ -64,7 +64,6 @@ void HMSMqtt::loadMQTTConfig()
   heapStr(&cfg.config.MQTTSetTopic, mqtt_topic_set);
   heapStr(&cfg.config.MQTTDeviceName, mqtt_device_name);
   heapStr(&cfg.config.MQTTClientID, mqtt_client_id);
-  WiFi.setHostname(cfg.config.hostname); // define hostname
   cfg.setConfigChanged();
   free(mqtt_user);
   free(mqtt_pass);

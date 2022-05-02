@@ -55,7 +55,7 @@ const long interval = 30000; // interval to wait for Wi-Fi connection (milliseco
 
 /**
  * @brief Construct a new HMSnetwork::HMSnetwork object
- * 
+ *
  */
 HMSnetwork::HMSnetwork()
 {
@@ -107,9 +107,25 @@ void notFound(AsyncWebServerRequest *request)
     request->send(404, "text/plain", "Not found.");
 }
 
-void checkClientConnected(WiFiEvent_t event, WiFiEventInfo_t info){
-  Serial.println("Connected to AP successfully!");
-  digitalWrite(LED_PIN_1, HIGH);
+void checkClientConnected(WiFiEvent_t event, WiFiEventInfo_t info)
+{
+    log_i("Connected to AP successfully!");
+    digitalWrite(LED_PIN_RED, HIGH);
+}
+
+void WiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info)
+{
+    log_i("WiFi connected");
+    log_i("IP address: %s", WiFi.localIP().toString().c_str());
+}
+
+void WiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info)
+{
+    log_i("Disconnected from WiFi access point");
+    log_i("WiFi lost connection. Reason: %d", info.disconnected.reason);
+    log_i("Trying to Reconnect");
+    digitalWrite(LED_PIN_RED, LOW);
+    network.CheckConnectionLoop_Active();
 }
 
 bool HMSnetwork::SetupNetworkStack()
@@ -152,6 +168,9 @@ bool HMSnetwork::SetupNetworkStack()
         log_i("%s\n", mdns.c_str());
         log_i("%s\n", dhcpcheck.c_str());
 
+        WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
+        WiFi.setHostname(cfg.config.hostname); // define hostname
+
         if (SSID[0] == '\0' || PASS[0] == '\0')
         {
             log_i("[INFO]: No SSID or password has been set.\n");
@@ -179,6 +198,10 @@ bool HMSnetwork::SetupNetworkStack()
             _ip.fromString(IP);
             _gateway.fromString(_gateway_);
             _subnet.fromString(_subnet_);
+
+            WiFi.onEvent(checkClientConnected, SYSTEM_EVENT_STA_CONNECTED);
+            WiFi.onEvent(WiFiGotIP, SYSTEM_EVENT_STA_GOT_IP);
+            WiFi.onEvent(WiFiStationDisconnected, SYSTEM_EVENT_STA_DISCONNECTED);
 
             if (dhcpcheck == "on")
             {
@@ -574,8 +597,8 @@ void HMSnetwork::CheckConnectionLoop_Active()
     // if WiFi is down, try reconnecting
     if (!wifiConnected && (currentMillis - previousMillis >= interval))
     {
-        Serial.print(millis());
-        Serial.println("Reconnecting to WiFi...");
+        log_i("%lu", millis());
+        log_i("Reconnecting to WiFi...");
         WiFi.disconnect();
         WiFi.reconnect();
         previousMillis = currentMillis;
@@ -698,6 +721,25 @@ void HMSnetwork::SetupServer()
 #endif
 }
 
+/**
+ * @brief Loop through Wifi networks and display them by SSID and RSSI
+ * Possible Encryption types:
+ * WIFI_AUTH_OPEN
+ *
+ * WIFI_AUTH_WEP
+ *
+ * WIFI_AUTH_WPA_PSK
+ *
+ * WIFI_AUTH_WPA2_PSK
+ *
+ * WIFI_AUTH_WPA_WPA2_PSK
+ *
+ * WIFI_AUTH_WPA2_ENTERPRISE
+ *
+ * @param None
+ * @return true
+ * @return false
+ */
 bool HMSnetwork::LoopWifiScan()
 {
     log_i("[INFO]: Beginning WIFI Network\n");
@@ -716,7 +758,30 @@ bool HMSnetwork::LoopWifiScan()
         for (int i = 0; i < n; ++i)
         {
             // Print SSID and RSSI for each network found
-            log_i("%d: %s (%d) %s", i + 1, WiFi.SSID(i).c_str(), WiFi.RSSI(i), (WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
+            switch (WiFi.encryptionType(i))
+            {
+            case WIFI_AUTH_OPEN:
+                log_i("%d: %s (%d) %s", i + 1, WiFi.SSID(i).c_str(), WiFi.RSSI(i), "OPEN");
+                break;
+            case WIFI_AUTH_WEP:
+                log_i("%d: %s (%d) %s", i + 1, WiFi.SSID(i).c_str(), WiFi.RSSI(i), "WEP");
+                break;
+            case WIFI_AUTH_WPA_PSK:
+                log_i("%d: %s (%d) %s", i + 1, WiFi.SSID(i).c_str(), WiFi.RSSI(i), "WPA");
+                break;
+            case WIFI_AUTH_WPA2_PSK:
+                log_i("%d: %s (%d) %s", i + 1, WiFi.SSID(i).c_str(), WiFi.RSSI(i), "WPA2");
+                break;
+            case WIFI_AUTH_WPA_WPA2_PSK:
+                log_i("%d: %s (%d) %s", i + 1, WiFi.SSID(i).c_str(), WiFi.RSSI(i), "WPA_WPA2");
+                break;
+            case WIFI_AUTH_WPA2_ENTERPRISE:
+                log_i("%d: %s (%d) %s", i + 1, WiFi.SSID(i).c_str(), WiFi.RSSI(i), "WPA2_ENTERPRISE");
+                break;
+            default:
+                log_i("%d: %s (%d) %s", i + 1, WiFi.SSID(i).c_str(), WiFi.RSSI(i), "UNKNOWN");
+                break;
+            }
             my_delay(0.1L);
             return true;
         }

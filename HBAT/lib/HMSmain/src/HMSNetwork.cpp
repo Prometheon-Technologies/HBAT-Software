@@ -177,9 +177,6 @@ bool HMSnetwork::SetupNetworkStack()
         log_i("%s\n", mdns.c_str());
         log_i("%s\n", dhcpcheck.c_str());
 
-        WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
-        WiFi.setHostname(cfg.config.hostname); // define hostname
-
         if (SSID[0] == '\0' || PASS[0] == '\0')
         {
             log_i("[INFO]: No SSID or password has been set.\n");
@@ -231,6 +228,7 @@ bool HMSnetwork::SetupNetworkStack()
                     return false;
                 }
             }
+            WiFi.setHostname(cfg.config.hostname); // define hostname
             WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
 
             unsigned long currentMillis = millis();

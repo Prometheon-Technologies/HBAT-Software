@@ -30,7 +30,7 @@
 
 // Data stack
 #include "HMS.hpp"
-#include "celltemp.hpp"
+#include "CellTemp.hpp"
 #include "Humidity.hpp"
 // Humidity Sensors
 //#include <sfm3003.hpp>
@@ -38,7 +38,7 @@
 // Temp Sensors
 
 // wifi definitions
-#include "HMSnetwork.hpp"
+#include "HMSNetwork.hpp"
 #include "mdns.hpp"
 #include "OTA.hpp"
 

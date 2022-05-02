@@ -665,16 +665,6 @@ void HMSnetwork::SetupServer()
 #endif
 }
 
-void HMSnetwork::SetupWifiScan()
-{
-    // Set WiFi to station mode and disconnect from an AP if it was previously connected
-    WiFi.mode(WIFI_STA);
-    WiFi.disconnect(); // Disconnect from the access point if connected before
-    my_delay(0.1L);
-
-    log_i("[INFO]: Setup done\n");
-}
-
 bool HMSnetwork::LoopWifiScan()
 {
     log_i("[INFO]: Beginning WIFI Network\n");

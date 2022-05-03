@@ -169,30 +169,41 @@ float Humidity::AverageStackTemp()
 {
   switch (HUMIDITY_SENSORS_ACTIVE)
   {
-  case 0:
-    result = {0, 0, 0, 0};
-    float stack_humidity = 0;
-    return stack_humidity; // return 0 if no sensors are active
-    break;
+    case 0:
+    {
+      result = {0, 0, 0, 0};
+      float stack_humidity = 0;
+      return stack_humidity; // return 0 if no sensors are active
+      break;
+    }
 
-  case 1:
-    float stack_temp = result.temp;
-    return stack_temp; // Only one sensor - return the value of that sensor
-    break;
+    case 1:
+    {
+      float stack_temp = result.temp;
+      return stack_temp; // Only one sensor - return the value of that sensor
+      break;
+    }
 
-  case 2:
-    float stack_temp = result.temp_2;
-    return stack_temp; // Only one sensor - return the value of that sensor
-    break;
+    case 2:
+    {
+      float stack_temp = result.temp_2;
+      return stack_temp; // Only one sensor - return the value of that sensor
+      break;
+    }
 
-  case 3:
-    float stack_temp = result.temp + result.temp_2;
-    return stack_temp / 2; // Read the _temperature from the sensor and average the two sensors.
-    break;
+    case 3:
+    {
+      float stack_temp = result.temp + result.temp_2;
+      return stack_temp / 2; // Read the _temperature from the sensor and average the two sensors.
+      break;
+    }
 
-  default:
-    break;
+    default:
+    {
+      break;
+    }
   }
+  return 0;
 }
 
 /******************************************************************************
@@ -206,30 +217,41 @@ float Humidity::StackHumidity()
 {
   switch (HUMIDITY_SENSORS_ACTIVE)
   {
-  case 0:
-    result = {0, 0, 0, 0};
-    float stack_humidity = 0;
-    return stack_humidity; // return 0 if no sensors are active
-    break;
+    case 0:
+    {
+      result = {0, 0, 0, 0};
+      float stack_humidity = 0;
+      return stack_humidity; // return 0 if no sensors are active
+      break;
+    }
 
-  case 1:
-    float stack_humidity = result.humidity;
-    return stack_humidity; // Only one sensor - return the value of that sensor
-    break;
+    case 1:
+    {
+      float stack_humidity = result.humidity;
+      return stack_humidity; // Only one sensor - return the value of that sensor
+      break;
+    }
 
-  case 2:
-    float stack_humidity = result.humidity_2;
-    return stack_humidity; // Only one sensor - return the value of that sensor
-    break;
+    case 2:
+    {
+      float stack_humidity = result.humidity_2;
+      return stack_humidity; // Only one sensor - return the value of that sensor
+      break;
+    }
 
-  case 3:
-    float stack_humidity = result.humidity + result.humidity_2;
-    return stack_humidity / 2; // Read the _humidity from the sensor and average the two sensors.
-    break;
+    case 3:
+    {
+      float stack_humidity = result.humidity + result.humidity_2;
+      return stack_humidity / 2; // Read the _humidity from the sensor and average the two sensors.
+      break;
+    }
 
-  default:
-    break;
+    default:
+    {
+      break;
+    }
   }
+  return 0;
 }
 
 /******************************************************************************

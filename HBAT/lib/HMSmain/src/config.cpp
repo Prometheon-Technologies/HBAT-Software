@@ -78,54 +78,50 @@ Config::~Config()
 
 void Config::CreateDefaultConfig()
 {
-    config.hostname = NULL;
-    config.MQTTClientID = NULL;
-    config.MQTTBroker = NULL;
-    config.MQTTPort = 0; // Port to use for unsecured MQTT
-    config.MQTTEnabled = false;     
-    config.MQTTPort_Secure = 0; // port to use if Secured MQTT is enabled
-    config.MQTTUser = NULL;
-    config.MQTTPass = NULL;
-    config.MQTTTopic = NULL;
-    config.MQTTSetTopic = NULL;
-    config.MQTTDeviceName = NULL;
-    config.data_json = false;
-    config.data_json_string = "";
-    config.last_mqtt_connect_attempt = 0;
-    config.last_mqtt_publish_attempt = 0;
-    config.lastMillis = 0;
-    config.IP = NULL;
-    config.netmask = NULL;
-    config.gateway = NULL;
-    config.MQTTSecureState = false;
-    config.lastMsg = 0;
-    config.msg = NULL;
-    config.value = 0;
-    config.WIFISSID = NULL;
-    config.WIFIPASS = NULL;
-    config.MQTTConnectedState = false;
-    config.NTPTIME = NULL;
-    config.NTPTIMEOFFSET = NULL;
-    config.MDNS = NULL;
-    config.DHCPCHECK = NULL;
-    config.numSensors = 0;
-    config.cell_count_max = 0;
-
-    for (int i = 0; i < 5; i++)
-    {
-        config.relays[i] = false;
-    }
-
-    config.stack_humidity = 0;
-    config.stack_temp = 0;
-    config.stack_voltage = 0;
-    config.stack_current = 0;
-
-    for (int i = 0; i < 10; i++)
-    {
-        config.cell_temp[i] = 0;
-        config.cell_voltage[i] = 0;
-    }
+    config = {
+        NULL,                                // hostname
+        false,                               // MQTTEnabled
+        NULL,                                // MQTTClientID
+        1883,                                // MQTTPort
+        8883,                                // MQTTPort_Secure
+        NULL,                                // MQTTUser
+        NULL,                                // MQTTPass
+        NULL,                                // MQTTTopic
+        NULL,                                // MQTTSetTopic
+        NULL,                                // MQTTDeviceName
+        0,                                   // last_mqtt_connect_attempt
+        0,                                   // last_mqtt_publish_attempt
+        0,                                   // lastMillis
+        NULL,                                // IP
+        NULL,                                // netmask
+        NULL,                                // gateway
+        false,                               // MQTTSecureState
+        NULL,                                // MQTTBroker
+        0,                                   // lastMsg
+        NULL,                                // msg
+        0,                                   // value
+        NULL,                                // WIFISSID
+        NULL,                                // WIFIPASS
+        false,                               // MQTTConnectedState
+        NULL,                                // NTPTIME
+        NULL,                                // NTPTIMEOFFSET
+        NULL,                                // MDNS
+        NULL,                                // DHCPCHECK
+        false,                               // data_json
+        "",                                  // data_json_string
+        {false, false, false, false, false}, // relays
+        {45, 38, 36, 35, 48},                // relay_pins
+        0,                                   // stack_humidity
+        0,                                   // stack_temp
+        0,                                   // stack_voltage
+        0,                                   // stack_current
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},      // cell_temp
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},      // cell_voltage
+        0,                                   // numSensors
+        0,                                   // cell_count_max
+        0,                                   // flow_rate
+        0,                                   // flow_rate_sensor_temp
+    };
 }
 
 // Initialize SPIFFS

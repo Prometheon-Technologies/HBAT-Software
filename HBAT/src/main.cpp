@@ -18,10 +18,7 @@ void setup()
     Serial.println(F("Setting up the program, standby..."));
     // Setup the main loop
     // Initialize the relay pins
-    int temp[5] = {45, 38, 36, 35, 48};
-    // initialize the Relay pins and set them to off state
-    std::copy(temp, temp + sizeof(temp) / sizeof(temp[0]), cfg.config.relays_pin);
-
+    
     // use a c++ ranged for loop to iterate through the relay pins
     for (auto pin : cfg.config.relays_pin)
     {

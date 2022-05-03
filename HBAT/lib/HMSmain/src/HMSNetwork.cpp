@@ -474,7 +474,7 @@ void HMSnetwork::networkRoutes()
                             heapStr(&cfg.config.MDNS, _mdns.c_str());
                             my_delay(0.1L);
                         }
-                        log_i("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
+                        log_i("POST[%s]: %s\n", p->name().c_str(), p->value().c_str()); //! REMOVE IN PRODUCTION
                     }
                 }
                 cfg.setConfigChanged();

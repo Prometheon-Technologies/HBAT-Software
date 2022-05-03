@@ -128,6 +128,21 @@ void WiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info)
     // network.CheckConnectionLoop_Active();
 }
 
+void wifiClear()
+{
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    wifiConnected = false;
+    delay(100);
+}
+
+void wifiDisconnect()
+{
+    WiFi.disconnect();
+    WiFi.mode(WIFI_OFF);
+    wifiConnected = false;
+}
+
 bool HMSnetwork::SetupNetworkStack()
 {
     String SSID;
@@ -175,23 +190,8 @@ bool HMSnetwork::SetupNetworkStack()
             log_i("[INFO]: Configured SSID: %s\r\n", SSID.c_str());
 
             // Set your Gateway IP address
-            IPAddress localIP;
-            IPAddress gateway;
-            IPAddress subnet;
-
-            IPAddress _ip;
-            IPAddress _gateway;
-            IPAddress _subnet;
 
             WiFi.mode(WIFI_STA);
-
-            localIP.fromString(WiFi.localIP().toString());
-            gateway.fromString(WiFi.gatewayIP().toString());
-            subnet.fromString(WiFi.subnetMask().toString());
-
-            _ip.fromString(IP);
-            _gateway.fromString(_gateway_);
-            _subnet.fromString(_subnet_);
 
             /* WiFi.onEvent(checkClientConnected, SYSTEM_EVENT_STA_CONNECTED);
             WiFi.onEvent(WiFiGotIP, SYSTEM_EVENT_STA_GOT_IP);
@@ -203,6 +203,12 @@ bool HMSnetwork::SetupNetworkStack()
             }
             else
             {
+                IPAddress _ip;
+                IPAddress _gateway;
+                IPAddress _subnet;
+                _ip.fromString(IP);
+                _gateway.fromString(_gateway_);
+                _subnet.fromString(_subnet_);
                 log_i("[INFO]: DHCP Check is off\n");
                 log_i("[INFO]: Using custom configuration\n");
                 if (!WiFi.config(_ip, _gateway, _subnet))
@@ -222,6 +228,7 @@ bool HMSnetwork::SetupNetworkStack()
 
             while (WiFi.status() != WL_CONNECTED)
             {
+                wifiClear();
                 currentMillis = millis();
                 if (currentMillis - previousMillis >= interval)
                 {
@@ -233,7 +240,6 @@ bool HMSnetwork::SetupNetworkStack()
             log_i("[INFO]: Connected to WiFi.\n");
             log_i("IP address: %s\n", WiFi.localIP().toString().c_str());
             return true;
-
         }
     }
     return false;
@@ -778,6 +784,15 @@ bool HMSnetwork::LoopWifiScan()
                 break;
             }
             my_delay(0.1L);
+
+            String net = WiFi.SSID(i);
+            for (int x = 0; x < net.length(); ++x)
+            {
+                Serial.print((int)net[x]);
+                Serial.print(" ");
+            }
+            Serial.println("\n----------");
+
             return true;
         }
     }

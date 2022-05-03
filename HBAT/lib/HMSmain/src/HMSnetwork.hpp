@@ -29,7 +29,6 @@ public:
     void SetupServer();
     void CheckNetworkLoop();
     void CheckConnectionLoop_Active();
-    void SetupWifiScan();
     void networkRoutes();
     bool LoopWifiScan();
 

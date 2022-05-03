@@ -107,6 +107,7 @@ void setup()
     Serial.print(F("\n===================================\n"));
     Serial.println(F("Setup Complete"));
     my_delay(1L);
+    network.LoopWifiScan();
 }
 
 void loop()

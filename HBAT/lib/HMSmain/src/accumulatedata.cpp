@@ -1,11 +1,12 @@
 #include "accumulatedata.hpp"
 
-int numSensors = 10;
+
 
 AccumulateData::AccumulateData()
 {
     maxVoltage = 24;
     maxTemp = 100;
+    numSensors = 10;
 }
 
 AccumulateData::~AccumulateData()

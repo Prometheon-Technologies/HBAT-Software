@@ -103,8 +103,6 @@ void Config::CreateDefaultConfig()
         NULL,                                // WIFISSID
         NULL,                                // WIFIPASS
         false,                               // MQTTConnectedState
-        NULL,                                // NTPTIME
-        NULL,                                // NTPTIMEOFFSET
         NULL,                                // MDNS
         NULL,                                // DHCPCHECK
         false,                               // data_json
@@ -247,8 +245,6 @@ bool Config::loadConfig()
     heapStr(&config.WIFISSID, jsonBuffer["WIFISSID"]);
     heapStr(&config.WIFIPASS, jsonBuffer["WIFIPASS"]);
     config.MQTTConnectedState = jsonBuffer["MQTTConnectedState"];
-    heapStr(&config.NTPTIME, jsonBuffer["NTPTIME"]);
-    heapStr(&config.NTPTIMEOFFSET, jsonBuffer["NTPTIMEOFFSET"]);
     heapStr(&config.MDNS, jsonBuffer["MDNS"]);
     heapStr(&config.DHCPCHECK, jsonBuffer["DHCPCHECK"]);
     config.numSensors = jsonBuffer["Number_of_Sensors"];
@@ -313,8 +309,6 @@ bool Config::saveConfig()
     json["WIFISSID"] = config.WIFISSID;
     json["WIFIPASS"] = config.WIFIPASS;
     json["MQTTConnectedState"] = config.MQTTConnectedState;
-    json["NTPTIME"] = config.NTPTIME;
-    json["NTPTIMEOFFSET"] = config.NTPTIMEOFFSET;
     json["MDNS"] = config.MDNS;
     json["DHCPCHECK"] = config.DHCPCHECK;
     json["Number_of_Sensors"] = config.numSensors;

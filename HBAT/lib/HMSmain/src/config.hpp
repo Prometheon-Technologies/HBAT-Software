@@ -40,8 +40,6 @@ public:
         char *WIFISSID;
         char *WIFIPASS;
         bool MQTTConnectedState;
-        char *NTPTIME;
-        char *NTPTIMEOFFSET;
         char *MDNS;
         char *DHCPCHECK;
         bool data_json;

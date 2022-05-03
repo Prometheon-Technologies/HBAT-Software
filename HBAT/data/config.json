@@ -23,8 +23,6 @@
 	"WIFISSID": "",
 	"WIFIPASS": "",
 	"MQTTConnectedState": false,
-	"NTPTIME": 0,
-	"NTPTIMEOFFSET": 0,
 	"MDNS": "",
 	"DHCPCHECK": "on",
 	"Number_of_Sensors": 0,

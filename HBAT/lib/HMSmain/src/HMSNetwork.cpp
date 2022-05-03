@@ -124,17 +124,14 @@ void WiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info)
 {
     log_i("Disconnected from WiFi access point");
     log_i("WiFi lost connection. Reason: %d", info.disconnected.reason);
-    log_i("Trying to Reconnect");
     digitalWrite(LED_PIN_RED, LOW);
-    network.CheckConnectionLoop_Active();
+    // network.CheckConnectionLoop_Active();
 }
 
 bool HMSnetwork::SetupNetworkStack()
 {
     String SSID;
     String PASS;
-    String ntptime;
-    String ntptimeoffset;
     String mdns;
     String dhcpcheck;
     String IP;
@@ -152,8 +149,6 @@ bool HMSnetwork::SetupNetworkStack()
         // Load values saved in SPIFFS
         SSID = cfg.config.WIFISSID;
         PASS = cfg.config.WIFIPASS;
-        ntptime = cfg.config.NTPTIME;
-        ntptimeoffset = cfg.config.NTPTIMEOFFSET;
         mdns = cfg.config.MDNS;
         dhcpcheck = cfg.config.DHCPCHECK;
         IP = cfg.config.IP;
@@ -189,6 +184,8 @@ bool HMSnetwork::SetupNetworkStack()
             IPAddress _subnet;
 
             WiFi.mode(WIFI_STA);
+            WiFi.setHostname(cfg.config.hostname); // define hostname
+
             localIP.fromString(WiFi.localIP().toString());
             gateway.fromString(WiFi.gatewayIP().toString());
             subnet.fromString(WiFi.subnetMask().toString());
@@ -197,18 +194,31 @@ bool HMSnetwork::SetupNetworkStack()
             _gateway.fromString(_gateway_);
             _subnet.fromString(_subnet_);
 
-            WiFi.onEvent(checkClientConnected, SYSTEM_EVENT_STA_CONNECTED);
+            /* WiFi.onEvent(checkClientConnected, SYSTEM_EVENT_STA_CONNECTED);
             WiFi.onEvent(WiFiGotIP, SYSTEM_EVENT_STA_GOT_IP);
-            WiFi.onEvent(WiFiStationDisconnected, SYSTEM_EVENT_STA_DISCONNECTED);
+            WiFi.onEvent(WiFiStationDisconnected, SYSTEM_EVENT_STA_DISCONNECTED); */
 
             if (dhcpcheck == "on")
             {
                 log_i("[INFO]: DHCP is on\n");
-                if (!WiFi.config(localIP, gateway, subnet))
+                WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
+
+                unsigned long currentMillis = millis();
+                previousMillis = currentMillis;
+
+                while (WiFi.status() != WL_CONNECTED)
                 {
-                    log_e("[INFO]: STA Failed to configure\n");
-                    return false;
+                    currentMillis = millis();
+                    if (currentMillis - previousMillis >= interval)
+                    {
+                        log_i("[INFO]: WiFi connection timed out.\n");
+                        return false;
+                    }
                 }
+
+                log_i("[INFO]: Connected to WiFi.\n");
+                log_i("IP address: %s\n", WiFi.localIP().toString().c_str());
+                return true;
             }
             else
             {
@@ -219,26 +229,25 @@ bool HMSnetwork::SetupNetworkStack()
                     log_e("[INFO]: STA Failed to configure.\n");
                     return false;
                 }
-            }
-            WiFi.setHostname(cfg.config.hostname); // define hostname
-            WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
+                WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
 
-            unsigned long currentMillis = millis();
-            previousMillis = currentMillis;
+                unsigned long currentMillis = millis();
+                previousMillis = currentMillis;
 
-            while (WiFi.status() != WL_CONNECTED)
-            {
-                currentMillis = millis();
-                if (currentMillis - previousMillis >= interval)
+                while (WiFi.status() != WL_CONNECTED)
                 {
-                    log_i("[INFO]: WiFi connection timed out.\n");
-                    return false;
+                    currentMillis = millis();
+                    if (currentMillis - previousMillis >= interval)
+                    {
+                        log_i("[INFO]: WiFi connection timed out.\n");
+                        return false;
+                    }
                 }
-            }
 
-            log_i("[INFO]: Connected to WiFi.\n");
-            log_i("IP address: %s\n", WiFi.localIP().toString().c_str());
-            return true;
+                log_i("[INFO]: Connected to WiFi.\n");
+                log_i("IP address: %s\n", WiFi.localIP().toString().c_str());
+                return true;
+            }
         }
     }
     return false;

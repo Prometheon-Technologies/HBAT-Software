@@ -471,7 +471,7 @@ void HMSnetwork::networkRoutes()
                 }
                 cfg.setConfigChanged();
                 request->send(200, MIMETYPE_JSON, "Done. ESP will restart and connect to your router");
-                my_delay(0.03L);
+                my_delay(3L);
                 ESP.restart(); });
 
     server.on("/mqttUpdate", HTTP_GET, [&](AsyncWebServerRequest *request)

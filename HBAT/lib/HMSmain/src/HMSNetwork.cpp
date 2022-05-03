@@ -200,24 +200,6 @@ bool HMSnetwork::SetupNetworkStack()
             if (dhcpcheck == "on")
             {
                 log_i("[INFO]: DHCP is on\n");
-                WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
-
-                unsigned long currentMillis = millis();
-                previousMillis = currentMillis;
-
-                while (WiFi.status() != WL_CONNECTED)
-                {
-                    currentMillis = millis();
-                    if (currentMillis - previousMillis >= interval)
-                    {
-                        log_i("[INFO]: WiFi connection timed out.\n");
-                        return false;
-                    }
-                }
-
-                log_i("[INFO]: Connected to WiFi.\n");
-                log_i("IP address: %s\n", WiFi.localIP().toString().c_str());
-                return true;
             }
             else
             {
@@ -228,28 +210,30 @@ bool HMSnetwork::SetupNetworkStack()
                     log_e("[INFO]: STA Failed to configure.\n");
                     return false;
                 }
-                WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
-
-                unsigned long currentMillis = millis();
-                previousMillis = currentMillis;
-
-                while (WiFi.status() != WL_CONNECTED)
-                {
-                    currentMillis = millis();
-                    if (currentMillis - previousMillis >= interval)
-                    {
-                        log_i("[INFO]: WiFi connection timed out.\n");
-                        return false;
-                    }
-                }
-
-                log_i("[INFO]: Connected to WiFi.\n");
-                log_i("IP address: %s\n", WiFi.localIP().toString().c_str());
-                return true;
             }
-            
+
             WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
             WiFi.setHostname(cfg.config.hostname); // define hostname
+
+            WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
+
+            unsigned long currentMillis = millis();
+            previousMillis = currentMillis;
+
+            while (WiFi.status() != WL_CONNECTED)
+            {
+                currentMillis = millis();
+                if (currentMillis - previousMillis >= interval)
+                {
+                    log_i("[INFO]: WiFi connection timed out.\n");
+                    return false;
+                }
+            }
+
+            log_i("[INFO]: Connected to WiFi.\n");
+            log_i("IP address: %s\n", WiFi.localIP().toString().c_str());
+            return true;
+
         }
     }
     return false;

@@ -184,7 +184,6 @@ bool HMSnetwork::SetupNetworkStack()
             IPAddress _subnet;
 
             WiFi.mode(WIFI_STA);
-            WiFi.setHostname(cfg.config.hostname); // define hostname
 
             localIP.fromString(WiFi.localIP().toString());
             gateway.fromString(WiFi.gatewayIP().toString());
@@ -248,6 +247,9 @@ bool HMSnetwork::SetupNetworkStack()
                 log_i("IP address: %s\n", WiFi.localIP().toString().c_str());
                 return true;
             }
+            
+            WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
+            WiFi.setHostname(cfg.config.hostname); // define hostname
         }
     }
     return false;

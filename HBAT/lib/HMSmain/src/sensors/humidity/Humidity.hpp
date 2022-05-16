@@ -8,7 +8,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_SHT31.h>
-#include "defines.hpp"
+#include <defines.hpp>
 
 struct Hum
 {

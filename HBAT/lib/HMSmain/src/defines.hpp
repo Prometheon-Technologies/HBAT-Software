@@ -10,6 +10,7 @@
 
 #define LED_BUILTIN 2
 
+// Data stack
 #include <Arduino.h>
 #include <stdio.h>  /* printf, NULL */
 #include <stdlib.h> /* strtoul */
@@ -22,32 +23,33 @@
 #include <SPIFFS.h>
 
 // data Struct
-#include "config.hpp"
+#include "data/config.hpp"
 
 // IO
 #include <Wire.h>
-#include "i2cscan.hpp"
+#include "io/i2cscan.hpp"
 
-// Data stack
-#include "HMS.hpp"
-#include "CellTemp.hpp"
-#include "Humidity.hpp"
+#include "sensors/power/HMS.hpp"
 // Humidity Sensors
+#include "sensors/humidity/Humidity.hpp"
 //#include <sfm3003.hpp>
 
 // Temp Sensors
+#include "sensors/temperature/CellTemp.hpp"
 
-// wifi definitions
-#include "HMSNetwork.hpp"
-#include "mdns.hpp"
-#include "OTA.hpp"
+// Network Stack
+#include "network/HMSNetwork.hpp"
+#include "network/mdns.hpp"
+#include "network/OTA.hpp"
 
 // Accumulate Data
-#include "accumulatedata.hpp"
+#include "data/accumulatedata.hpp"
 
 // Timed tasks
-#include "Relays.hpp"
-#include "timedtasks.hpp"
+#include "data/timedtasks.hpp"
+
+// Relays and Outputs
+#include "io/Relays.hpp"
 
 #define STR(x) #x
 #define XSTR(x) STR(x)

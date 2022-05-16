@@ -5,7 +5,7 @@
 #pragma once
 #ifndef HMSMDNS_hpp
 #define HMSMDNS_hpp
-#include "defines.hpp"
+#include <defines.hpp>
 #include <ESPmDNS.h>
 
 class HMSmdns

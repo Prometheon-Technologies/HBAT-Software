@@ -6,7 +6,7 @@
 #ifndef HMSMQTT_HPP
 #define HMSMQTT_HPP
 #include <PubSubClient.h>
-#include "defines.hpp"
+#include <defines.hpp>
 
 extern PubSubClient mqttClient;
 class HMSMqtt

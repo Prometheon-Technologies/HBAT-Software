@@ -6,7 +6,7 @@
 #ifndef HMSNETWORK_hpp
 #define HMSNETWORK_hpp
 
-#include "defines.hpp"
+#include <defines.hpp>
 #include "SecureOTA.hpp"
 #include <ESPmDNS.h>
 #include <WiFi.h>

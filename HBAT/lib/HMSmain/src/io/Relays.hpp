@@ -1,6 +1,6 @@
 #ifndef RELAYS_HPP
 #define RELAYS_HPP
-#include "defines.hpp"
+#include <defines.hpp>
 
 class Relays
 {

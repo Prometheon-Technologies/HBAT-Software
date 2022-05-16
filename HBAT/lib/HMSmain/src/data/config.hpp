@@ -6,7 +6,7 @@
 #pragma once
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
-#include "defines.hpp"
+#include <defines.hpp>
 
 class Config
 {

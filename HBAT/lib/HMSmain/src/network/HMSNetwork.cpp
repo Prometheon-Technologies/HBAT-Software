@@ -108,7 +108,7 @@ void notFound(AsyncWebServerRequest *request)
     request->send(404, "text/plain", "Not found.");
 }
 
-void checkClientConnected(WiFiEvent_t event, WiFiEventInfo_t info)
+/* void checkClientConnected(WiFiEvent_t event, WiFiEventInfo_t info)
 {
     log_i("Connected to AP successfully!");
     digitalWrite(LED_PIN_RED, HIGH);
@@ -126,7 +126,7 @@ void WiFiStationDisconnected(WiFiEvent_t event, WiFiEventInfo_t info)
     log_i("WiFi lost connection. Reason: %d", info.disconnected.reason);
     digitalWrite(LED_PIN_RED, LOW);
     // network.CheckConnectionLoop_Active();
-}
+} */
 
 void wifiClear()
 {

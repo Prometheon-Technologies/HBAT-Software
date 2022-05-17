@@ -9,7 +9,7 @@ DallasTemperature sensors(&oneWire);
 
 DeviceAddress temp_sensor_addresses;
 
-Temp cell_temp_sensor_results;
+CellTemp::Temp cell_temp_sensor_results;
 
 int sensors_count = 0;
 CellTemp::CellTemp()
@@ -87,7 +87,7 @@ void CellTemp::printAddress(DeviceAddress deviceAddress)
  * Parameters: None
  * Return: float array - Temperature of the sensors
  ******************************************************************************/
-Temp CellTemp::ReadTempSensorData()
+CellTemp::Temp CellTemp::ReadTempSensorData()
 {
     // handle the case where no sensors are connected
     if (sensors_count == 0)

@@ -9,7 +9,9 @@ int loopCnt = 0;
 Adafruit_SHT31 sht31;
 Adafruit_SHT31 sht31_2;
 
+#if USE_SFM3003
 SensirionI2CSfmSf06 sfmSf06;
+#endif // USE_SFM3003
 
 bool enableHeater = false;
 
@@ -390,6 +392,7 @@ Humidity::Hum Humidity::ReadSensor()
   }
 }
 
+#if USE_SFM3003
 void Humidity::sfm3003Setup()
 {
   uint16_t error;
@@ -457,6 +460,7 @@ Humidity::Hum Humidity::sfm3003Loop()
     return result;
   }
 }
+#endif // USE_SFM3003
 
 /******************************************************************************
  * Function: Control MPX2010DP - K014308 and AD623

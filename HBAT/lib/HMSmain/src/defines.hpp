@@ -1,6 +1,6 @@
 /*
  defines.hpp - HBAT library
- Copyright (c) 2021 Zacariah Austin Heim.
+ Copyright (c) 2021 ZanzyTHEbar
  */
 #ifndef DEFINES_hpp
 #define DEFINES_hpp
@@ -10,6 +10,7 @@
 
 #define LED_BUILTIN 2
 
+// Data stack
 #include <Arduino.h>
 #include <stdio.h>  /* printf, NULL */
 #include <stdlib.h> /* strtoul */
@@ -22,33 +23,33 @@
 #include <SPIFFS.h>
 
 // data Struct
-#include "globaldebug.hpp"
-#include "config.hpp"
+#include "data/config.hpp"
 
 // IO
 #include <Wire.h>
-#include "i2cscan.hpp"
+#include "io/i2cscan.hpp"
 
-// Data stack
-#include "HMS.hpp"
-#include "celltemp.hpp"
-#include "Humidity.hpp"
+#include "sensors/power/HMS.hpp"
 // Humidity Sensors
+#include "sensors/humidity/Humidity.hpp"
 //#include <sfm3003.hpp>
 
 // Temp Sensors
+#include "sensors/temperature/CellTemp.hpp"
 
-// wifi definitions
-#include "HMSnetwork.hpp"
-#include "mdns.hpp"
-#include "OTA.hpp"
+// Network Stack
+#include "network/HMSNetwork.hpp"
+#include "network/mdns.hpp"
+#include "network/OTA.hpp"
 
 // Accumulate Data
-#include "accumulatedata.hpp"
+#include "data/accumulatedata.hpp"
 
 // Timed tasks
-#include "Relays.hpp"
-#include "timedtasks.hpp"
+#include "data/timedtasks.hpp"
+
+// Relays and Outputs
+#include "io/Relays.hpp"
 
 #define STR(x) #x
 #define XSTR(x) STR(x)
@@ -71,27 +72,11 @@ void my_delay(volatile long delay_time);
 String generateDeviceID();
 
 /*######################## MQTT Configuration ########################*/
-#ifdef ENABLE_MQTT_SUPPORT
+#if ENABLE_MQTT_SUPPORT
 _Pragma (STR(message (ENABLE_MQTT_SUPPORT)))
-// these are deafault settings which can be changed in the web interface "settings" page
-#define MQTT_SECURE_ENABLED 0
-#define MQTT_PORT 1883
-#define MQTT_PORT_SECURE 8883
-
-#define MQTT_MAX_TRANSFER_SIZE 1024
 // MQTT includes
 #include "HMSmqtt.hpp"
-
-    // Variables for MQTT
-    extern const char *MQTT_TOPIC;
-extern const String HOMEASSISTANT_MQTT_HOSTNAME;
-extern const String MQTT_USER;
-extern const String MQTT_PASS;
-extern const String MQTT_HOMEASSISTANT_TOPIC_SET; // MQTT Topic to subscribe to for changes(Home Assistant)
-extern const String MQTT_HOMEASSISTANT_TOPIC;     // MQTT Topic to Publish to for state and config (Home Assistant);
-extern String MQTT_DEVICE_NAME;                   // MQTT Topic to Publish to for state and config (Any MQTT Broker)
-extern bool mqttProcessing;
-#endif
+#endif // ENABLE_MQTT_SUPPORT
 /*###################### MQTT Configuration END ######################*/
 
 // Variables

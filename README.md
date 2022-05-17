@@ -2,7 +2,7 @@
    <img width="250px" height="120px" title="HBAT Logo" src="img/logo.png">
 </p>
 
----
+----
 
 # HBAT-Software Public repo
 
@@ -14,6 +14,7 @@
   - [Current Network Flow-Chart](#current-network-flow-chart)
   - [MQTT Broker Configuration and Connection](#mqtt-broker-configuration-and-connection)
   - [Project Configuration](#project-configuration)
+  - [Important Notes](#important-notes)
 
 Custom Software Stack files are located in `HBAT/lib` and `HBAT/HBAT_HMS_V1.0`.
 
@@ -134,7 +135,7 @@ For this to work, the MQTT service needs to be advertised. On a Linux host syste
 - [x] Implement Error Correct Code for sensors.
 - [x] Implement I2C Scanner.
 - [x] Implement Humidity and Temperature sensors.
-- [ ] Implement Relay Logic. //TODO: Interface with UI
+- [x] Implement Relay Logic. //TODO: Interface with UI
 - [x] Implement UI.
 - [ ] Implement MQTT. //TODO: Full implementation still needs to be done.
 - [x] Implement MQTT discovery.
@@ -146,3 +147,19 @@ For this to work, the MQTT service needs to be advertised. On a Linux host syste
 - [ ] Implement Battery Charge Curve.
 - [ ] Implement Battery Capacity measurements.
 - [x] Implement config file stored in flash.
+
+## Important Notes
+
+> **Important**: If you receive the error:
+
+      WebAuthentication.cpp:73: undefined reference to mbedtls_md5_starts
+
+> Please remove the code *within* the `ifdef ESP32` block on line `72`. and paste the following:
+
+```ino
+   mbedtls_md5_init(&_ctx); mbedtls_md5_update_ret (&_ctx,data,len);
+   mbedtls_md5_finish_ret(&_ctx,data);
+   mbedtls_internal_md5_process( &_ctx ,data); // mbedtls_md5_starts(&_ctx); // mbedtls_md5_update(&_ctx, data, len); // mbedtls_md5_finish(&_ctx, _buf);
+```
+
+> the comments are the old-lines.

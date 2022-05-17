@@ -104,14 +104,6 @@
             <form>
                 <section class="wificreds">
                     <h2>Settings</h2>
-                    <label for="apName">AP SSID</label>
-                    <input type="text" id="apName"><br>
-                    <label for="apPass">AP Pass</label>
-                    <input type="text" id="apPass"><br>
-
-                    <hr>
-
-                    <button onclick="saveSettings()">Save</button>
                 </section>
                 <section class="mqttcreds">
                     <label for="mqttIP">MQTT IP</label>
@@ -121,8 +113,8 @@
 
                     <label for="mqttPass">MQTT Pass</label>
                     <input type="text" id="mqttPass"><br>
-                    <hr>
                     <button onclick="saveMQTTSettings()">Save</button>
+                    <hr>
                     <br>
                     <br>
                 </section>
@@ -157,6 +149,16 @@
                 <hr>
                 <a href="/wifimanager">
                     <input type="button" value="Wifi Manager" />
+                </a>
+                <br>
+                <hr>
+                <a href="/api/reset/config">
+                    <input type="button" value="Reset Config" />
+                </a>
+                <br>
+                <hr>
+                <a href="/api/reset/device">
+                    <input type="button" value="Reset Device" />
                 </a>
                 <script>
 
@@ -221,7 +223,6 @@
             graphData = await JSON.parse(await getHTML("/data.json"));
             console.log(graphData);
             setMeeterValue("batteryLevel", graphData.stack_voltage, "%", "Yellow");
-            /* setMeeterValue("batteryLevel", 20, "%", "Yellow"); */
             setMeeterValue("batteryTemp", graphData.stack_temp, "℃", "red");
             setMeeterValue("batteryHumidity", graphData.stack_humidity, "%💧", "cyan");
 
@@ -232,7 +233,7 @@
             buildGraph(graphData.GraphData);
         }
 
-        window.setInterval(grabData, 5000);
+        window.setInterval(grabData, 1000);
 
         async function updateToggles(togglesToUpdate) {
             for (let i = 0; i < togglesToUpdate.length; i++) {
@@ -242,9 +243,9 @@
         async function updateMQTT(mqttToUpdate) {
             (await document.getElementById("mqttEnableState")).innerHTML = ((mqttToUpdate == 1) ? toggleOnString : toggleOffString);
         }
-        async function saveSettings() {
+        /* async function saveSettings() {
             await getHTML("./wifiUpdate?apName=" + document.getElementById("apName").value + "&apPass=" + document.getElementById("apPass").value, false);
-        }
+        } */
         async function saveMQTTSettings() {
             await getHTML("./mqttUpdate?mqttIP=" + document.getElementById("mqttIP").value + "&mqttName=" + document.getElementById("mqttName").value + "&mqttPass=" + document.getElementById("mqttPass").value, false);
         }

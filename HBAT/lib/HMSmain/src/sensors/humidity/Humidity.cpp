@@ -9,6 +9,8 @@ int loopCnt = 0;
 Adafruit_SHT31 sht31;
 Adafruit_SHT31 sht31_2;
 
+SensirionI2CSfmSf06 sfmSf06;
+
 bool enableHeater = false;
 
 int _offset = 32000; // _Offset for the sensor
@@ -16,7 +18,7 @@ int HUMIDITY_SENSORS_ACTIVE = 0;
 
 float _scale = 140.0; // _Scale factor for Air and N2 is 140.0, O2 is 142.8
 
-Hum result;
+Humidity::Hum result;
 
 Humidity::Humidity()
 {
@@ -169,39 +171,39 @@ float Humidity::AverageStackTemp()
 {
   switch (HUMIDITY_SENSORS_ACTIVE)
   {
-    case 0:
-    {
-      result = {0, 0, 0, 0};
-      float stack_humidity = 0;
-      return stack_humidity; // return 0 if no sensors are active
-      break;
-    }
+  case 0:
+  {
+    result = {0, 0, 0, 0};
+    float stack_humidity = 0;
+    return stack_humidity; // return 0 if no sensors are active
+    break;
+  }
 
-    case 1:
-    {
-      float stack_temp = result.temp;
-      return stack_temp; // Only one sensor - return the value of that sensor
-      break;
-    }
+  case 1:
+  {
+    float stack_temp = result.temp;
+    return stack_temp; // Only one sensor - return the value of that sensor
+    break;
+  }
 
-    case 2:
-    {
-      float stack_temp = result.temp_2;
-      return stack_temp; // Only one sensor - return the value of that sensor
-      break;
-    }
+  case 2:
+  {
+    float stack_temp = result.temp_2;
+    return stack_temp; // Only one sensor - return the value of that sensor
+    break;
+  }
 
-    case 3:
-    {
-      float stack_temp = result.temp + result.temp_2;
-      return stack_temp / 2; // Read the _temperature from the sensor and average the two sensors.
-      break;
-    }
+  case 3:
+  {
+    float stack_temp = result.temp + result.temp_2;
+    return stack_temp / 2; // Read the _temperature from the sensor and average the two sensors.
+    break;
+  }
 
-    default:
-    {
-      break;
-    }
+  default:
+  {
+    break;
+  }
   }
   return 0;
 }
@@ -217,39 +219,39 @@ float Humidity::StackHumidity()
 {
   switch (HUMIDITY_SENSORS_ACTIVE)
   {
-    case 0:
-    {
-      result = {0, 0, 0, 0};
-      float stack_humidity = 0;
-      return stack_humidity; // return 0 if no sensors are active
-      break;
-    }
+  case 0:
+  {
+    result = {0, 0, 0, 0};
+    float stack_humidity = 0;
+    return stack_humidity; // return 0 if no sensors are active
+    break;
+  }
 
-    case 1:
-    {
-      float stack_humidity = result.humidity;
-      return stack_humidity; // Only one sensor - return the value of that sensor
-      break;
-    }
+  case 1:
+  {
+    float stack_humidity = result.humidity;
+    return stack_humidity; // Only one sensor - return the value of that sensor
+    break;
+  }
 
-    case 2:
-    {
-      float stack_humidity = result.humidity_2;
-      return stack_humidity; // Only one sensor - return the value of that sensor
-      break;
-    }
+  case 2:
+  {
+    float stack_humidity = result.humidity_2;
+    return stack_humidity; // Only one sensor - return the value of that sensor
+    break;
+  }
 
-    case 3:
-    {
-      float stack_humidity = result.humidity + result.humidity_2;
-      return stack_humidity / 2; // Read the _humidity from the sensor and average the two sensors.
-      break;
-    }
+  case 3:
+  {
+    float stack_humidity = result.humidity + result.humidity_2;
+    return stack_humidity / 2; // Read the _humidity from the sensor and average the two sensors.
+    break;
+  }
 
-    default:
-    {
-      break;
-    }
+  default:
+  {
+    break;
+  }
   }
   return 0;
 }
@@ -260,7 +262,7 @@ float Humidity::StackHumidity()
  * Parameters: None
  * Return: float array
  ******************************************************************************/
-Hum Humidity::ReadSensor()
+Humidity::Hum Humidity::ReadSensor()
 {
   switch (HUMIDITY_SENSORS_ACTIVE)
   {
@@ -388,6 +390,74 @@ Hum Humidity::ReadSensor()
   }
 }
 
+void Humidity::sfm3003Setup()
+{
+  uint16_t error;
+  char errorMessage[256];
+
+  /**
+   * select the proper i2c address for your sensor
+   * see datasheet of your sensor
+   *
+   */
+  sfmSf06.begin(Wire, ADDR_SFM3003_300_CE);
+
+  error = sfmSf06.stopContinuousMeasurement();
+
+  if (error)
+  {
+    errorToString(error, errorMessage, 256);
+    log_i("Error trying to execute stopContinuousMeasurement(): %s", errorMessage);
+  }
+
+  uint32_t productIdentifier;
+  uint8_t serialNumber[8];
+  uint8_t serialNumberSize = 8;
+
+  error = sfmSf06.readProductIdentifier(productIdentifier, serialNumber, serialNumberSize);
+
+  if (error)
+  {
+    errorToString(error, errorMessage, 256);
+    log_i("Error trying to execute readProductIdentifier(): %s", errorMessage);
+  }
+  else
+  {
+    log_i("Product Identifer: %d", productIdentifier);
+    log_i("Serial Number:");
+    log_i("0x");
+    for (size_t i = 0; i < serialNumberSize; i++)
+    {
+      uint8_t value = serialNumber[i];
+      log_i("%d", value < 16 ? "0" : "");
+      log_i("%d", value, HEX);
+    }
+  }
+
+  sfmSf06.startO2ContinuousMeasurement();
+  log_i("flow\ttemperature");
+}
+
+Humidity::Hum Humidity::sfm3003Loop()
+{
+  uint16_t error;
+  char errorMessage[256];
+  float flow = 0;
+  float temperature = 0;
+  uint16_t status = 0;
+
+  // Read Measurement
+  error = sfmSf06.readMeasurementData(flow, temperature, status);
+  my_delay(1L);
+  if (!error)
+  {
+    log_i("%.3f\t%.3f", flow, temperature);
+    result.flow = flow;
+    result.temperature = temperature;
+    return result;
+  }
+}
+
 /******************************************************************************
  * Function: Control MPX2010DP - K014308 and AD623
  * Description: This function allows for the control of the MPX2010DP - K014308 and AD623
@@ -396,7 +466,13 @@ Hum Humidity::ReadSensor()
  * ADD IN CODE TO READ PRESSURE SENSORS
  ******************************************************************************/
 
-uint8_t Humidity::crc8(const uint8_t result, uint8_t crc)
+
+
+
+
+
+
+/* uint8_t Humidity::crc8(const uint8_t result, uint8_t crc)
 {
   crc ^= result;
 
@@ -444,7 +520,7 @@ int Humidity::loopSFM3003()
     }
   }
   return 0;
-}
+} */
 
 /* int Humidity::SetupSFM3003()
 {

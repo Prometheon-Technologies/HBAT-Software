@@ -17,7 +17,6 @@ void setup()
     Serial.println(F("Setting up the program, standby..."));
     // Setup the main loop
     // Initialize the relay pins
-    
     // use a c++ ranged for loop to iterate through the relay pins
     for (auto pin : cfg.config.relays_pin)
     {
@@ -85,8 +84,8 @@ void setup()
 #if ENABLE_MQTT_SUPPORT
 
     Mdns.DiscovermDNSBroker(); // discover the mDNS broker for mqtt
-#endif // ENABLE_MQTT_SUPPORT
-#endif // ENABLE_MDNS_SUPPORT
+#endif                         // ENABLE_MQTT_SUPPORT
+#endif                         // ENABLE_MDNS_SUPPORT
 
 #if ENABLE_MQTT_SUPPORT
     HMSmqtt.MQTTSetup();
@@ -106,7 +105,7 @@ void setup()
     Serial.print(F("\n===================================\n"));
     Serial.println(F("Setup Complete"));
     my_delay(1L);
-    //network.LoopWifiScan();
+    // network.LoopWifiScan();
 }
 
 void loop()
@@ -137,7 +136,7 @@ void loop()
 #endif // ENABLE_MQTT_SUPPORT
 
 #if ENABLE_MDNS_SUPPORT
-        Mdns.mDNSLoop();
+    Mdns.mDNSLoop();
 #endif // ENABLE_MDNS_SUPPORT
 
     my_delay(1L);

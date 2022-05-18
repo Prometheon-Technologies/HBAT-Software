@@ -40,7 +40,7 @@ public:
   
 #if USE_SFM3003
   void sfm3003Setup();
-  void sfm3003Loop();
+  Hum sfm3003Loop();
 #endif // USE_SFM3003
 
   /* int loopSFM3003();

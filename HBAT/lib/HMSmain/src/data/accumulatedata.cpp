@@ -74,7 +74,7 @@ void AccumulateData::InitAccumulateData()
     cfg.config.numSensors = numSensors;
 
     // Flow Rate dataTosend
-    cfg.config.flow_rate = humidity.sfm3003Loop();
+    cfg.config.flow_rate = humidity.result.flow;
     // returns a float array of cell temperatures
 
     // loop through and store per cell temp data

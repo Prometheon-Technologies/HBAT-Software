@@ -452,13 +452,19 @@ Humidity::Hum Humidity::sfm3003Loop()
   // Read Measurement
   error = sfmSf06.readMeasurementData(flow, temperature, status);
   my_delay(1L);
-  if (!error)
+
+  if (error)
   {
-    log_i("%.3f\t%.3f", flow, temperature);
-    result.flow = flow;
-    result.temperature = temperature;
+    result.flow = 0;
+    result.temperature = 0;
+    log_e("Error trying to execute readMeasurementData(): %s", errorMessage);
     return result;
   }
+
+  log_i("%.3f\t%.3f", flow, temperature);
+  result.flow = flow;
+  result.temperature = temperature;
+  return result;
 }
 #endif // USE_SFM3003
 
@@ -470,11 +476,7 @@ Humidity::Hum Humidity::sfm3003Loop()
  * ADD IN CODE TO READ PRESSURE SENSORS
  ******************************************************************************/
 
-
 /* Put pressure sensor code here */
-
-
-
 
 /* uint8_t Humidity::crc8(const uint8_t result, uint8_t crc)
 {

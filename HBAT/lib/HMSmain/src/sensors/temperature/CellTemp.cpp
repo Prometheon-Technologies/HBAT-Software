@@ -11,18 +11,23 @@ DeviceAddress temp_sensor_addresses;
 
 CellTemp::Temp cell_temp_sensor_results;
 
-int sensors_count = 0;
 CellTemp::CellTemp()
 {
+    sensors_count = 0;
 }
 
 CellTemp::~CellTemp()
 {
 }
 
-int setSensorCount()
+void CellTemp::setSensorCount()
 {
-    return sensors_count = sensors.getDeviceCount(); // returns the number of sensors found
+    sensors_count = sensors.getDeviceCount(); // returns the number of sensors found
+}
+
+int CellTemp::getSensorCount()
+{
+    return sensors_count;
 }
 
 /******************************************************************************

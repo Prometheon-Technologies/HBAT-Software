@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sensirion_arch_config.h"
-#include "sensirion_i2c.h"
+#include <sensirion_arch_config.h>
+#include <sensirion_i2c.h>
 
 // needed for delay() routine
 #include <Arduino.h>

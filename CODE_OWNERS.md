@@ -11,3 +11,5 @@ In addition to @ZanzyTHEbar the following code is mainly owned by:
 |                            |
 | HBAT Source Code           |
 | all                        | @ZanzyTHEbar
+|                            |
+| data/frontend.html         | @mmiscool

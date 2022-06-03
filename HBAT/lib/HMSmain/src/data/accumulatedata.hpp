@@ -14,9 +14,9 @@ public:
 
 private:
     // Stack Data to send
-    int maxVoltage;
-    int maxTemp;
-    int numSensors;
+    int _maxVoltage;
+    int _maxTemp;
+    int _numSensors;
 };
 
 extern AccumulateData accumulatedata;

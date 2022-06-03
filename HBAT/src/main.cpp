@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include <defines.hpp>
 
 /******************************************************************************
@@ -18,7 +17,6 @@ void setup()
     Serial.println(F("Setting up the program, standby..."));
     // Setup the main loop
     // Initialize the relay pins
-    
     // use a c++ ranged for loop to iterate through the relay pins
     for (auto pin : cfg.config.relays_pin)
     {
@@ -41,12 +39,13 @@ void setup()
     {
         Serial.println(F("I2C failed"));
     }
-    HMSmain.setupSensor();
 
     Serial.println(F("HMS booting - please wait"));
     Serial.println(F("Starting..."));
+    HMSmain.setupSensor();
     Cell_Temp.SetupSensors();
 
+    humidity.sfm3003Setup();
     switch (humidity.setupSensor())
     {
     case 0:
@@ -80,14 +79,13 @@ void setup()
     HMSmqtt.loadMQTTConfig();
 #endif // ENABLE_MQTT_SUPPORT
 
-    if (ENABLE_MDNS_SUPPORT)
-    {
-        Mdns.SetupmDNSServer(); // setup the mDNS server for the future web-front-end
-        if (ENABLE_MQTT_SUPPORT)
-        {
-            Mdns.DiscovermDNSBroker(); // discover the mDNS broker for mqtt
-        }
-    }
+#if ENABLE_MDNS_SUPPORT
+    Mdns.SetupmDNSServer(); // setup the mDNS server for the future web-front-end
+#if ENABLE_MQTT_SUPPORT
+
+    Mdns.DiscovermDNSBroker(); // discover the mDNS broker for mqtt
+#endif                         // ENABLE_MQTT_SUPPORT
+#endif                         // ENABLE_MDNS_SUPPORT
 
 #if ENABLE_MQTT_SUPPORT
     HMSmqtt.MQTTSetup();
@@ -107,7 +105,7 @@ void setup()
     Serial.print(F("\n===================================\n"));
     Serial.println(F("Setup Complete"));
     my_delay(1L);
-    network.LoopWifiScan();
+    // network.LoopWifiScan();
 }
 
 void loop()
@@ -137,9 +135,9 @@ void loop()
     }
 #endif // ENABLE_MQTT_SUPPORT
 
-    if (ENABLE_MDNS_SUPPORT)
-    {
-        Mdns.mDNSLoop();
-    }
+#if ENABLE_MDNS_SUPPORT
+    Mdns.mDNSLoop();
+#endif // ENABLE_MDNS_SUPPORT
+
     my_delay(1L);
 }

@@ -1,12 +1,10 @@
 #include "accumulatedata.hpp"
 
-
-
 AccumulateData::AccumulateData()
 {
-    maxVoltage = 24;
-    maxTemp = 100;
-    numSensors = 10;
+    _maxVoltage = 24;
+    _maxTemp = 100;
+    _numSensors = 10;
 }
 
 AccumulateData::~AccumulateData()
@@ -21,11 +19,13 @@ AccumulateData::~AccumulateData()
  ******************************************************************************/
 void AccumulateData::InitAccumulateData()
 {
+    _numSensors = Cell_Temp.getSensorCount();
+    cfg.config.numSensors = _numSensors;
     // Initialize the library
     humidity.ReadSensor();
-    if (numSensors > maxCellCount)
+    if (_numSensors > maxCellCount)
     {
-        numSensors = maxCellCount;
+        _numSensors = maxCellCount;
     }
 
     /******************************************************************************
@@ -42,7 +42,7 @@ void AccumulateData::InitAccumulateData()
     // Add arrays for Cell level Data.
     float *cell_voltage = HMSmain.readSensAndCondition();
     // loop through and store per cell voltage
-    for (int i = 0; i < numSensors; i++)
+    for (int i = 0; i < _numSensors; i++)
     {
         cfg.config.cell_voltage[i] = cell_voltage[i];
     }
@@ -71,17 +71,17 @@ void AccumulateData::InitAccumulateData()
 
     // free(&cell_voltage); // free the memory
     cfg.config.cell_count_max = maxCellCount;
-    cfg.config.numSensors = numSensors;
+    cfg.config.numSensors = _numSensors;
 
     // Flow Rate dataTosend
-    cfg.config.flow_rate = humidity.loopSFM3003();
+    cfg.config.flow_rate = humidity.result.flow;
     // returns a float array of cell temperatures
 
     // loop through and store per cell temp data
 
-    for (int i = 0; i < numSensors; i++)
+    for (int i = 0; i < _numSensors; i++)
     {
-        cfg.config.cell_temp[i] = cell_temp_sensor_results.temp[i];
+        cfg.config.cell_temp[i] = Cell_Temp.cell_temp_sensor_results.temp[i];
     }
 
     // Relays
@@ -162,14 +162,14 @@ bool AccumulateData::SendData()
         json += R"====({"label": "🌡 )====" + (String)i + "\",\n";
         json += R"====("type": "temp",)====" + (String) "\n";
         json += R"====("value": )====" + (String)cfg.config.cell_temp[i] + (String) ",\n";
-        json += R"====("maxValue": )====" + (String)maxTemp;
+        json += R"====("maxValue": )====" + (String)_maxTemp;
         json += R"====(})====" + (String) "\n";
         json += R"====(,)====";
 
         json += R"====({"label": "⚡ )====" + (String)i + "\",\n";
         json += R"====("type": "volt",)====" + (String) "\n";
         json += R"====("value": )====" + (String)cfg.config.cell_voltage[i] + (String) ",\n";
-        json += R"====("maxValue": )====" + (String)maxVoltage;
+        json += R"====("maxValue": )====" + (String)_maxVoltage;
         json += R"====(})====" + (String) "\n";
 
         if (i < 9)

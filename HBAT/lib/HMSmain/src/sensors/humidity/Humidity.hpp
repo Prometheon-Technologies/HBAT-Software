@@ -5,20 +5,12 @@
 
 #ifndef HUMIDITY_HPP
 #define HUMIDITY_HPP
-#include <Arduino.h>
+#include <defines.hpp>
+#if USE_SFM3003
+#include <SensirionI2CSfmSf06.h>
+#endif // USE_SFM3003
 #include <Wire.h>
 #include <Adafruit_SHT31.h>
-#include <defines.hpp>
-
-struct Hum
-{
-  float temp;
-  float humidity;
-  float temp_2;
-  float humidity_2;
-};
-
-extern Hum result;
 
 class Humidity
 {
@@ -31,9 +23,28 @@ public:
   bool checkHeaterEnabled();
   float StackHumidity();
   float AverageStackTemp();
+
+  struct Hum
+  {
+    float temp;
+    float humidity;
+    float temp_2;
+    float humidity_2;
+    float flow;
+    float temperature;
+  };
+
+  Hum result;
+
   Hum ReadSensor();
-  int loopSFM3003();
-  uint8_t crc8(const uint8_t data, uint8_t crc);
+  
+#if USE_SFM3003
+  void sfm3003Setup();
+  Hum sfm3003Loop();
+#endif // USE_SFM3003
+
+  /* int loopSFM3003();
+  uint8_t crc8(const uint8_t data, uint8_t crc); */
 
   // Variables
 private:

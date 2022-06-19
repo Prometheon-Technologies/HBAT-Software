@@ -34,6 +34,18 @@ float HMS::readVoltage(byte pinnumber)
     return (float)((analogRead(pinnumber) * 3300.0) / 4095.0);
 }
 
+/* ADC readings v voltage
+ *  y = -0.000000000009824x3 + 0.000000016557283x2 + 0.000854596860691x + 0.065440348345433
+ * Polynomial curve match, based on raw data thus:
+ *   464     0.5
+ *  1088     1.0
+ *  1707     1.5
+ *  2331     2.0
+ *  2951     2.5
+ *  3775     3.0
+ *
+ *  Serial.println(readVoltagePolynomial(36), 3);
+ */
 double HMS::readVoltagePolynomial(byte pinnumber)
 {
     double reading = analogRead(pinnumber); // Reference voltage is 3v3 so maximum reading is 3v3 = 4095 in range 0 to 4095
@@ -51,7 +63,6 @@ double HMS::readVoltagePolynomial(byte pinnumber)
  ******************************************************************************/
 float *HMS::readSensAndCondition()
 {
-    
     if (!Cell_Temp.setSensorCount())
     {
         Serial.println("No cells detected");

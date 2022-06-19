@@ -1,2 +1,0 @@
-- Make sure you configure the platformio.ini according to the development board you are using.
-- Open the project for each sensor through the platformIO interface. If there are IntelliSense errors (seemable include errors with red underlines), just build the code and see what it does. It should now build with no problem. 

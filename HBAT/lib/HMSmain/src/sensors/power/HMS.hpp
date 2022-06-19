@@ -3,8 +3,8 @@
  Copyright (c) 2021 ZanzyTHEbar
  */
 
-#ifndef HMS_h
-#define HMS_h
+#ifndef HMS_HPP
+#define HMS_HPP
 #include <defines.hpp>
 #include <ACS712.h>
 
@@ -16,11 +16,19 @@ public:
   void calibrateAmps();
   void setupSensor();
   int readAmps();
-  float readVoltage(int pinnumber);
+  float readVoltage(byte pinnumber);
+  double readVoltagePolynomial();
   float *readSensAndCondition();
   String generateDeviceID();
 
 private:
+  bool _mux_enabled_voltage;
+  bool _mux_enabled_amps;
+  int _power_mux_pin_amps;
+  int _power_mux_pin_voltage;
+  bool _POWER_MUX_ENABLED_AMPS;
+  bool _POWER_MUX_ENABLED_VOLTAGE;
+  float *_cell_voltage;
 };
 
 extern HMS HMSmain;

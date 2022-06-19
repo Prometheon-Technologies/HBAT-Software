@@ -59,6 +59,26 @@ public:
     };
     Config_t config;
 
+    Config_t *getDeviceConfig() { return &this->config; }
+
+    struct OTA_t
+    {
+        char name[32];
+        char OTAPassword[64];
+        int OTAPort = 0;
+    };
+
+    OTA_t ota_config;
+
+    OTA_t *getOTAConfig() { return &this->ota_config; }
+
+    /* Erase all data in SPIFFS - VERY DESTRUCTIVE */
+    void
+    reset()
+    {
+        SPIFFS.format();
+    }
+
     bool loadConfig();
     // trigger a config write/commit
     bool setConfigChanged();
@@ -69,7 +89,7 @@ public:
     bool isValidHostname(char *hostname_to_check, long size);
     // parse and set a new hostname to config
     void setHostname(String new_hostname);
-    // we can't assing wifiManager.resetSettings(); to reset, somehow it gets called straight away.
+    // we can't assign wifiManager.resetSettings(); to reset, somehow it gets called straight away.
     void setWiFiConf(String ssid, String password);
     void InitDataStruct();
     void CreateDefaultConfig();

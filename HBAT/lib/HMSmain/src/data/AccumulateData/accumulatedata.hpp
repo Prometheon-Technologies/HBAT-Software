@@ -9,14 +9,14 @@ public:
     virtual ~AccumulateData();
 
     void InitAccumulateData();
-    int ChargeStatus();
+    ProgramStates::BatteryChargeState::ChargeState ChargeStatus();
     bool SendData();
 
 private:
     // Stack Data to send
-    int _maxVoltage;
-    int _maxTemp;
-    int _numSensors;
+    byte _maxVoltage;
+    byte _maxTemp;
+    byte _numSensors;
 };
 
 extern AccumulateData accumulatedata;

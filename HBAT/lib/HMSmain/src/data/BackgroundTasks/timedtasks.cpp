@@ -66,22 +66,4 @@ void TimedTasks::updateCurrentData() // check to see if the data has changed
   }
 }
 
-// Timer delay Settings
-/* void TimedTasks::setCallback(void (*funct)())
-{
-  callback = funct;
-  hookup();
-}
-
-void TimedTasks::setSeconds(float seconds) { setTime(seconds * 1000); }
-
-void TimedTasks::idle()
-{
-  if (ding())
-  {
-    stepTime();
-    callback();
-  }
-} */
-
 TimedTasks timedTasks;

@@ -22,14 +22,15 @@
 // File System
 #include <SPIFFS.h>
 
+#include "data/StateManager/StateManager.hpp"
+
 // data Struct
-#include "data/config.hpp"
+#include "data/Config/config.hpp"
 
 // IO
 #include <Wire.h>
-#include "io/i2cscan.hpp"
+#include "io/I2CScanner/i2cscan.hpp"
 
-#include "sensors/power/HMS.hpp"
 // Humidity Sensors
 #include "sensors/humidity/Humidity.hpp"
 //#include <sfm3003.hpp>
@@ -37,19 +38,20 @@
 // Temp Sensors
 #include "sensors/temperature/CellTemp.hpp"
 
+// Power Sensors
+#include "sensors/power/HMS.hpp"
+
 // Network Stack
 #include "network/HMSNetwork.hpp"
-#include "network/mdns.hpp"
-#include "network/OTA.hpp"
 
 // Accumulate Data
-#include "data/accumulatedata.hpp"
+#include "data/AccumulateData/accumulatedata.hpp"
 
 // Timed tasks
-#include "data/timedtasks.hpp"
+#include "data/BackgroundTasks/timedtasks.hpp"
 
 // Relays and Outputs
-#include "io/Relays.hpp"
+#include "io/Relays/Relays.hpp"
 
 /**
  * @brief The below Macros print data to the terminal during compilation.
@@ -103,8 +105,6 @@
  * @see https://en.wikipedia.org/wiki/ANSI_escape_code
  */
 
-#define maxCellCount 10 // max number of cells
-
 // Globally available functions
 char *StringtoChar(String inputString);
 char *appendChartoChar(const char *hostname, const char *def_host);
@@ -112,23 +112,15 @@ void my_delay(volatile long delay_time);
 String generateDeviceID();
 
 /*######################## MQTT Configuration ########################*/
-#if ENABLE_MQTT_SUPPORT
-_Pragma (STR(message (ENABLE_MQTT_SUPPORT)))
 // MQTT includes
-#include "HMSmqtt.hpp"
-#endif // ENABLE_MQTT_SUPPORT
+#if ENABLE_MDNS_SUPPORT
+#include "network/mDNSManager/mDNSManager.hpp"
+#endif // ENABLE_MDNS_SUPPORT
+#if ENABLE_HASS
+#include "mqtt/HASSIO/hassmqtt.hpp"
+#else
+#include "mqtt/BASIC/basicmqtt.hpp"
+#endif // ENABLE_HASS
 /*###################### MQTT Configuration END ######################*/
-
-// Variables
-extern const char *mqtt_mDNS_clientId;
-extern char mDNS_hostname[4];
-
-extern int period;
-extern unsigned long time_now;
-extern bool Charge_State;
-
-// Wifi Variables
-extern bool wifiMangerPortalRunning;
-extern bool wifiConnected;
 
 #endif

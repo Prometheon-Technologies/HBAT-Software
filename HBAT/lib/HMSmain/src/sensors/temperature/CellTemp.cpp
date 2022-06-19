@@ -20,12 +20,19 @@ CellTemp::~CellTemp()
 {
 }
 
-void CellTemp::setSensorCount()
+bool CellTemp::setSensorCount()
 {
+    if (sensors.getDeviceCount() < 1)
+    {
+        Serial.println("No cells detected");
+        return false;
+    }
+
     sensors_count = sensors.getDeviceCount(); // returns the number of sensors found
+    return true;
 }
 
-int CellTemp::getSensorCount()
+byte CellTemp::getSensorCount()
 {
     return sensors_count;
 }

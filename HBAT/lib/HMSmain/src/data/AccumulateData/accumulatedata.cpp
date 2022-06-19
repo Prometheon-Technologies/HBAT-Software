@@ -1,10 +1,7 @@
 #include "accumulatedata.hpp"
 
-AccumulateData::AccumulateData()
+AccumulateData::AccumulateData() : _maxVoltage(24), _maxTemp(100), _numSensors(0)
 {
-    _maxVoltage = 24;
-    _maxTemp = 100;
-    _numSensors = 10;
 }
 
 AccumulateData::~AccumulateData()
@@ -19,14 +16,18 @@ AccumulateData::~AccumulateData()
  ******************************************************************************/
 void AccumulateData::InitAccumulateData()
 {
-    _numSensors = Cell_Temp.getSensorCount();
+    if (!Cell_Temp.setSensorCount())
+    {
+        _numSensors = 0;
+    }
+    else
+    {
+        _numSensors = Cell_Temp.getSensorCount();
+    }
+
     cfg.config.numSensors = _numSensors;
     // Initialize the library
     humidity.ReadSensor();
-    if (_numSensors > maxCellCount)
-    {
-        _numSensors = maxCellCount;
-    }
 
     /******************************************************************************
      * Function: Setup the Stack Climate Data
@@ -69,11 +70,9 @@ void AccumulateData::InitAccumulateData()
 
     cfg.config.stack_voltage = sum;
 
-    // free(&cell_voltage); // free the memory
-    cfg.config.cell_count_max = maxCellCount;
     cfg.config.numSensors = _numSensors;
 
-    // Flow Rate dataTosend
+    // Flow Rate data to send
     cfg.config.flow_rate = humidity.result.flow;
     // returns a float array of cell temperatures
 
@@ -96,46 +95,53 @@ void AccumulateData::InitAccumulateData()
  * Function: Return Charge Status of Stack
  * Description: This function reads the current stack voltage and returns a number representing the charge status
  * Parameters: None
- * Return: String
+ * Return: Enum representing the charge status
  ******************************************************************************/
-int AccumulateData::ChargeStatus()
+ProgramStates::BatteryChargeState::ChargeState AccumulateData::ChargeStatus()
 {
     if (cfg.config.stack_voltage < 8.00 && cfg.config.stack_voltage >= 0.00)
     {
-        return 1;
+        stateManager.setState(ProgramStates::BatteryChargeState::CHARGE_DISCHARGED);
+        return ProgramStates::BatteryChargeState::CHARGE_DISCHARGED;
         log_i("Stack is fully discharged");
     }
     else if (cfg.config.stack_voltage < 10.00 && cfg.config.stack_voltage >= 8.00)
     {
-        return 2;
+        stateManager.setState(ProgramStates::BatteryChargeState::CHARGE_LOW);
+        return ProgramStates::BatteryChargeState::CHARGE_LOW;
         log_i("Stack needs to be charged");
     }
     else if (cfg.config.stack_voltage < 13.00 && cfg.config.stack_voltage >= 11.0)
     {
-        return 3;
+        stateManager.setState(ProgramStates::BatteryChargeState::CHARGE_MEDIUM);
+        return ProgramStates::BatteryChargeState::CHARGE_MEDIUM;
         log_i("Stack has a full charge");
     }
     else if (cfg.config.stack_voltage < 14.0 && cfg.config.stack_voltage >= 12.0)
     {
-        return 4;
+        stateManager.setState(ProgramStates::BatteryChargeState::CHARGE_CHARGING);
+        return ProgramStates::BatteryChargeState::CHARGE_CHARGING;
         log_i("Stack is charging");
     }
     else if (cfg.config.stack_voltage < 16.0 && cfg.config.stack_voltage >= 14.0)
     {
-        return 5;
+        stateManager.setState(ProgramStates::BatteryChargeState::CHARGE_OVERCHAREGD);
+        return ProgramStates::BatteryChargeState::CHARGE_OVERCHAREGD;
         log_w("[DANGER]: Stack has encountered an overcharge condition");
     }
 
     else
     {
-        return 0;
+        stateManager.setState(ProgramStates::BatteryChargeState::CHARGE_ERROR);
+        return ProgramStates::BatteryChargeState::CHARGE_ERROR;
         log_w("[DANGER]: Stack is in an unknown state!!");
     }
-    return 0;
+    return ProgramStates::BatteryChargeState::CHARGE_ERROR;
 }
 
 bool AccumulateData::SendData()
 {
+    ProgramStates::BatteryChargeState::ChargeState chargeState = ChargeStatus();
     String json = "";
     json += R"====({)====";
 
@@ -153,6 +159,9 @@ bool AccumulateData::SendData()
 
     json += R"====("mqtt_enable":)====";
     json += (String)cfg.config.MQTTEnabled + ",\n";
+
+    json += R"====("charge_status":)====";
+    json += (String)chargeState + ",\n";
 
     json += R"====("GraphData":[)====";
     json += "\n";

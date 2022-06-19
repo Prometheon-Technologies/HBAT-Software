@@ -22,7 +22,7 @@ int HMSmdns::DiscovermDNSBroker()
         log_i("[mDNS Broker Discovery]: connected!\n");
 
         log_i("[mDNS Broker Discovery]: Setting up mDNS: ");
-        if (!MDNS.begin(mqtt_mDNS_clientId))
+        if (!MDNS.begin(DEFAULT_HOSTNAME))
         {
             log_i("[Fail]\n");
         }

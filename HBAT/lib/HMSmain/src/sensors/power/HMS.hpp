@@ -17,7 +17,7 @@ public:
   void setupSensor();
   int readAmps();
   float readVoltage(byte pinnumber);
-  double readVoltagePolynomial();
+  double readVoltagePolynomial(byte pinnumber);
   float *readSensAndCondition();
   String generateDeviceID();
 

@@ -43,34 +43,18 @@ AsyncWebServer server(80);
 
 WiFiClient espClient;
 
-const size_t MAX_FILESIZE = 1024 * 1024 * 2; // 2MB
-
-const char *HTTP_USERNAME = "admin";
-const char *HTTP_PASSWORD = "admin";
-
-String ledState;
-
-// Timer variables
-unsigned long previousMillis = 0;
-const long interval = 30000; // interval to wait for Wi-Fi connection (milliseconds)
-
 /**
  * @brief Construct a new HMSnetwork::HMSnetwork object
  *
  */
-HMSnetwork::HMSnetwork()
-{
-    // constructor
-    log_i("[INFO]: HMSnetwork::HMSnetwork()\n");
-    log_i("[INFO]: Creating network object\n");
-}
+HMSnetwork::HMSnetwork() : _wifiConnected(false),
+                           _MAX_FILESIZE(1024 * 1024 * 2),
+                           _HTTP_USERNAME("admin"),
+                           _HTTP_PASSWORD("admin"),
+                           _previousMillis(0),
+                           _interval(30000) {}
 
-HMSnetwork::~HMSnetwork()
-{
-    // destructor
-    log_i("[INFO]: HMSnetwork::~HMSnetwork()\n");
-    log_i("[INFO]: Destroying network object\n");
-}
+HMSnetwork::~HMSnetwork() {}
 
 /* format bytes as KB, MB or GB string */
 String humanReadableSize(const size_t bytes)
@@ -132,7 +116,7 @@ void wifiClear()
 {
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
-    wifiConnected = false;
+    network._wifiConnected = false;
     delay(100);
 }
 
@@ -140,7 +124,7 @@ void wifiDisconnect()
 {
     WiFi.disconnect();
     WiFi.mode(WIFI_OFF);
-    wifiConnected = false;
+    network._wifiConnected = false;
 }
 
 bool HMSnetwork::SetupNetworkStack()
@@ -224,13 +208,13 @@ bool HMSnetwork::SetupNetworkStack()
             WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
 
             unsigned long currentMillis = millis();
-            previousMillis = currentMillis;
+            _previousMillis = currentMillis;
 
             while (WiFi.status() != WL_CONNECTED)
             {
                 wifiClear();
                 currentMillis = millis();
-                if (currentMillis - previousMillis >= interval)
+                if (currentMillis - _previousMillis >= _interval)
                 {
                     log_i("[INFO]: WiFi connection timed out.\n");
                     return false;
@@ -340,15 +324,15 @@ void HMSnetwork::networkRoutes()
     server.on(
         "/api/upload", HTTP_POST, [&](AsyncWebServerRequest *request)
         {
-        if (request->authenticate(HTTP_USERNAME, HTTP_PASSWORD))
+        if (request->authenticate(_HTTP_USERNAME, _HTTP_PASSWORD))
             request->send(200);
         else {
             request->send(401);
             request->client()->close();
         } },
-        [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
+        [&](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
         {
-            if (!request->authenticate(HTTP_USERNAME, HTTP_PASSWORD))
+            if (!request->authenticate(_HTTP_USERNAME, _HTTP_PASSWORD))
             {
                 request->send(401);
                 request->client()->close();
@@ -373,11 +357,11 @@ void HMSnetwork::networkRoutes()
 
                 log_i("UPLOAD: fileSize: %s\n", request->header(FILESIZE_HEADER).c_str());
 
-                if (request->header(FILESIZE_HEADER).toInt() >= MAX_FILESIZE)
+                if (request->header(FILESIZE_HEADER).toInt() >= _MAX_FILESIZE)
                 {
                     request->send(400, MIMETYPE_HTML,
                                   "Too large. (" + humanReadableSize(request->header(FILESIZE_HEADER).toInt()) +
-                                      ") Max size is " + humanReadableSize(MAX_FILESIZE) + ".");
+                                      ") Max size is " + humanReadableSize(_MAX_FILESIZE) + ".");
 
                     request->client()->close();
                     log_e("UPLOAD: Aborted upload because filesize limit.\n");
@@ -580,12 +564,12 @@ void HMSnetwork::CheckNetworkLoop()
     // run current function every 5 seconds
     if (WiFi.status() != WL_CONNECTED)
     {
-        wifiConnected = false;
+        _wifiConnected = false;
         log_i("Wifi is not connected\n");
     }
     else
     {
-        wifiConnected = true;
+        _wifiConnected = true;
         log_i("Wifi is connected\n");
         log_i("[INFO]: WiFi Connected! Open http://%s in your browser\n", WiFi.localIP().toString().c_str());
     }
@@ -595,13 +579,13 @@ void HMSnetwork::CheckConnectionLoop_Active()
 {
     unsigned long currentMillis = millis();
     // if WiFi is down, try reconnecting
-    if (!wifiConnected && (currentMillis - previousMillis >= interval))
+    if (!_wifiConnected && (currentMillis - _previousMillis >= _interval))
     {
         log_i("%lu", millis());
         log_i("Reconnecting to WiFi...");
         WiFi.disconnect();
         WiFi.reconnect();
-        previousMillis = currentMillis;
+        _previousMillis = currentMillis;
     }
 }
 

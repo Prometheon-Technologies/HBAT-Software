@@ -66,7 +66,6 @@ void setup()
     }
 
     Serial.println("");
-    Relay.SetupPID();
     // Setup the network stack
     // Setup the Wifi Manager
     network.SetupWebServer();

@@ -47,8 +47,7 @@ WiFiClient espClient;
  * @brief Construct a new HMSnetwork::HMSnetwork object
  *
  */
-HMSnetwork::HMSnetwork() : _wifiConnected(false),
-                           _MAX_FILESIZE(1024 * 1024 * 2),
+HMSnetwork::HMSnetwork() : _MAX_FILESIZE(1024 * 1024 * 2),
                            _HTTP_USERNAME("admin"),
                            _HTTP_PASSWORD("admin"),
                            _previousMillis(0),
@@ -116,7 +115,7 @@ void wifiClear()
 {
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
-    network._wifiConnected = false;
+    stateManager.setState(ProgramStates::DeviceState::WiFiState::WiFiState_Disconnected);
     delay(100);
 }
 
@@ -124,7 +123,7 @@ void wifiDisconnect()
 {
     WiFi.disconnect();
     WiFi.mode(WIFI_OFF);
-    network._wifiConnected = false;
+    stateManager.setState(ProgramStates::DeviceState::WiFiState::WiFiState_Disconnected);
 }
 
 bool HMSnetwork::SetupNetworkStack()
@@ -184,6 +183,7 @@ bool HMSnetwork::SetupNetworkStack()
             if (dhcpcheck == "on")
             {
                 log_i("[INFO]: DHCP is on\n");
+                WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
             }
             else
             {
@@ -202,7 +202,6 @@ bool HMSnetwork::SetupNetworkStack()
                 }
             }
 
-            WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
             WiFi.setHostname(cfg.config.hostname); // define hostname
 
             WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
@@ -210,9 +209,8 @@ bool HMSnetwork::SetupNetworkStack()
             unsigned long currentMillis = millis();
             _previousMillis = currentMillis;
 
-            while (WiFi.status() != WL_CONNECTED)
+            while (!CheckNetworkLoop())
             {
-                wifiClear();
                 currentMillis = millis();
                 if (currentMillis - _previousMillis >= _interval)
                 {
@@ -559,30 +557,30 @@ void HMSnetwork::networkRoutes()
  * Parameters: None
  * Return: None
  ******************************************************************************/
-void HMSnetwork::CheckNetworkLoop()
+bool HMSnetwork::CheckNetworkLoop()
 {
-    // run current function every 5 seconds
-    if (WiFi.status() != WL_CONNECTED)
+    stateManager.setState((WiFi.status() != WL_CONNECTED) ? ProgramStates::DeviceState::WiFiState::WiFiState_Disconnected : ProgramStates::DeviceState::WiFiState::WiFiState_Connected);
+    return (stateManager.getCurrentWiFiState() == ProgramStates::DeviceState::WiFiState::WiFiState_Connected) ? true : false;
+    /* if (WiFi.status() != WL_CONNECTED)
     {
-        _wifiConnected = false;
+        stateManager.setState(ProgramStates::DeviceState::WiFiState::WiFiState_Disconnected);
         log_i("Wifi is not connected\n");
     }
     else
     {
-        _wifiConnected = true;
+        stateManager.setState(ProgramStates::DeviceState::WiFiState::WiFiState_Connected);
         log_i("Wifi is connected\n");
         log_i("[INFO]: WiFi Connected! Open http://%s in your browser\n", WiFi.localIP().toString().c_str());
-    }
+    } */
 }
 
 void HMSnetwork::CheckConnectionLoop_Active()
 {
     unsigned long currentMillis = millis();
     // if WiFi is down, try reconnecting
-    if (!_wifiConnected && (currentMillis - _previousMillis >= _interval))
+    if (stateManager.getCurrentWiFiState() == ProgramStates::DeviceState::WiFiState::WiFiState_Disconnected && (currentMillis - _previousMillis >= _interval))
     {
-        log_i("%lu", millis());
-        log_i("Reconnecting to WiFi...");
+        log_i("WiFi is disconnected, reconnecting...\n");
         WiFi.disconnect();
         WiFi.reconnect();
         _previousMillis = currentMillis;
@@ -609,8 +607,6 @@ void HMSnetwork::CheckConnectionLoop_Active()
         // Load values saved in SPIFFS
         String SSID = cfg.config.WIFISSID;
         String PASS = cfg.config.WIFIPASS;
-        String ntptime = cfg.config.NTPTIME;
-        String ntptimeoffset = cfg.config.NTPTIMEOFFSET;
         String mdns = cfg.config.MDNS;
         String dhcpcheck = cfg.config.DHCPCHECK;
 

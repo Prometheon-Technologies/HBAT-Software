@@ -47,12 +47,39 @@ public:
         enum State
         {
             Starting,
-            ConnectingToWifi,
-            ConnectingToWifiError,
-            ConnectingToWifiSuccess,
-            ServerError,
+            Started,
+            Stopping,
+            Stopped
+        };
+
+        enum WiFiState
+        {
+            WiFiState_None,
+            WiFiState_Connecting,
+            WiFiState_Connected,
+            WiFiState_Disconnected,
+            WiFiState_Disconnecting,
+            WiFiState_Error
+        };
+
+        enum WebServerState
+        {
+            WebServerState_None,
+            WebServerState_Starting,
+            WebServerState_Started,
+            WebServerState_Stopping,
+            WebServerState_Stopped,
+            WebServerState_Error
+        };
+
+        enum MDNSState
+        {
             MDNSSuccess,
-            MDNSError,
+            MDNSError
+        };
+
+        enum MQTTState
+        {
             MQTTSuccess,
             MQTTError
         };
@@ -69,15 +96,29 @@ class StateManager
 public:
     StateManager();
     virtual ~StateManager();
+    
     void setState(ProgramStates::DeviceState::State state);
+    void setState(ProgramStates::DeviceState::WiFiState state);
+    void setState(ProgramStates::DeviceState::WebServerState state);
+    void setState(ProgramStates::DeviceState::MDNSState state);
+    void setState(ProgramStates::DeviceState::MQTTState state);
     void setState(ProgramStates::EnabledHumiditySensors::EnabledSensors state);
     void setState(ProgramStates::BatteryChargeState::ChargeState state);
+
     ProgramStates::DeviceState::State getCurrentState();
+    ProgramStates::DeviceState::WiFiState getCurrentWiFiState();
+    ProgramStates::DeviceState::WebServerState getCurrentWebServerState();
+    ProgramStates::DeviceState::MDNSState getCurrentMDNSState();
+    ProgramStates::DeviceState::MQTTState getCurrentMQTTState();
     ProgramStates::EnabledHumiditySensors::EnabledSensors getCurrentSensorState();
     ProgramStates::BatteryChargeState::ChargeState getCurrentBatteryState();
 
 private:
     ProgramStates::DeviceState::State _current_state;
+    ProgramStates::DeviceState::WiFiState _current_wifi_state;
+    ProgramStates::DeviceState::WebServerState _current_webserver_state;
+    ProgramStates::DeviceState::MDNSState _current_mdns_state;
+    ProgramStates::DeviceState::MQTTState _current_mqtt_state;
     ProgramStates::EnabledHumiditySensors::EnabledSensors _enabled_humidity_sensors;
     ProgramStates::BatteryChargeState::ChargeState _battery_charge_state;
 };

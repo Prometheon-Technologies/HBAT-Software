@@ -8,24 +8,27 @@ namespace mDNSManager
 {
     class MDNSHandler : public IObserver
     {
-    private:
-        StateManager *stateManager;
-        Config *deviceConfig;
-
     public:
         MDNSHandler(StateManager *stateManager, Config *deviceConfig);
         virtual ~MDNSHandler();
+
         bool startMDNS();
         void update(ObserverEvent::Event event);
 
         //******************************************************************************
         // * Function: Discover mDNS Broker
-        // * Description: Find the mDNS broker and and port and write them to the config struct
+        // * Description: Find the mDNS broker and port and write them to the config struct
         // * Parameters: None
         // * Return: int - 1 if success, 0 if fail
         //******************************************************************************
         bool DiscovermDNSBroker();
+
+    private:
+        StateManager *stateManager;
+        Config *deviceConfig;
     };
 }
+
+extern mDNSManager::MDNSHandler *mDNSHandler;
 
 #endif // MDNSMANAGER_HPP

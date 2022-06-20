@@ -23,10 +23,11 @@ public:
     virtual ~HMSnetwork();
     // Functions
     bool SetupNetworkStack();
-    bool connectToApWithFailToStation();
+    // bool connectToApWithFailToStation();
+    
     void SetupWebServer();
     void SetupServer();
-    void CheckNetworkLoop();
+    bool CheckNetworkLoop();
     void CheckConnectionLoop_Active();
     void networkRoutes();
     bool LoopWifiScan();
@@ -38,7 +39,6 @@ public:
     // variables
 private:
     int CheckWifiState();
-    bool _wifiConnected;
     unsigned long _previousMillis;
 
     const size_t _MAX_FILESIZE; // 2MB

@@ -126,7 +126,7 @@ bool BASEMQTT::begin()
     log_i("Subscribing to the topic [%s]", _mqttControlTopic);
 
     log_i("Successfully subscribed to all topics.");
-    
+
     return true;
 }
 
@@ -178,6 +178,9 @@ void BASEMQTT::mqttReconnect()
                 mqttClient.subscribe(relay);
                 log_i("Subscribing to the topic [%s]", relay);
             }
+
+            mqttClient.subscribe(_mqttControlTopic);
+            log_i("Subscribing to the topic [%s]", _mqttControlTopic);
         }
         else
         {
@@ -202,7 +205,7 @@ void BASEMQTT::mqttLoop()
         else
         {
             mqttClient.loop();
-            callback;
+            //callback;
 
             unsigned long currentMillis = millis();
             if (currentMillis - _previousMillis >= _interval)

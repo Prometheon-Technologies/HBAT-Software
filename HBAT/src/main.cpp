@@ -79,15 +79,14 @@ void setup()
 #endif // ENABLE_MQTT_SUPPORT
 
 #if ENABLE_MDNS_SUPPORT
-    Mdns.SetupmDNSServer(); // setup the mDNS server for the future web-front-end
+    mDNSHandler->startMDNS(); // setup the mDNS server for the future web-front-end
 #if ENABLE_MQTT_SUPPORT
-
-    Mdns.DiscovermDNSBroker(); // discover the mDNS broker for mqtt
+    mDNSHandler->DiscovermDNSBroker(); // discover the mDNS broker for mqtt
 #endif                         // ENABLE_MQTT_SUPPORT
 #endif                         // ENABLE_MDNS_SUPPORT
 
 #if ENABLE_MQTT_SUPPORT
-    HMSmqtt.MQTTSetup();
+    basemqtt.begin();
 #endif // ENABLE_MQTT_SUPPORT
 
     Serial.println("");
@@ -128,14 +127,14 @@ void loop()
     }
 
 #if ENABLE_MQTT_SUPPORT
-    if (WiFi.status() == WL_CONNECTED)
+    if (stateManager.getCurrentState() == ProgramStates::DeviceState::State::ConnectingToWifiSuccess)
     {
-        HMSmqtt.RunMqttService();
+        basemqtt.mqttLoop();
     }
 #endif // ENABLE_MQTT_SUPPORT
 
 #if ENABLE_MDNS_SUPPORT
-    Mdns.mDNSLoop();
+    //! TODO: put mDNS loop here
 #endif // ENABLE_MDNS_SUPPORT
 
     my_delay(1L);

@@ -32,12 +32,12 @@ private:
     uint8_t _user_bytes_received;
     char _user_data[100];
 
-    char *_infoTopic;
-    char *_statusTopic;
-    char *_commandTopic;
-    char *_configTopic;
+    const char *_infoTopic;
+    const char *_statusTopic;
+    const char *_commandTopic;
+    const char *_configTopic;
     const char _relayTopics[5][20];
-    char *_mqttControlTopic;
+    const char *_mqttControlTopic;
 };
 
 extern BASEMQTT basemqtt;

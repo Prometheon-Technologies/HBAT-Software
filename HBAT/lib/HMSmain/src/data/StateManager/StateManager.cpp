@@ -2,7 +2,7 @@
 
 StateManager::StateManager() : _current_state(ProgramStates::DeviceState::Starting),
                                _enabled_humidity_sensors(ProgramStates::EnabledHumiditySensors::HUM_NONE),
-                               _battery_charge_state(ProgramStates::BatteryChargeState::Charge_OFF)
+                               _battery_charge_state(ProgramStates::BatteryChargeState::CHARGE_OFF)
 {
 }
 

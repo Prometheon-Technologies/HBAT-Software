@@ -67,7 +67,8 @@ public:
 class StateManager
 {
 public:
-    StateManager() {}
+    StateManager();
+    virtual ~StateManager();
     void setState(ProgramStates::DeviceState::State state);
     void setState(ProgramStates::EnabledHumiditySensors::EnabledSensors state);
     void setState(ProgramStates::BatteryChargeState::ChargeState state);

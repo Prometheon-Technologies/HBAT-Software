@@ -2,6 +2,7 @@
 #define MDNSMANAGER_HPP
 #include <defines.hpp>
 #include <ESPmDNS.h>
+#include "observer.hpp"
 
 namespace mDNSManager
 {

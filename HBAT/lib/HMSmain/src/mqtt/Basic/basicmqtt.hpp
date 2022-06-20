@@ -1,6 +1,6 @@
 /*
- basicmqtt.hpp - ESP32GreenHouseDIY MQTT library
- Copyright (c) 2021 ZanzyTHEbar
+ basemqtt.hpp - HBAT HMS MQTT library
+ Copyright (c) 2022 ZanzyTHEbar
  */
 #pragma once
 #ifndef BASEMQTT_HPP
@@ -21,7 +21,6 @@ public:
     void mqttReconnect();
 
     // Friends
-    friend class LDR;
     friend void callback(char *topic, byte *payload, unsigned int length);
 
 private:
@@ -37,9 +36,9 @@ private:
     char *_statusTopic;
     char *_commandTopic;
     char *_configTopic;
-    char *_menuTopic;
     char _relayTopics[5][20];
+    char *_mqttControlTopic;
 };
 
 extern BASEMQTT basemqtt;
-#endif // HAMQTT_HPP
+#endif // BASEMQTT_HPP

@@ -3,17 +3,17 @@
 IPAddress broker_ip;
 
 void callback(char *topic, byte *payload, unsigned int length);
-String getBroker();
+char *getBroker();
 
 #if MQTT_SECURE
-PubSubClient mqttClient(broker_ip.fromString(getBroker()), MQTT_SECURE_PORT, callback, espClient); // Local Mosquitto Connection
+PubSubClient mqttClient(broker_ip.fromString(getBroker()), MQTT_SECURE_PORT, callback, espClient); // Local Secure Mosquitto Connection
 #else
 PubSubClient mqttClient(broker_ip.fromString(getBroker()), MQTT_PORT, callback, espClient); // Local Mosquitto Connection
 #endif // MQTT_SECURE
 
 //***********************************************************************************************************************
-// * Class Global Variables
-// * Please only make changes to the following class variables within the ini file. Do not change them here.
+// * MQTT Class
+// * @brief Base Class for handling MQTT - without support for HASS
 //************************************************************************************************************************
 
 BASEMQTT::BASEMQTT() : _interval(60000),
@@ -24,8 +24,8 @@ BASEMQTT::BASEMQTT() : _interval(60000),
                        _statusTopic("hbathms/status"),
                        _commandTopic("hbathms/command"),
                        _configTopic("hbathms/config"),
-                       _menuTopic("hbathms/menu"),
-                       _relayTopics{{"relay1"}, {"relay2"}, {"relay3"}, {"relay4"}, {"relay5"}}
+                       _relayTopics{{"relay1"}, {"relay2"}, {"relay3"}, {"relay4"}, {"relay5"}},
+                       _mqttControlTopic("hbathms/mqtt/control")
 {
     // Constructor
 }
@@ -35,7 +35,7 @@ BASEMQTT::~BASEMQTT()
     // Destructor
 }
 
-String getBroker()
+char *getBroker()
 {
 #pragma message(Feature "mDNS Enabled: " STR(ENABLE_MDNS_SUPPORT))
 #if ENABLE_MDNS_SUPPORT
@@ -44,20 +44,20 @@ String getBroker()
         if (mDNSManager::DiscovermDNSBroker())
         {
             Serial.println(F("[mDNS responder started] Setting up Broker..."));
-            String BROKER_ADDR = cfg.config.MQTTBroker; // IP address of the MQTT broker - change to your broker IP address or enable MDNS support
+            char *BROKER_ADDR = cfg.config.MQTTBroker;
             return BROKER_ADDR;
         }
         else
         {
             Serial.println(F("[mDNS responder failed]"));
-            String BROKER_ADDR = MQTT_BROKER;
+            char *BROKER_ADDR = MQTT_BROKER;
             return BROKER_ADDR;
         }
 
         return String(MQTT_BROKER);
     }
 #else
-    return String(MQTT_BROKER);
+    return MQTT_BROKER;
 #endif // ENABLE_MDNS_SUPPORT
 }
 
@@ -75,7 +75,7 @@ void callback(char *topic, byte *payload, unsigned int length)
 
     // Check if the message is for the current topic
     for (auto relay : basemqtt._relayTopics)
-    { 
+    {
         if (strcmp(topic, relay) == 0)
         {
             if (strcmp(result.c_str(), "ON") == 0)
@@ -88,10 +88,15 @@ void callback(char *topic, byte *payload, unsigned int length)
                 log_i("Turning off the relay: [%s]", relay);
                 cfg.config.relays[relay - basemqtt._relayTopics[0]] = false;
             }
-            for (int i = 0; i < sizeof(cfg.config.relays_pin) / sizeof(cfg.config.relays_pin[0]); i++)
-            {
-                Relay.RelayOnOff(cfg.config.relays_pin[i], cfg.config.relays[i]);
-            }
+        }
+    }
+
+    if (strcmp(topic, basemqtt._mqttControlTopic) == 0)
+    {
+        if (strcmp(result.c_str(), "OFF") == 0)
+        {
+            log_i("Turning off MQTT");
+            cfg.config.MQTTEnabled = false;
         }
     }
 }
@@ -110,20 +115,18 @@ bool BASEMQTT::begin()
     }
 
     cfg.config.MQTTConnectedState = mqttClient.state();
-#if ENABLE_PH_SUPPORT
-    // connection succeeded
-    log_i("Connection succeeded. Subscribing to the topic [%s]", phsensor._pHTopic);
-    mqttClient.subscribe(phsensor._pHTopic);
-#endif // ENABLE_PH_SUPPORT
-    log_i("Subscribing to the topic [%s]", pump._pumpTopic);
-    mqttClient.subscribe(pump._pumpTopic);
+    log_i("MQTT client state is: %d", mqttClient.state());
+    for (auto relay : _relayTopics)
+    {
+        mqttClient.subscribe(relay);
+        log_i("Subscribing to the topic [%s]", relay);
+    }
 
-    log_i("Successfully subscribed to the topic.");
+    mqttClient.subscribe(_mqttControlTopic);
+    log_i("Subscribing to the topic [%s]", _mqttControlTopic);
 
-    _menuTopic = "menuControl/menu";
-    _infoTopic = "user/info";
-    /* _speakerTopic = SPEAKER_TOPIC;
-    _waterlevelTopic = WATER_LEVEL_TOPIC; */
+    log_i("Successfully subscribed to all topics.");
+    
     return true;
 }
 
@@ -169,60 +172,52 @@ void BASEMQTT::mqttReconnect()
         if (mqttClient.connect(DEFAULT_HOSTNAME))
         {
             log_i("Connected to MQTT broker.");
-            // Subscribe
-#if ENABLE_PH_SUPPORT
-            mqttClient.subscribe(phsensor._pHTopic);
-#endif // ENABLE_PH_SUPPORT
+            // Subscribe to topics
+            for (auto relay : _relayTopics)
+            {
+                mqttClient.subscribe(relay);
+                log_i("Subscribing to the topic [%s]", relay);
+            }
         }
         else
         {
             log_i("failed, rc= %d", mqttClient.state());
-            log_i(" try again in 5 seconds");
-            // Wait 15 seconds before retrying
-            my_delay(15L);
+            log_i("trying again in 5 seconds");
+            // Wait 5 seconds before retrying
+            my_delay(5L);
         }
     }
 }
 
 void BASEMQTT::mqttLoop()
 {
-    my_delay(1L);
-
-    if (!mqttClient.connected())
+    if (cfg.config.MQTTEnabled)
     {
-        mqttReconnect();
-    }
-    else
-    {
-        mqttClient.loop();
-        callback;
+        my_delay(1L);
 
-        unsigned long currentMillis = millis();
-        if (currentMillis - _previousMillis >= _interval)
+        if (!mqttClient.connected())
         {
-            _previousMillis = currentMillis;
+            mqttReconnect();
+        }
+        else
+        {
+            mqttClient.loop();
+            callback;
 
-            if (Serial.available() > 0)
+            unsigned long currentMillis = millis();
+            if (currentMillis - _previousMillis >= _interval)
             {
-                _user_bytes_received = Serial.readBytesUntil(13, _user_data, sizeof(_user_data));
-            }
+                _previousMillis = currentMillis;
+                cfg.config.data_json = true;
+                my_delay(1L);
+                String temp = cfg.config.data_json_string;
+                mqttClient.publish(_infoTopic, temp.c_str(), true);
+                temp = "";
+                log_i("Published to topic [%s]", _infoTopic);
 
-            if (_user_bytes_received)
-            {
-                phsensor.parse_cmd(_user_data);
-                _user_bytes_received = 0;
-                memset(_user_data, 0, sizeof(_user_data));
+                ProgramStates::BatteryChargeState::ChargeState chargeState = accumulatedata.ChargeStatus();
+                mqttClient.publish(_statusTopic, String(chargeState).c_str(), true);
             }
-#if ENABLE_PH_SUPPORT
-            log_i("Sending message to topic: %s", phsensor._pHOutTopic);
-#endif // ENABLE_PH_SUPPORT
-            float newpH = cfg.config.pH;
-            String timeStamp = networkntp.getTimeStamp();
-            log_i("pH: %s", String(newpH).c_str());
-#if ENABLE_PH_SUPPORT
-            mqttClient.publish(phsensor._pHOutTopic, String(newpH).c_str(), true);
-            mqttClient.publish(phsensor._pHOutTopic, timeStamp.c_str(), true);
-#endif // ENABLE_PH_SUPPORT
         }
     }
 }

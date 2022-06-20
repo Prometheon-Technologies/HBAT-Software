@@ -36,7 +36,7 @@ private:
     char *_statusTopic;
     char *_commandTopic;
     char *_configTopic;
-    char _relayTopics[5][20];
+    const char _relayTopics[5][20];
     char *_mqttControlTopic;
 };
 

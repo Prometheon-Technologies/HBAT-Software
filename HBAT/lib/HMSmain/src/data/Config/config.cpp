@@ -11,70 +11,7 @@ Config::Config()
     doc_string = "";
 }
 
-Config::~Config()
-{
-    /* // Free the allocated memory
-    if (config.hostname)
-    {
-        freeStr(&config.hostname);
-    }
-    if (config.MQTTBroker)
-    {
-        freeStr(&config.MQTTBroker);
-    }
-    if (config.MQTTPort)
-    {
-        freeStr(&config.MQTTPort);
-    }
-    if (config.MQTTUser)
-    {
-        freeStr(&config.MQTTUser);
-    }
-    if (config.MQTTPass)
-    {
-        freeStr(&config.MQTTPass);
-    }
-    if (config.MQTTTopic)
-    {
-        freeStr(&config.MQTTTopic);
-    }
-    if (config.MQTTSetTopic)
-    {
-        freeStr(&config.MQTTSetTopic);
-    }
-    if (config.MQTTDeviceName)
-    {
-        freeStr(&config.MQTTDeviceName);
-    }
-    if (config.NTPTIME)
-    {
-        freeStr(&config.NTPTIME);
-    }
-    if (config.NTPTIMEOFFSET)
-    {
-        freeStr(&config.NTPTIMEOFFSET);
-    }
-    if (config.WIFISSID)
-    {
-        freeStr(&config.WIFISSID);
-    }
-    if (config.WIFIPASS)
-    {
-        freeStr(&config.WIFIPASS);
-    }
-    if (config.MDNS)
-    {
-        freeStr(&config.MDNS);
-    }
-    if (config.DHCPCHECK)
-    {
-        freeStr(&config.DHCPCHECK);
-    }
-    if (config.configData)
-    {
-        freeStr(&config.configData);
-    } */
-}
+Config::~Config() {}
 
 void Config::CreateDefaultConfig()
 {
@@ -116,7 +53,6 @@ void Config::CreateDefaultConfig()
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},      // cell_temp
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},      // cell_voltage
         0,                                   // numSensors
-        0,                                   // cell_count_max
         0,                                   // flow_rate
         0,                                   // flow_rate_sensor_temp
     };
@@ -248,7 +184,6 @@ bool Config::loadConfig()
     heapStr(&config.MDNS, jsonBuffer["MDNS"]);
     heapStr(&config.DHCPCHECK, jsonBuffer["DHCPCHECK"]);
     config.numSensors = jsonBuffer["Number_of_Sensors"];
-    config.cell_count_max = jsonBuffer["Max_Cell_Count"];
 
     for (int i = 0; i < sizeof(config.relays); i++)
     {
@@ -312,7 +247,6 @@ bool Config::saveConfig()
     json["MDNS"] = config.MDNS;
     json["DHCPCHECK"] = config.DHCPCHECK;
     json["Number_of_Sensors"] = config.numSensors;
-    json["Max_Cell_Count"] = config.cell_count_max;
 
     // Relays
     JsonArray Relays = json.createNestedArray("HMS_Relays_State");

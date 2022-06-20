@@ -105,5 +105,3 @@ namespace mDNSManager
         return 0;
     }
 }
-
-mDNSManager::MDNSHandler *mDNSHandler;

@@ -7,8 +7,9 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 #include <defines.hpp>
+#include "network/mDNSManager/observer.hpp"
 
-class Config
+class Config : public ISubject
 {
 public:
     Config();
@@ -45,7 +46,7 @@ public:
         bool data_json;
         String data_json_string;
         bool relays[5];
-        int relays_pin[5];
+        byte relays_pin[5];
         float stack_humidity;
         float stack_temp;
         float stack_voltage;
@@ -53,7 +54,6 @@ public:
         float cell_temp[10];
         float cell_voltage[10];
         int numSensors;
-        int cell_count_max;
         int flow_rate;
         int flow_rate_sensor_temp;
     };

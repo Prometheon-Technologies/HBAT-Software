@@ -1,5 +1,9 @@
 #include <defines.hpp>
 
+#if ENABLE_MDNS_SUPPORT
+mDNSManager::MDNSHandler mdnsHandler = mDNSManager::MDNSHandler(&stateManager, &cfg);
+#endif // ENABLE_MDNS_SUPPORT
+
 /******************************************************************************
  * Function: Setup Main Loop
  * Description: This is the setup function for the main loop of the whole program. Use this to setup the main loop.
@@ -13,23 +17,10 @@ void setup()
     digitalWrite(LED_BUILTIN, LOW);
 
     timedTasks.setupTimers();
+    ledManager.setupLED();
 
     Serial.println(F("Setting up the program, standby..."));
     // Setup the main loop
-    // Initialize the relay pins
-    // use a c++ ranged for loop to iterate through the relay pins
-    for (auto pin : cfg.config.relays_pin)
-    {
-        pinMode(pin, OUTPUT);
-        digitalWrite(pin, LOW);
-    }
-
-    // C for loop - legacy function
-    /* for (int i = 0; i < sizeof(cfg.config.relays_pin) / sizeof(cfg.config.relays_pin[0]); i++)
-    {
-        pinMode(cfg.config.relays_pin[i], OUTPUT);
-        digitalWrite(cfg.config.relays_pin[i], LOW);
-    } */
 
     if (Wire.begin())
     {
@@ -69,21 +60,32 @@ void setup()
     // Setup the network stack
     // Setup the Wifi Manager
     network.SetupWebServer();
+#if ENABLE_MDNS_SUPPORT
+    cfg.attach(&mdnsHandler);
+#endif // ENABLE_MDNS_SUPPORT
+
     Serial.println(F("Starting Webserver"));
     network.SetupServer();
     Serial.println(F("Setting up WiFi"));
 
 #if ENABLE_MQTT_SUPPORT
     Serial.println(F("Setting up MQTT"));
-    HMSmqtt.loadMQTTConfig();
+    basemqtt.loadMQTTConfig();
 #endif // ENABLE_MQTT_SUPPORT
 
 #if ENABLE_MDNS_SUPPORT
-    mDNSHandler->startMDNS(); // setup the mDNS server for the future web-front-end
+    mdnsHandler.startMDNS();
 #if ENABLE_MQTT_SUPPORT
-    mDNSHandler->DiscovermDNSBroker(); // discover the mDNS broker for mqtt
-#endif                         // ENABLE_MQTT_SUPPORT
-#endif                         // ENABLE_MDNS_SUPPORT
+    if (mdnsHandler.DiscovermDNSBroker())
+    {
+        Serial.println(F("[mDNS responder started] Setting up Broker..."));
+    }
+    else
+    {
+        Serial.println(F("[mDNS responder failed]"));
+    }
+#endif // ENABLE_MQTT_SUPPORT                // ENABLE_MDNS_SUPPORT
+#endif // ENABLE_MDNS_SUPPORT
 
 #if ENABLE_MQTT_SUPPORT
     basemqtt.begin();
@@ -100,6 +102,9 @@ void setup()
         Serial.println(F("Network Stack Setup Failed - Activating Access-Point Mode"));
     }
 
+    ledManager.onOff(true);
+    ota.SetupOTA(cfg);
+
     Serial.print(F("\n===================================\n"));
     Serial.println(F("Setup Complete"));
     my_delay(1L);
@@ -108,9 +113,13 @@ void setup()
 
 void loop()
 {
-    timedTasks.ScanI2CBus();
-    timedTasks.accumulateSensorData();
     timedTasks.checkNetwork();
+    ota.HandleOTAUpdate();
+    ledManager.displayStatus();
+#if ENABLE_I2C_SCANNER
+    timedTasks.ScanI2CBus();
+#endif // ENABLE_I2C_SCANNER
+    timedTasks.accumulateSensorData();
     timedTasks.updateCurrentData();
 
     if (cfg.config.data_json)
@@ -127,15 +136,17 @@ void loop()
     }
 
 #if ENABLE_MQTT_SUPPORT
-    if (stateManager.getCurrentState() == ProgramStates::DeviceState::State::ConnectingToWifiSuccess)
+    if (stateManager.getCurrentState() == ProgramStates::DeviceState::WiFiState::WiFiConnected)
     {
+#if ENABLE_HASS
+        hassmqtt.mqttLoop();
+#else
         basemqtt.mqttLoop();
+#endif // ENABLE_HASS
     }
 #endif // ENABLE_MQTT_SUPPORT
 
 #if ENABLE_MDNS_SUPPORT
     //! TODO: put mDNS loop here
 #endif // ENABLE_MDNS_SUPPORT
-
-    my_delay(1L);
 }

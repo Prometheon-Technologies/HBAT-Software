@@ -30,6 +30,7 @@
 // IO
 #include <Wire.h>
 #include "io/I2CScanner/i2cscan.hpp"
+#include "io/LEDManager/LEDManager.hpp"
 
 // Humidity Sensors
 #include "sensors/humidity/Humidity.hpp"
@@ -43,7 +44,7 @@
 
 // Network Stack
 #include "network/HMSNetwork.hpp"
-
+#include "network/OTA/OTA.hpp"
 // Accumulate Data
 #include "data/AccumulateData/accumulatedata.hpp"
 

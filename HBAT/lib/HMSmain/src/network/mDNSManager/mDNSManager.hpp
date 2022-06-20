@@ -29,6 +29,4 @@ namespace mDNSManager
     };
 }
 
-extern mDNSManager::MDNSHandler *mDNSHandler;
-
 #endif // MDNSMANAGER_HPP

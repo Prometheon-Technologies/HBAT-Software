@@ -16,7 +16,16 @@ PubSubClient mqttClient(broker_ip.fromString(getBroker()), MQTT_PORT, callback, 
 // * Please only make changes to the following class variables within the ini file. Do not change them here.
 //************************************************************************************************************************
 
-BASEMQTT::BASEMQTT() : _interval(60000), _user_data{0}, _previousMillis(0), _user_bytes_received(0)
+BASEMQTT::BASEMQTT() : _interval(60000),
+                       _user_data{0},
+                       _previousMillis(0),
+                       _user_bytes_received(0),
+                       _infoTopic("hbathms/info"),
+                       _statusTopic("hbathms/status"),
+                       _commandTopic("hbathms/command"),
+                       _configTopic("hbathms/config"),
+                       _menuTopic("hbathms/menu"),
+                       _relayTopics{{"relay1"}, {"relay2"}, {"relay3"}, {"relay4"}, {"relay5"}}
 {
     // Constructor
 }
@@ -28,23 +37,26 @@ BASEMQTT::~BASEMQTT()
 
 String getBroker()
 {
+#pragma message(Feature "mDNS Enabled: " STR(ENABLE_MDNS_SUPPORT))
 #if ENABLE_MDNS_SUPPORT
-#pragma message(Feature "mDNS Enabled: " STR(ENABLE_MDNS_SUPPORT " - Yes"))
-    if (mDNSDiscovery::DiscovermDNSBroker())
+    if (mDNSManager::startMDNS())
     {
-        Serial.println(F("[mDNS responder started] Setting up Broker..."));
-        String BROKER_ADDR = cfg.config.MQTTBroker; // IP address of the MQTT broker - change to your broker IP address or enable MDNS support
-        return BROKER_ADDR;
+        if (mDNSManager::DiscovermDNSBroker())
+        {
+            Serial.println(F("[mDNS responder started] Setting up Broker..."));
+            String BROKER_ADDR = cfg.config.MQTTBroker; // IP address of the MQTT broker - change to your broker IP address or enable MDNS support
+            return BROKER_ADDR;
+        }
+        else
+        {
+            Serial.println(F("[mDNS responder failed]"));
+            String BROKER_ADDR = MQTT_BROKER;
+            return BROKER_ADDR;
+        }
+
+        return String(MQTT_BROKER);
     }
-    else
-    {
-        Serial.println(F("[mDNS responder failed]"));
-        String BROKER_ADDR = MQTT_BROKER;
-        return BROKER_ADDR;
-    }
-    return String(MQTT_BROKER);
 #else
-#pragma message(Feature "mDNS Enabled: " STR(ENABLE_MDNS_SUPPORT " - No"))
     return String(MQTT_BROKER);
 #endif // ENABLE_MDNS_SUPPORT
 }
@@ -62,26 +74,26 @@ void callback(char *topic, byte *payload, unsigned int length)
     log_i("Message: [%s]", result.c_str());
 
     // Check if the message is for the current topic
-    if (strcmp(topic, pump._pumpTopic) == 0)
-    {
-        if (strcmp(result.c_str(), "ON") == 0)
+    for (auto relay : basemqtt._relayTopics)
+    { 
+        if (strcmp(topic, relay) == 0)
         {
-            log_i("Turning on the pump");
-            Relay.RelayOnOff(pump._pump_relay_pin, true);
-        }
-        else if (strcmp(result.c_str(), "OFF") == 0)
-        {
-            log_i("Turning off the pump");
-            Relay.RelayOnOff(pump._pump_relay_pin, false);
+            if (strcmp(result.c_str(), "ON") == 0)
+            {
+                log_i("Turning on relay: [%s]", relay);
+                cfg.config.relays[relay - basemqtt._relayTopics[0]] = true;
+            }
+            else if (strcmp(result.c_str(), "OFF") == 0)
+            {
+                log_i("Turning off the relay: [%s]", relay);
+                cfg.config.relays[relay - basemqtt._relayTopics[0]] = false;
+            }
+            for (int i = 0; i < sizeof(cfg.config.relays_pin) / sizeof(cfg.config.relays_pin[0]); i++)
+            {
+                Relay.RelayOnOff(cfg.config.relays_pin[i], cfg.config.relays[i]);
+            }
         }
     }
-#if ENABLE_PH_SUPPORT
-    else if (strcmp(topic, phsensor._pHTopic) == 0)
-    {
-        log_i("Setting pH level to: [%s]", result.c_str());
-        phsensor.eventListener(topic, payload, length);
-    }
-#endif // ENABLE_PH_SUPPORT
 }
 
 bool BASEMQTT::begin()

@@ -116,11 +116,14 @@ String generateDeviceID();
 #if ENABLE_MDNS_SUPPORT
 #include "network/mDNSManager/mDNSManager.hpp"
 #endif // ENABLE_MDNS_SUPPORT
+
+#if ENABLE_MQTT_SUPPORT
 #if ENABLE_HASS
 #include "mqtt/HASSIO/hassmqtt.hpp"
 #else
 #include "mqtt/BASIC/basicmqtt.hpp"
 #endif // ENABLE_HASS
+#endif // ENABLE_MQTT_SUPPORT
 /*###################### MQTT Configuration END ######################*/
 
 #endif

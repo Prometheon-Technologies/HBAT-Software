@@ -41,7 +41,7 @@ namespace mDNSManager
     // * Parameters: None
     // * Return: int, 1 if success 0 if fail
     //******************************************************************************
-    int MDNSHandler::DiscovermDNSBroker()
+    bool MDNSHandler::DiscovermDNSBroker()
     {
         IPAddress mqttServer;
         // check if there is a WiFi connection

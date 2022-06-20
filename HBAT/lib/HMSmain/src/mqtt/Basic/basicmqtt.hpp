@@ -38,6 +38,7 @@ private:
     char *_commandTopic;
     char *_configTopic;
     char *_menuTopic;
+    char _relayTopics[5][20];
 };
 
 extern BASEMQTT basemqtt;

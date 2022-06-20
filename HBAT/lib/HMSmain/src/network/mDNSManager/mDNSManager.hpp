@@ -23,7 +23,7 @@ namespace mDNSManager
         // * Parameters: None
         // * Return: int - 1 if success, 0 if fail
         //******************************************************************************
-        int DiscovermDNSBroker();
+        bool DiscovermDNSBroker();
     };
 }
 

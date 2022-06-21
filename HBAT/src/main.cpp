@@ -142,6 +142,7 @@ void loop()
 #if ENABLE_HASS
         hassmqtt.mqttLoop();
 #else
+        timedTasks.checkMQTTState();
         basemqtt.mqttLoop();
 #endif // ENABLE_HASS
     }

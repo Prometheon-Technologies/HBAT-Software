@@ -17,6 +17,7 @@ public:
 
     bool begin();
     void loadMQTTConfig();
+    void checkState();
     void mqttLoop();
     void mqttReconnect();
 

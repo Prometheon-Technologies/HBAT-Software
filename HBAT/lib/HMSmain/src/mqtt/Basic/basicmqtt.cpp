@@ -158,17 +158,35 @@ void BASEMQTT::loadMQTTConfig()
     log_i("Loaded config: hostname %s", cfg.config.hostname);
 }
 
+void BASEMQTT::checkState()
+{
+    cfg.config.MQTTConnectedState = mqttClient.state();
+    if (!cfg.config.MQTTEnabled)
+    {
+        log_i("MQTT is disabled");
+        return;
+    }
+
+    if (!cfg.config.MQTTConnectedState)
+    {
+        stateManager.setState(ProgramStates::DeviceState::MQTTState::MQTT_Disconnected);
+    }
+    else
+    {
+        stateManager.setState(ProgramStates::DeviceState::MQTTState::MQTT_Connected);
+    }
+    log_i("MQTT client state is: %d", mqttClient.state());
+}
+
 void BASEMQTT::mqttReconnect()
 {
     // Loop until we're reconnected
     while (!mqttClient.connected())
     {
         log_i("Attempting MQTT connection...");
-        stateManager.setState(ProgramStates::DeviceState::MQTTState::MQTT_Disconnected);
         // Attempt to connect
         if (mqttClient.connect(DEFAULT_HOSTNAME))
         {
-            stateManager.setState(ProgramStates::DeviceState::MQTTState::MQTT_Connected);
             log_i("Connected to MQTT broker.");
             // Subscribe to topics
             for (auto relay : _relayTopics)
@@ -197,7 +215,7 @@ void BASEMQTT::mqttLoop()
     {
         my_delay(1L);
 
-        if (!mqttClient.connected())
+        if (stateManager.getCurrentMQTTState() == ProgramStates::DeviceState::MQTTState::MQTT_Disconnected || stateManager.getCurrentMQTTState() == ProgramStates::DeviceState::MQTTState::MQTT_Error)
         {
             mqttReconnect();
         }

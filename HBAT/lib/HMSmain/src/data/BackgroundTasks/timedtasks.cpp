@@ -66,4 +66,15 @@ void TimedTasks::updateCurrentData() // check to see if the data has changed
   }
 }
 
+#if ENABLE_MQTT_SUPPORT
+void TimedTasks::checkMQTTState() // check to see if the data has changed
+{
+  if (Timer_10s_2.ding())
+  {
+    basemqtt.checkState();
+    Timer_10s_2.start();
+  }
+}
+#endif // MQTT_SUPPORT_ENABLED
+
 TimedTasks timedTasks;

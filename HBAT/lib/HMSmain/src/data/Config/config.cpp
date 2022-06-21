@@ -2,14 +2,11 @@
 
 // save last "timestamp" the config has been saved
 
-Config::Config()
-{
-    last_config_change = false;
-    last_config = 0;
-    maxVoltage = 24;
-    maxTemp = 120;
-    doc_string = "";
-}
+Config::Config() : _last_config_change(false),
+                   _last_config(0),
+                   _maxVoltage(24),
+                   _maxTemp(120),
+                   _doc_string("") {}
 
 Config::~Config() {}
 
@@ -196,7 +193,7 @@ bool Config::loadConfig()
 // trigger a config write/commit
 bool Config::setConfigChanged()
 {
-    last_config_change = true;
+    _last_config_change = true;
     saveConfig();
     log_i("[Set Config Changed]: Config save set to true");
     return true;
@@ -205,7 +202,7 @@ bool Config::setConfigChanged()
 bool Config::saveConfig()
 {
     // check if the data in config is different from the data in the file
-    if (!last_config_change)
+    if (!_last_config_change)
     {
         log_i("[Save Config Changes]: Config has not changed because it is the same as the file");
         return false;
@@ -272,7 +269,7 @@ bool Config::saveConfig()
     configFile.close();
     // end save
     log_i("[Save Config Changes]: Config written");
-    last_config_change = false;
+    _last_config_change = false;
 
     return true;
 }
@@ -280,7 +277,7 @@ bool Config::saveConfig()
 bool Config::updateCurrentData()
 {
     // check if the data in config is different from the data in the file
-    if (!last_config_change)
+    if (!_last_config_change)
     {
         log_i("[Update Current Data]: Config has not changed because it is the same as the file");
         return false;
@@ -340,7 +337,7 @@ void Config::setHostname(String new_hostname)
     setConfigChanged();
 }
 
-// we can't assing wifiManager.resetSettings(); to reset, somehow it gets called straight away.
+// we can't assign wifiManager.resetSettings(); to reset, somehow it gets called straight away.
 void Config::setWiFiConf(String ssid, String password)
 {
     /* #if defined(ESP32)

@@ -11,30 +11,25 @@ DeviceAddress temp_sensor_addresses;
 
 CellTemp::Temp cell_temp_sensor_results;
 
-CellTemp::CellTemp()
-{
-    sensors_count = 0;
-}
+CellTemp::CellTemp() : _sensors_count(0) {}
 
-CellTemp::~CellTemp()
-{
-}
+CellTemp::~CellTemp() {}
 
 bool CellTemp::setSensorCount()
 {
     if (sensors.getDeviceCount() < 1)
     {
-        Serial.println("No cells detected");
+        Serial.println("No Temperature sensors detected");
         return false;
     }
 
-    sensors_count = sensors.getDeviceCount(); // returns the number of sensors found
+    _sensors_count = sensors.getDeviceCount(); // returns the number of sensors found
     return true;
 }
 
 byte CellTemp::getSensorCount()
 {
-    return sensors_count;
+    return _sensors_count;
 }
 
 /******************************************************************************
@@ -51,16 +46,16 @@ void CellTemp::SetupSensors()
 
     // handle the case where no sensors are connected
     log_i("Locating devices...");
-    if (sensors_count == 0)
+    if (_sensors_count == 0)
     {
         log_e("No temperature sensors found - please connect them and restart the device");
         return;
     }
     // locate devices on the bus
-    log_i("Found %d devices", sensors_count, DEC);
+    log_i("Found %d devices", _sensors_count, DEC);
 
     // Loop through each device, print out address
-    for (int i = 0; i < sensors_count; i++)
+    for (byte i = 0; i < _sensors_count; i++)
     {
         // Search the wire for address
         if (sensors.getAddress(temp_sensor_addresses, i))
@@ -85,7 +80,7 @@ void CellTemp::SetupSensors()
 // function to print a device address
 void CellTemp::printAddress(DeviceAddress deviceAddress)
 {
-    for (uint8_t i = 0; i < sensors_count; i++)
+    for (uint8_t i = 0; i < _sensors_count; i++)
     {
         if (deviceAddress[i] < 16)
             Serial.println("0");
@@ -102,10 +97,10 @@ void CellTemp::printAddress(DeviceAddress deviceAddress)
 CellTemp::Temp CellTemp::ReadTempSensorData()
 {
     // handle the case where no sensors are connected
-    if (sensors_count == 0)
+    if (_sensors_count == 0)
     {
         float no_sensors[] = {0};
-        for (int i = 0; i < sensors_count; i++)
+        for (byte i = 0; i < _sensors_count; i++)
         {
             cell_temp_sensor_results.temp[i] = no_sensors[i];
         }
@@ -113,7 +108,7 @@ CellTemp::Temp CellTemp::ReadTempSensorData()
         return cell_temp_sensor_results;
     }
 
-    for (int i = 0; i < sensors_count; i++)
+    for (byte i = 0; i < _sensors_count; i++)
     {
         // Search the wire for address
         if (sensors.getAddress(temp_sensor_addresses, i))

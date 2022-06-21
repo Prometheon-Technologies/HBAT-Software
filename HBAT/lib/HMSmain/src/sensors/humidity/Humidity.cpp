@@ -30,7 +30,7 @@ Humidity::~Humidity()
  * Parameters: None
  * Return: None
  ******************************************************************************/
-byte Humidity::setupSensor()
+void Humidity::setupSensor()
 {
   log_i("SHT31 Sensors Setup Beginning....");
   // Set to 0x45 for alternate i2c address
@@ -39,27 +39,23 @@ byte Humidity::setupSensor()
     log_i("Couldn't find SHT31 sensors");
     log_i("SHT31 Sensors Setup did not complete successfully, check your wiring or the addresses and try again");
     stateManager.setState(ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_NONE);
-    return 0;
   }
   else if (!sht31.begin(0x44) && sht31_2.begin(0x45))
   {
     log_i("Couldn't find SHT31 sensor #1");
     log_i("SHT31 Sensors Setup did not complete successfully, check your wiring and try again");
     stateManager.setState(ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_1);
-    return 1;
   }
   else if (!sht31_2.begin(0x45) && sht31.begin(0x44))
   {
     log_i("Couldn't find SHT31 sensor #2");
     log_i("SHT31 Sensors Setup did not complete successfully, check your wiring and try again");
     stateManager.setState(ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_2);
-    return 2;
   }
   else
   {
     log_i("SHT31 Sensors Setup Complete");
     stateManager.setState(ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_BOTH);
-    return 3;
   }
   my_delay(2L); // delay in between reads for stability
 }

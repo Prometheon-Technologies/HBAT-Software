@@ -32,7 +32,7 @@ public:
     Temp ReadTempSensorData();
 
 private:
-    int sensors_count;
+    byte _sensors_count;
 };
 
 extern int sensors_count;

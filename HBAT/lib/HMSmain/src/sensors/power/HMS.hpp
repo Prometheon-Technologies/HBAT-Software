@@ -13,6 +13,7 @@ class HMS
 public:
   HMS();
   virtual ~HMS();
+  void begin();
   void calibrateAmps();
   void setupSensor();
   int readAmps();

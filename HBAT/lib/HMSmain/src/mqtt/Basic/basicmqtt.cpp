@@ -25,15 +25,9 @@ BASEMQTT::BASEMQTT() : _interval(60000),
                        _commandTopic("hbathms/command"),
                        _configTopic("hbathms/config"),
                        _relayTopics{{"relay1"}, {"relay2"}, {"relay3"}, {"relay4"}, {"relay5"}},
-                       _mqttControlTopic("hbathms/mqtt/control")
-{
-    // Constructor
-}
+                       _mqttControlTopic("hbathms/mqtt/control") {}
 
-BASEMQTT::~BASEMQTT()
-{
-    // Destructor
-}
+BASEMQTT::~BASEMQTT() {}
 
 char *getBroker()
 {

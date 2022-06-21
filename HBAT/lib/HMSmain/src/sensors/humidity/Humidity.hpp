@@ -19,7 +19,7 @@ public:
   Humidity();
   virtual ~Humidity();
   // Initialize the library
-  byte setupSensor();
+  void setupSensor();
   bool checkHeaterEnabled();
   float StackHumidity();
   float AverageStackTemp();

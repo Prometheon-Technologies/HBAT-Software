@@ -33,11 +33,12 @@ void setup()
 
     Serial.println(F("HMS booting - please wait"));
     Serial.println(F("Starting..."));
+    HMSmain.begin();
     HMSmain.setupSensor();
     Cell_Temp.SetupSensors();
 
     humidity.sfm3003Setup();
-    switch (humidity.setupSensor())
+    switch (stateManager.getCurrentSensorState())
     {
     case 0:
         Serial.println(F("Humidity Sensor Setup Failed - No sensors present"));

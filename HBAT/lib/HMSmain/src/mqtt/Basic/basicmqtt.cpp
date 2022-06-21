@@ -234,9 +234,7 @@ void BASEMQTT::mqttLoop()
                 mqttClient.publish(_infoTopic, temp.c_str(), true);
                 temp = "";
                 log_i("Published to topic [%s]", _infoTopic);
-
-                ProgramStates::BatteryChargeState::ChargeState chargeState = accumulatedata.ChargeStatus();
-                mqttClient.publish(_statusTopic, String(chargeState).c_str(), true);
+                mqttClient.publish(_statusTopic, String(accumulatedata.ChargeStatus()).c_str(), true);
             }
         }
     }

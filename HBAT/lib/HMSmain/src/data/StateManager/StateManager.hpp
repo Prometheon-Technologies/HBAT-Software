@@ -49,7 +49,8 @@ public:
             Starting,
             Started,
             Stopping,
-            Stopped
+            Stopped,
+            Error
         };
 
         enum WiFiState
@@ -74,14 +75,18 @@ public:
 
         enum MDNSState
         {
-            MDNSSuccess,
-            MDNSError
+            MDNS_Success,
+            MDNS_Connected,
+            MDNS_Disconnected,
+            MDNS_Error
         };
 
         enum MQTTState
         {
-            MQTTSuccess,
-            MQTTError
+            MQTT_Success,
+            MQTT_Connected,
+            MQTT_Disconnected,
+            MQTT_Error
         };
     };
 };

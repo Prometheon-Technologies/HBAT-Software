@@ -14,12 +14,12 @@ namespace mDNSManager
         auto localConfig = deviceConfig->getDeviceConfig();
         if (!MDNS.begin(localConfig->hostname))
         {
-            stateManager->setState(ProgramStates::DeviceState::MDNSState::MDNSError);
+            stateManager->setState(ProgramStates::DeviceState::MDNSState::MDNS_Error);
             log_e("Error initializing MDNS");
             return false;
         }
 
-        stateManager->setState(ProgramStates::DeviceState::MDNSState::MDNSSuccess);
+        stateManager->setState(ProgramStates::DeviceState::MDNSState::MDNS_Success);
         MDNS.addService("GreenhouseTowerDIY", "tcp", 80);
         MDNS.addServiceTxt("GreenhouseTowerDIY", "tcp", "webserver_port", String(80));
         log_i("MDNS initialized!");
@@ -48,7 +48,7 @@ namespace mDNSManager
         if (stateManager->getCurrentWiFiState() == ProgramStates::DeviceState::WiFiState::WiFiState_Connected)
         {
             // check if there is a mDNS connection
-            if (stateManager->getCurrentMDNSState() == ProgramStates::DeviceState::MDNSState::MDNSSuccess)
+            if (stateManager->getCurrentMDNSState() == ProgramStates::DeviceState::MDNSState::MDNS_Success)
             {
                 log_i("[mDNS Broker Discovery]: connected!\n");
 

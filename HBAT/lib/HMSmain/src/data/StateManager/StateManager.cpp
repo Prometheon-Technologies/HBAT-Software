@@ -1,6 +1,10 @@
 #include "StateManager.hpp"
 
 StateManager::StateManager() : _current_state(ProgramStates::DeviceState::Starting),
+                               _current_wifi_state(ProgramStates::DeviceState::WiFiState::WiFiState_None),
+                               _current_webserver_state(ProgramStates::DeviceState::WebServerState::WebServerState_None),
+                               _current_mdns_state(ProgramStates::DeviceState::MDNSState::MDNS_Disconnected),
+                               _current_mqtt_state(ProgramStates::DeviceState::MQTTState::MQTT_Disconnected),
                                _enabled_humidity_sensors(ProgramStates::EnabledHumiditySensors::HUM_NONE),
                                _battery_charge_state(ProgramStates::BatteryChargeState::CHARGE_OFF)
 {

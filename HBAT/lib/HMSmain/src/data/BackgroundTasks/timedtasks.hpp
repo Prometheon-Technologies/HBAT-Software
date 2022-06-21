@@ -13,6 +13,7 @@ public:
 
   void setupTimers();
   void updateCurrentData();
+  void checkMQTTState();
   void ScanI2CBus();
   void accumulateSensorData();
   void checkNetwork();

@@ -221,8 +221,8 @@ void BASEMQTT::mqttLoop()
             unsigned long currentMillis = millis();
             if (currentMillis - _previousMillis >= _interval_reconnect)
             {
-                mqttReconnect();
                 _previousMillis = currentMillis;
+                mqttReconnect();
             }
         }
         else
@@ -233,6 +233,7 @@ void BASEMQTT::mqttLoop()
             unsigned long currentMillis = millis();
             if (currentMillis - _previousMillis >= _interval)
             {
+                _previousMillis = currentMillis;
                 cfg.config.data_json = true;
                 my_delay(1L);
                 String temp = cfg.config.data_json_string;
@@ -240,7 +241,6 @@ void BASEMQTT::mqttLoop()
                 temp = "";
                 log_i("Published to topic [%s]", _infoTopic);
                 mqttClient.publish(_statusTopic, String(accumulatedata.ChargeStatus()).c_str(), true);
-                _previousMillis = currentMillis;
             }
         }
     }

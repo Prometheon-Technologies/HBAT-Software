@@ -105,10 +105,12 @@ bool BASEMQTT::begin()
         // connection failed
         log_i("Connection failed. MQTT client state is: %d", mqttClient.state());
         cfg.config.MQTTConnectedState = mqttClient.state();
+        stateManager.setState(ProgramStates::DeviceState::MQTTState::MQTT_Error);
         return false;
     }
 
     cfg.config.MQTTConnectedState = mqttClient.state();
+    stateManager.setState(ProgramStates::DeviceState::MQTTState::MQTT_Connected);
     log_i("MQTT client state is: %d", mqttClient.state());
     for (auto relay : _relayTopics)
     {
@@ -162,9 +164,11 @@ void BASEMQTT::mqttReconnect()
     while (!mqttClient.connected())
     {
         log_i("Attempting MQTT connection...");
+        stateManager.setState(ProgramStates::DeviceState::MQTTState::MQTT_Disconnected);
         // Attempt to connect
         if (mqttClient.connect(DEFAULT_HOSTNAME))
         {
+            stateManager.setState(ProgramStates::DeviceState::MQTTState::MQTT_Connected);
             log_i("Connected to MQTT broker.");
             // Subscribe to topics
             for (auto relay : _relayTopics)
@@ -178,6 +182,7 @@ void BASEMQTT::mqttReconnect()
         }
         else
         {
+            stateManager.setState(ProgramStates::DeviceState::MQTTState::MQTT_Error);
             log_i("failed, rc= %d", mqttClient.state());
             log_i("trying again in 5 seconds");
             // Wait 5 seconds before retrying
@@ -199,7 +204,7 @@ void BASEMQTT::mqttLoop()
         else
         {
             mqttClient.loop();
-            //callback;
+            // callback;
 
             unsigned long currentMillis = millis();
             if (currentMillis - _previousMillis >= _interval)

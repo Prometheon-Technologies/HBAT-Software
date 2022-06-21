@@ -17,6 +17,7 @@ PubSubClient mqttClient(broker_ip.fromString(getBroker()), MQTT_PORT, callback, 
 //************************************************************************************************************************
 
 BASEMQTT::BASEMQTT() : _interval(60000),
+                       _interval_reconnect(5000),
                        _user_data{0},
                        _previousMillis(0),
                        _user_bytes_received(0),
@@ -181,7 +182,7 @@ void BASEMQTT::checkState()
 void BASEMQTT::mqttReconnect()
 {
     // Loop until we're reconnected
-    while (!mqttClient.connected())
+    if (!mqttClient.connected())
     {
         log_i("Attempting MQTT connection...");
         // Attempt to connect
@@ -217,7 +218,12 @@ void BASEMQTT::mqttLoop()
 
         if (stateManager.getCurrentMQTTState() == ProgramStates::DeviceState::MQTTState::MQTT_Disconnected || stateManager.getCurrentMQTTState() == ProgramStates::DeviceState::MQTTState::MQTT_Error)
         {
-            mqttReconnect();
+            unsigned long currentMillis = millis();
+            if (currentMillis - _previousMillis >= _interval_reconnect)
+            {
+                mqttReconnect();
+                _previousMillis = currentMillis;
+            }
         }
         else
         {
@@ -227,7 +233,6 @@ void BASEMQTT::mqttLoop()
             unsigned long currentMillis = millis();
             if (currentMillis - _previousMillis >= _interval)
             {
-                _previousMillis = currentMillis;
                 cfg.config.data_json = true;
                 my_delay(1L);
                 String temp = cfg.config.data_json_string;
@@ -235,6 +240,7 @@ void BASEMQTT::mqttLoop()
                 temp = "";
                 log_i("Published to topic [%s]", _infoTopic);
                 mqttClient.publish(_statusTopic, String(accumulatedata.ChargeStatus()).c_str(), true);
+                _previousMillis = currentMillis;
             }
         }
     }

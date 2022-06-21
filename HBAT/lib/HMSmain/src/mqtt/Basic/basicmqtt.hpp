@@ -29,6 +29,7 @@ private:
 
     // Private variables
     const long _interval;
+    const long _interval_reconnect;
     unsigned long _previousMillis;
     uint8_t _user_bytes_received;
     char _user_data[100];

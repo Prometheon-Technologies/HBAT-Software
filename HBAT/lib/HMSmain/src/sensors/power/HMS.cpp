@@ -13,7 +13,7 @@ ACS712 ACS(_amppin, 5.0, 4095, 100);
 HMS::HMS() : _mux_enabled_voltage(false),
              _mux_enabled_amps(false),
              _power_mux_pin_amps(20),
-             _power_mux_pin_voltage(46),
+             _power_mux_pin_voltage(46)
 {
 }
 

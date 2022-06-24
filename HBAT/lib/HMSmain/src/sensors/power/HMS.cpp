@@ -46,9 +46,10 @@ void HMS::begin()
     pinMode(35, INPUT);
     pinMode(32, INPUT);
 #else
-    for (int i = 1; i < 11; i++)
+    for (byte i = 0; i < 9; i++)
     {
-        pinMode(i, INPUT);
+        byte pin = 1;
+        pinMode(pin++, INPUT);
     }
 #endif // !PRODUCTION
 

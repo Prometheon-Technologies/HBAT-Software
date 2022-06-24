@@ -38,22 +38,19 @@ void HMS::begin()
         pinMode(pin, INPUT);
     }*/
 
-    if (!PRODUCTION)
+#if !PRODUCTION
+    // 36, 39, 34, 35, 32;
+    pinMode(36, INPUT);
+    pinMode(39, INPUT);
+    pinMode(34, INPUT);
+    pinMode(35, INPUT);
+    pinMode(32, INPUT);
+#else
+    for (int i = 1; i < 11; i++)
     {
-        //36, 39, 34, 35, 32;
-        pinMode(36, INPUT);
-        pinMode(39, INPUT);
-        pinMode(34, INPUT);
-        pinMode(35, INPUT);
-        pinMode(32, INPUT);
+        pinMode(i, INPUT);
     }
-    else
-    {
-        for (int i = 1; i < 10; i++)
-        {
-            pinMode(i, INPUT);
-        }
-    }
+#endif // !PRODUCTION
 
     // Set up the power mux
     pinMode(_power_mux_pin_amps, OUTPUT);
@@ -109,7 +106,12 @@ float *HMS::readSensAndCondition()
     }
 
     byte numtoaverage = 5;
-    float *_cell_voltage = (float *)malloc(sizeof(float) * numtoaverage);
+#if !PRODUCTION
+    float _cell_voltage[5] = {0};
+#else
+    float _cell_voltage[10] = {0};
+#endif // !PRODUCTION
+
     for (byte i = 0; i < numtoaverage; i++)
     {
 #if !PRODUCTION

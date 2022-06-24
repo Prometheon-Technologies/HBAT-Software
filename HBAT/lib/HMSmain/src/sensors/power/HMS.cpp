@@ -13,7 +13,7 @@ ACS712 ACS(_amppin, 5.0, 4095, 100);
 HMS::HMS() : _mux_enabled_voltage(false),
              _mux_enabled_amps(false),
              _power_mux_pin_amps(20),
-             _power_mux_pin_voltage(46)
+             _power_mux_pin_voltage(46),
 {
 }
 
@@ -23,6 +23,38 @@ HMS::~HMS()
 
 void HMS::begin()
 {
+    /* if (!PRODUCTION)
+    {
+        byte _voltage_pins[Cell_Temp.getSensorCount()] = {36, 39, 34, 35, 32};
+    }
+    else
+    {
+
+        byte _voltage_pins[Cell_Temp.getSensorCount()] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    }
+
+    for (auto &pin : _voltage_pins)
+    {
+        pinMode(pin, INPUT);
+    }*/
+
+    if (!PRODUCTION)
+    {
+        //36, 39, 34, 35, 32;
+        pinMode(36, INPUT);
+        pinMode(39, INPUT);
+        pinMode(34, INPUT);
+        pinMode(35, INPUT);
+        pinMode(32, INPUT);
+    }
+    else
+    {
+        for (int i = 1; i < 10; i++)
+        {
+            pinMode(i, INPUT);
+        }
+    }
+
     // Set up the power mux
     pinMode(_power_mux_pin_amps, OUTPUT);
     pinMode(_power_mux_pin_voltage, OUTPUT);
@@ -76,11 +108,17 @@ float *HMS::readSensAndCondition()
         return NULL;
     }
 
-    byte numtoaverage = Cell_Temp.getSensorCount();
+    byte numtoaverage = 5;
     float *_cell_voltage = (float *)malloc(sizeof(float) * numtoaverage);
     for (byte i = 0; i < numtoaverage; i++)
     {
 #if !PRODUCTION
+
+        /* for (auto &pin : _voltage_pins)
+        {
+            _cell_voltage[i] = readVoltage(pin);
+        } */
+
         _cell_voltage[0] = readVoltage(36);
         _cell_voltage[1] = readVoltage(39);
         _cell_voltage[2] = readVoltage(34);
@@ -99,6 +137,11 @@ float *HMS::readSensAndCondition()
         my_delay(0.1L);
         _mux_enabled_voltage = false;
 #else
+        /* for (auto &pin : _voltage_pins)
+        {
+            _cell_voltage[i] = readVoltage(pin);
+        } */
+
         _cell_voltage[0] = readVoltage(1);
         _cell_voltage[1] = readVoltage(2);
         _cell_voltage[2] = readVoltage(3);

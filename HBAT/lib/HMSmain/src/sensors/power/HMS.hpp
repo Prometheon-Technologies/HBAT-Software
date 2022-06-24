@@ -29,7 +29,7 @@ private:
   int _power_mux_pin_voltage;
   bool _POWER_MUX_ENABLED_AMPS;
   bool _POWER_MUX_ENABLED_VOLTAGE;
-  float *_cell_voltage;
+  byte _voltage_pins[100];
 };
 
 extern HMS HMSmain;

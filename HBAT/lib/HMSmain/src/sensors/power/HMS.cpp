@@ -119,11 +119,11 @@ float *HMS::readSensAndCondition()
             _cell_voltage[i] = readVoltage(pin);
         } */
 
-        _cell_voltage[0] = readVoltage(36);
-        _cell_voltage[1] = readVoltage(39);
-        _cell_voltage[2] = readVoltage(34);
-        _cell_voltage[3] = readVoltage(35); // voltage leads on analog pins ADC1 - ADC2 pins do not work when wifi is enabled
-        _cell_voltage[4] = readVoltage(32);
+        _cell_voltage[0] += readVoltage(36);
+        _cell_voltage[1] += readVoltage(39);
+        _cell_voltage[2] += readVoltage(34);
+        _cell_voltage[3] += readVoltage(35); // voltage leads on analog pins ADC1 - ADC2 pins do not work when wifi is enabled
+        _cell_voltage[4] += readVoltage(32);
 
         digitalWrite(_power_mux_pin_amps, LOW);
         my_delay(0.1L);
@@ -142,15 +142,15 @@ float *HMS::readSensAndCondition()
             _cell_voltage[i] = readVoltage(pin);
         } */
 
-        _cell_voltage[0] = readVoltage(1);
-        _cell_voltage[1] = readVoltage(2);
-        _cell_voltage[2] = readVoltage(3);
-        _cell_voltage[3] = readVoltage(4); // voltage leads on analog pins ADC1 - ADC2 pins do not work when wifi is enabled
-        _cell_voltage[4] = readVoltage(5);
-        _cell_voltage[5] = readVoltage(6);
-        _cell_voltage[6] = readVoltage(7);
-        _cell_voltage[7] = readVoltage(8);
-        _cell_voltage[8] = readVoltage(9);
+        _cell_voltage[0] += readVoltage(1);
+        _cell_voltage[1] += readVoltage(2);
+        _cell_voltage[2] += readVoltage(3);
+        _cell_voltage[3] += readVoltage(4); // voltage leads on analog pins ADC1 - ADC2 pins do not work when wifi is enabled
+        _cell_voltage[4] += readVoltage(5);
+        _cell_voltage[5] += readVoltage(6);
+        _cell_voltage[6] += readVoltage(7);
+        _cell_voltage[7] += readVoltage(8);
+        _cell_voltage[8] += readVoltage(9);
         digitalWrite(_power_mux_pin_amps, LOW);
         my_delay(0.1L);
         if (!_mux_enabled_amps && !_POWER_MUX_ENABLED_AMPS)

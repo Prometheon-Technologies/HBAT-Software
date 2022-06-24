@@ -118,7 +118,7 @@ float *HMS::readSensAndCondition()
 
         /* for (auto &pin : _voltage_pins)
         {
-            _cell_voltage[i] = readVoltage(pin);
+            _cell_voltage[i] += readVoltage(pin);
         } */
 
         _cell_voltage[0] += readVoltage(36);
@@ -141,7 +141,7 @@ float *HMS::readSensAndCondition()
 #else
         /* for (auto &pin : _voltage_pins)
         {
-            _cell_voltage[i] = readVoltage(pin);
+            _cell_voltage[i] += readVoltage(pin);
         } */
 
         _cell_voltage[0] += readVoltage(1);

@@ -161,28 +161,21 @@ void BASEMQTT::loadMQTTConfig()
 
 void BASEMQTT::checkState()
 {
-    cfg.config.MQTTConnectedState = mqttClient.state();
+    cfg.config.MQTTConnectedState = mqttClient.connected();
     if (!cfg.config.MQTTEnabled)
     {
         log_i("MQTT is disabled");
         return;
     }
 
-    if (!cfg.config.MQTTConnectedState)
-    {
-        stateManager.setState(ProgramStates::DeviceState::MQTTState::MQTT_Disconnected);
-    }
-    else
-    {
-        stateManager.setState(ProgramStates::DeviceState::MQTTState::MQTT_Connected);
-    }
+    cfg.config.MQTTConnectedState ? stateManager.setState(ProgramStates::DeviceState::MQTTState::MQTT_Connected) : stateManager.setState(ProgramStates::DeviceState::MQTTState::MQTT_Disconnected);
     log_i("MQTT client state is: %d", mqttClient.state());
 }
 
 void BASEMQTT::mqttReconnect()
 {
     // Loop until we're reconnected
-    if (!mqttClient.connected())
+    if (stateManager.getCurrentMQTTState() == ProgramStates::DeviceState::MQTTState::MQTT_Disconnected)
     {
         log_i("Attempting MQTT connection...");
         // Attempt to connect

@@ -182,7 +182,7 @@ bool Config::loadConfig()
     heapStr(&config.DHCPCHECK, jsonBuffer["DHCPCHECK"]);
     config.numSensors = jsonBuffer["Number_of_Sensors"];
 
-    for (int i = 0; i < sizeof(config.relays); i++)
+    for (int i = 0; i < sizeof(config.relays) / sizeof(config.relays[0]); i++)
     {
         config.relays[i] = jsonBuffer["relays"][i];
     }

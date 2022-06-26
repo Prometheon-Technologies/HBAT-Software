@@ -23,28 +23,13 @@ HMS::~HMS()
 
 void HMS::begin()
 {
-    /* if (!PRODUCTION)
-    {
-        byte _voltage_pins[Cell_Temp.getSensorCount()] = {36, 39, 34, 35, 32};
-    }
-    else
-    {
-
-        byte _voltage_pins[Cell_Temp.getSensorCount()] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    }
-
-    for (auto &pin : _voltage_pins)
-    {
-        pinMode(pin, INPUT);
-    }*/
-
 #if !PRODUCTION
     // 36, 39, 34, 35, 32;
-    pinMode(36, INPUT);
-    pinMode(39, INPUT);
-    pinMode(34, INPUT);
-    pinMode(35, INPUT);
-    pinMode(32, INPUT);
+    byte _voltage_pins[] = {36, 39, 34, 35, 32};
+    for (byte i = 0; i < sizeof(_voltage_pins) / sizeof(_voltage_pins[0]); i++)
+    {
+        pinMode(_voltage_pins[i], INPUT);
+    }
 #else
     for (byte i = 0; i < 9; i++)
     {
@@ -87,7 +72,10 @@ double HMS::readVoltagePolynomial(byte pinnumber)
 {
     double reading = analogRead(pinnumber); // Reference voltage is 3v3 so maximum reading is 3v3 = 4095 in range 0 to 4095
     if (reading < 1 || reading > 4095)
+    {
         return 0;
+    }
+
     // return -0.000000000009824 * pow(reading,3) + 0.000000016557283 * pow(reading,2) + 0.000854596860691 * reading + 0.065440348345433;
     return -0.000000000000016 * pow(reading, 4) + 0.000000000118171 * pow(reading, 3) - 0.000000301211691 * pow(reading, 2) + 0.001109019271794 * reading + 0.034143524634089;
 } // Added an improved polynomial, use either, comment out as required
@@ -168,7 +156,7 @@ float *HMS::readSensAndCondition()
 #endif // PRODUCTION
     }
 
-    for (byte i = 0; i < numtoaverage; i++)
+    for (byte i = 0; i < sizeof(_cell_voltage) / sizeof(_cell_voltage[0]); i++)
     {
         _cell_voltage[i] = _cell_voltage[i] / numtoaverage;
     }

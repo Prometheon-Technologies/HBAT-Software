@@ -44,7 +44,7 @@
 
 // Network Stack
 #include "network/HMSNetwork.hpp"
-#include "network/OTA/OTA.hpp"
+//#include "network/OTA/OTA.hpp"
 // Accumulate Data
 #include "data/AccumulateData/accumulatedata.hpp"
 

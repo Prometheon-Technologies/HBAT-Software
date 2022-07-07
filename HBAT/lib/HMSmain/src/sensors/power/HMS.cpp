@@ -10,16 +10,14 @@ uint8_t _amppin = 10;
 
 ACS712 ACS(_amppin, 5.0, 4095, 100);
 
+HMS::Cell_Voltages_t cell_voltages;
+
 HMS::HMS() : _mux_enabled_voltage(false),
              _mux_enabled_amps(false),
              _power_mux_pin_amps(20),
-             _power_mux_pin_voltage(46)
-{
-}
+             _power_mux_pin_voltage(46) {}
 
-HMS::~HMS()
-{
-}
+HMS::~HMS() {}
 
 void HMS::begin()
 {
@@ -30,10 +28,11 @@ void HMS::begin()
     {
         pinMode(_voltage_pins[i], INPUT);
     }
+    pinMode(33, INPUT);
 #else
+    byte pin = 1;
     for (byte i = 0; i < 9; i++)
     {
-        byte pin = 1;
         pinMode(pin++, INPUT);
     }
 #endif // !PRODUCTION
@@ -86,20 +85,16 @@ double HMS::readVoltagePolynomial(byte pinnumber)
  * Parameters: None
  * Return: float array
  ******************************************************************************/
-float *HMS::readSensAndCondition()
+HMS::Cell_Voltages_t HMS::readSensAndCondition()
 {
     if (!Cell_Temp.setSensorCount())
     {
         Serial.println("No cells detected");
-        return NULL;
+        cell_voltages = {0};
+        return cell_voltages;
     }
 
     byte numtoaverage = 5;
-#if !PRODUCTION
-    float _cell_voltage[5] = {0};
-#else
-    float _cell_voltage[10] = {0};
-#endif // !PRODUCTION
 
     for (byte i = 0; i < numtoaverage; i++)
     {
@@ -109,12 +104,11 @@ float *HMS::readSensAndCondition()
         {
             _cell_voltage[i] += readVoltage(pin);
         } */
-
-        _cell_voltage[0] += readVoltage(36);
-        _cell_voltage[1] += readVoltage(39);
-        _cell_voltage[2] += readVoltage(34);
-        _cell_voltage[3] += readVoltage(35); // voltage leads on analog pins ADC1 - ADC2 pins do not work when wifi is enabled
-        _cell_voltage[4] += readVoltage(32);
+        byte _voltage_pins[] = {36, 39, 34, 35, 32};
+        for (byte i = 0; i < sizeof(_voltage_pins) / sizeof(_voltage_pins[0]); i++)
+        {
+            cell_voltages.cell_voltage[i] += readVoltage(_voltage_pins[i]);
+        }
 
         digitalWrite(_power_mux_pin_amps, LOW);
         my_delay(0.1L);
@@ -122,33 +116,25 @@ float *HMS::readSensAndCondition()
         {
             _mux_enabled_voltage = true;
             digitalWrite(_power_mux_pin_voltage, HIGH);
-            _cell_voltage[5] = readVoltage(33);
+            cell_voltages.cell_voltage[5] = readVoltage(33);
         }
         digitalWrite(_power_mux_pin_voltage, LOW);
         my_delay(0.1L);
         _mux_enabled_voltage = false;
 #else
-        /* for (auto &pin : _voltage_pins)
-        {
-            _cell_voltage[i] += readVoltage(pin);
-        } */
 
-        _cell_voltage[0] += readVoltage(1);
-        _cell_voltage[1] += readVoltage(2);
-        _cell_voltage[2] += readVoltage(3);
-        _cell_voltage[3] += readVoltage(4); // voltage leads on analog pins ADC1 - ADC2 pins do not work when wifi is enabled
-        _cell_voltage[4] += readVoltage(5);
-        _cell_voltage[5] += readVoltage(6);
-        _cell_voltage[6] += readVoltage(7);
-        _cell_voltage[7] += readVoltage(8);
-        _cell_voltage[8] += readVoltage(9);
+        byte pin = 9;
+        for (byte i = 8; i > 8; i--)
+        {
+            cell_voltages.cell_voltage[i] += readVoltage(pin--);
+        }
         digitalWrite(_power_mux_pin_amps, LOW);
         my_delay(0.1L);
         if (!_mux_enabled_amps && !_POWER_MUX_ENABLED_AMPS)
         {
             _mux_enabled_voltage = true;
             digitalWrite(_power_mux_pin_voltage, HIGH);
-            _cell_voltage[9] = readVoltage(10);
+            cell_voltages.cell_voltage[9] = readVoltage(10);
         }
         digitalWrite(_power_mux_pin_voltage, LOW);
         my_delay(0.1L);
@@ -156,11 +142,11 @@ float *HMS::readSensAndCondition()
 #endif // PRODUCTION
     }
 
-    for (byte i = 0; i < sizeof(_cell_voltage) / sizeof(_cell_voltage[0]); i++)
+    for (byte i = 0; i < sizeof(cell_voltages.cell_voltage) / sizeof(cell_voltages.cell_voltage[0]); i++)
     {
-        _cell_voltage[i] = _cell_voltage[i] / numtoaverage;
+        cell_voltages.cell_voltage[i] = cell_voltages.cell_voltage[i] / numtoaverage;
     }
-    return _cell_voltage;
+    return cell_voltages;
 }
 
 /******************************************************************************

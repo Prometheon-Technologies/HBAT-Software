@@ -104,7 +104,7 @@ void setup()
     }
 
     ledManager.onOff(true);
-    ota.SetupOTA(cfg);
+    //ota.SetupOTA(cfg);
 
     Serial.print(F("\n===================================\n"));
     Serial.println(F("Setup Complete"));
@@ -115,7 +115,7 @@ void setup()
 void loop()
 {
     timedTasks.checkNetwork();
-    ota.HandleOTAUpdate();
+    //ota.HandleOTAUpdate();
     ledManager.displayStatus();
 #if ENABLE_I2C_SCANNER
     timedTasks.ScanI2CBus();

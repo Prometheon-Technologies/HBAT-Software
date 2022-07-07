@@ -41,7 +41,7 @@ void AccumulateData::InitAccumulateData()
     cfg.config.stack_current = HMSmain.readAmps();
 
     // Add arrays for Cell level Data.
-    float *cell_voltage = HMSmain.readSensAndCondition();
+    float *cell_voltage = HMSmain.readSensAndCondition().cell_voltage;
     // loop through and store per cell voltage
     for (int i = 0; i < _numSensors; i++)
     {
@@ -54,15 +54,19 @@ void AccumulateData::InitAccumulateData()
      * Parameters: None
      * Return: The mean Stack Voltage
      ******************************************************************************/
+#if !PRODUCTION
+    float array[5];
+#else
     float array[10];
+#endif // !PRODUCTION
+    
     float sum = 0;
-    int size = sizeof(cell_voltage) / sizeof(cell_voltage[0]);
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < sizeof(array) / sizeof(array[0]); i++)
     {
         array[i] = cell_voltage[i];
     }
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < sizeof(cell_voltage) / sizeof(cell_voltage[0]); i++)
     {
         sum += array[i];
     }

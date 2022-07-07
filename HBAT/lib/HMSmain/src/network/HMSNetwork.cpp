@@ -202,9 +202,13 @@ bool HMSnetwork::SetupNetworkStack()
                 }
             }
 
-            WiFi.setHostname(cfg.config.hostname); // define hostname
-
+            // WiFi.setHostname(cfg.config.hostname); // define hostname
+            WiFi.setSleep(false);
             WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
+            WiFi.persistent(false);
+            WiFi.setAutoConnect(false);
+            WiFi.setAutoReconnect(true);
+            WiFi.setTxPower(WIFI_POWER_2dBm);
 
             unsigned long currentMillis = millis();
             _previousMillis = currentMillis;

@@ -60,6 +60,7 @@ void setup()
     Serial.println("");
     // Setup the network stack
     // Setup the Wifi Manager
+    WiFi.disconnect();
     network.SetupWebServer();
 #if ENABLE_MDNS_SUPPORT
     cfg.attach(&mdnsHandler);

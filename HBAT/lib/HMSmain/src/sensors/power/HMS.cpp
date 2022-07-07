@@ -3,29 +3,45 @@
 // ESP 32 (requires resistors to step down the logic voltage)
 // ACS712  ACS(25, 5.0, 4095, 185);
 #if !PRODUCTION
-
 uint8_t _amppin = 33;
-
 #else
 uint8_t _amppin = 10;
 #endif
 
 ACS712 ACS(_amppin, 5.0, 4095, 100);
 
-bool mux_enabled_voltage = false;
-bool mux_enabled_amps = false;
-int power_mux_pin_amps = 20;
-int power_mux_pin_voltage = 46;
-bool POWER_MUX_ENABLED_AMPS = digitalRead(power_mux_pin_amps);
-bool POWER_MUX_ENABLED_VOLTAGE = digitalRead(power_mux_pin_voltage);
-float *cell_voltage = (float *)malloc(sizeof(float) * maxCellCount);
+HMS::Cell_Voltages_t cell_voltages;
 
-HMS::HMS()
-{
-}
+HMS::HMS() : _mux_enabled_voltage(false),
+             _mux_enabled_amps(false),
+             _power_mux_pin_amps(20),
+             _power_mux_pin_voltage(46) {}
 
-HMS::~HMS()
+HMS::~HMS() {}
+
+void HMS::begin()
 {
+#if !PRODUCTION
+    // 36, 39, 34, 35, 32;
+    byte _voltage_pins[] = {36, 39, 34, 35, 32};
+    for (byte i = 0; i < sizeof(_voltage_pins) / sizeof(_voltage_pins[0]); i++)
+    {
+        pinMode(_voltage_pins[i], INPUT);
+    }
+    pinMode(33, INPUT);
+#else
+    byte pin = 1;
+    for (byte i = 0; i < 9; i++)
+    {
+        pinMode(pin++, INPUT);
+    }
+#endif // !PRODUCTION
+
+    // Set up the power mux
+    pinMode(_power_mux_pin_amps, OUTPUT);
+    pinMode(_power_mux_pin_voltage, OUTPUT);
+    _POWER_MUX_ENABLED_AMPS = digitalRead(_power_mux_pin_amps);
+    _POWER_MUX_ENABLED_VOLTAGE = digitalRead(_power_mux_pin_voltage);
 }
 
 /******************************************************************************
@@ -34,10 +50,34 @@ HMS::~HMS()
  * Parameters: int pinnumber
  * Return: float
  ******************************************************************************/
-float HMS::readVoltage(int pinnumber)
+float HMS::readVoltage(byte pinnumber)
 {
     return (float)((analogRead(pinnumber) * 3300.0) / 4095.0);
 }
+
+/* ADC readings v voltage
+ *  y = -0.000000000009824x3 + 0.000000016557283x2 + 0.000854596860691x + 0.065440348345433
+ * Polynomial curve match, based on raw data thus:
+ *   464     0.5
+ *  1088     1.0
+ *  1707     1.5
+ *  2331     2.0
+ *  2951     2.5
+ *  3775     3.0
+ *
+ *  Serial.println(readVoltagePolynomial(36), 3);
+ */
+double HMS::readVoltagePolynomial(byte pinnumber)
+{
+    double reading = analogRead(pinnumber); // Reference voltage is 3v3 so maximum reading is 3v3 = 4095 in range 0 to 4095
+    if (reading < 1 || reading > 4095)
+    {
+        return 0;
+    }
+
+    // return -0.000000000009824 * pow(reading,3) + 0.000000016557283 * pow(reading,2) + 0.000854596860691 * reading + 0.065440348345433;
+    return -0.000000000000016 * pow(reading, 4) + 0.000000000118171 * pow(reading, 3) - 0.000000301211691 * pow(reading, 2) + 0.001109019271794 * reading + 0.034143524634089;
+} // Added an improved polynomial, use either, comment out as required
 
 /******************************************************************************
  * Function: Read Voltage per Cell and average
@@ -45,61 +85,68 @@ float HMS::readVoltage(int pinnumber)
  * Parameters: None
  * Return: float array
  ******************************************************************************/
-float *HMS::readSensAndCondition()
+HMS::Cell_Voltages_t HMS::readSensAndCondition()
 {
-    int numtoaverage = 10;
-    for (int i = 0; i < numtoaverage; i++)
+    if (!Cell_Temp.setSensorCount())
     {
-        if (!PRODUCTION)
-        {
-            cell_voltage[0] = readVoltage(36);
-            cell_voltage[1] = readVoltage(39);
-            cell_voltage[2] = readVoltage(34);
-            cell_voltage[3] = readVoltage(35); // voltage leads on analog pins ADC1 - ADC2 pins do not work when wifi is enabled
-            cell_voltage[4] = readVoltage(32);
-
-            digitalWrite(power_mux_pin_amps, LOW);
-            my_delay(0.1L);
-            if (!mux_enabled_amps && !POWER_MUX_ENABLED_AMPS)
-            {
-                mux_enabled_voltage = true;
-                digitalWrite(power_mux_pin_voltage, HIGH);
-                cell_voltage[5] = readVoltage(33);
-            }
-            digitalWrite(power_mux_pin_voltage, LOW);
-            my_delay(0.1L);
-            mux_enabled_voltage = false;
-        }
-        else
-        {
-            cell_voltage[0] = readVoltage(1);
-            cell_voltage[1] = readVoltage(2);
-            cell_voltage[2] = readVoltage(3);
-            cell_voltage[3] = readVoltage(4); // voltage leads on analog pins ADC1 - ADC2 pins do not work when wifi is enabled
-            cell_voltage[4] = readVoltage(5);
-            cell_voltage[5] = readVoltage(6);
-            cell_voltage[6] = readVoltage(7);
-            cell_voltage[7] = readVoltage(8);
-            cell_voltage[8] = readVoltage(9);
-            digitalWrite(power_mux_pin_amps, LOW);
-            my_delay(0.1L);
-            if (!mux_enabled_amps && !POWER_MUX_ENABLED_AMPS)
-            {
-                mux_enabled_voltage = true;
-                digitalWrite(power_mux_pin_voltage, HIGH);
-                cell_voltage[9] = readVoltage(10);
-            }
-            digitalWrite(power_mux_pin_voltage, LOW);
-            my_delay(0.1L);
-            mux_enabled_voltage = false;
-        }
+        Serial.println("No cells detected");
+        cell_voltages = {0};
+        return cell_voltages;
     }
 
-    for (int i = 0; i < numtoaverage; i++)
+    byte numtoaverage = 5;
+
+    for (byte i = 0; i < numtoaverage; i++)
     {
-        cell_voltage[i] = cell_voltage[i] / numtoaverage;
+#if !PRODUCTION
+
+        /* for (auto &pin : _voltage_pins)
+        {
+            _cell_voltage[i] += readVoltage(pin);
+        } */
+        byte _voltage_pins[] = {36, 39, 34, 35, 32};
+        for (byte i = 0; i < sizeof(_voltage_pins) / sizeof(_voltage_pins[0]); i++)
+        {
+            cell_voltages.cell_voltage[i] += readVoltage(_voltage_pins[i]);
+        }
+
+        digitalWrite(_power_mux_pin_amps, LOW);
+        my_delay(0.1L);
+        if (!_mux_enabled_amps && !_POWER_MUX_ENABLED_AMPS)
+        {
+            _mux_enabled_voltage = true;
+            digitalWrite(_power_mux_pin_voltage, HIGH);
+            cell_voltages.cell_voltage[5] = readVoltage(33);
+        }
+        digitalWrite(_power_mux_pin_voltage, LOW);
+        my_delay(0.1L);
+        _mux_enabled_voltage = false;
+#else
+
+        byte pin = 9;
+        for (byte i = 8; i > 8; i--)
+        {
+            cell_voltages.cell_voltage[i] += readVoltage(pin--);
+        }
+        digitalWrite(_power_mux_pin_amps, LOW);
+        my_delay(0.1L);
+        if (!_mux_enabled_amps && !_POWER_MUX_ENABLED_AMPS)
+        {
+            _mux_enabled_voltage = true;
+            digitalWrite(_power_mux_pin_voltage, HIGH);
+            cell_voltages.cell_voltage[9] = readVoltage(10);
+        }
+        digitalWrite(_power_mux_pin_voltage, LOW);
+        my_delay(0.1L);
+        _mux_enabled_voltage = false;
+#endif // PRODUCTION
     }
-    return cell_voltage;
+
+    for (byte i = 0; i < sizeof(cell_voltages.cell_voltage) / sizeof(cell_voltages.cell_voltage[0]); i++)
+    {
+        cell_voltages.cell_voltage[i] = cell_voltages.cell_voltage[i] / numtoaverage;
+    }
+    return cell_voltages;
 }
 
 /******************************************************************************
@@ -114,15 +161,15 @@ float *HMS::readSensAndCondition()
 void HMS::setupSensor()
 {
     // Setup the ACS712 sensor
-    digitalWrite(power_mux_pin_voltage, LOW);
-    if (!mux_enabled_voltage && !POWER_MUX_ENABLED_VOLTAGE)
+    digitalWrite(_power_mux_pin_voltage, LOW);
+    if (!_mux_enabled_voltage && !_POWER_MUX_ENABLED_VOLTAGE)
     {
-        mux_enabled_amps = true;
-        digitalWrite(power_mux_pin_amps, HIGH);
+        _mux_enabled_amps = true;
+        digitalWrite(_power_mux_pin_amps, HIGH);
         ACS.autoMidPoint();
         my_delay(0.1L);
-        digitalWrite(power_mux_pin_amps, LOW);
-        mux_enabled_amps = false;
+        digitalWrite(_power_mux_pin_amps, LOW);
+        _mux_enabled_amps = false;
     }
 }
 
@@ -136,15 +183,15 @@ void HMS::setupSensor()
 int HMS::readAmps()
 {
     // Setup the ACS712 sensor
-    digitalWrite(power_mux_pin_voltage, LOW);
-    if (!mux_enabled_voltage && !POWER_MUX_ENABLED_VOLTAGE)
+    digitalWrite(_power_mux_pin_voltage, LOW);
+    if (!_mux_enabled_voltage && !_POWER_MUX_ENABLED_VOLTAGE)
     {
-        mux_enabled_amps = true;
-        digitalWrite(power_mux_pin_amps, HIGH);
+        _mux_enabled_amps = true;
+        digitalWrite(_power_mux_pin_amps, HIGH);
         int mA = ACS.mA_DC();
         String amps = String(mA);
-        digitalWrite(power_mux_pin_amps, LOW);
-        mux_enabled_amps = false;
+        digitalWrite(_power_mux_pin_amps, LOW);
+        _mux_enabled_amps = false;
         log_i("Stack mA: %s\n", amps.c_str());
         my_delay(0.1L);
         return amps.toInt();
@@ -161,11 +208,11 @@ int HMS::readAmps()
 void HMS::calibrateAmps()
 {
     // Setup the ACS712 sensor
-    digitalWrite(power_mux_pin_voltage, LOW);
-    if (!mux_enabled_voltage && !POWER_MUX_ENABLED_VOLTAGE)
+    digitalWrite(_power_mux_pin_voltage, LOW);
+    if (!_mux_enabled_voltage && !_POWER_MUX_ENABLED_VOLTAGE)
     {
-        mux_enabled_amps = true;
-        digitalWrite(power_mux_pin_amps, HIGH);
+        _mux_enabled_amps = true;
+        digitalWrite(_power_mux_pin_amps, HIGH);
         if (Serial.available())
         {
             char c = Serial.read();
@@ -193,8 +240,8 @@ void HMS::calibrateAmps()
             }
         }
         my_delay(0.01L);
-        digitalWrite(power_mux_pin_amps, LOW);
-        mux_enabled_amps = false;
+        digitalWrite(_power_mux_pin_amps, LOW);
+        _mux_enabled_amps = false;
         my_delay(0.1L);
     }
 }

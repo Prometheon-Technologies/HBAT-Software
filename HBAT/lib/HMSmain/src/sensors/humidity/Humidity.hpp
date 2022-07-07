@@ -19,7 +19,7 @@ public:
   Humidity();
   virtual ~Humidity();
   // Initialize the library
-  int setupSensor();
+  void setupSensor();
   bool checkHeaterEnabled();
   float StackHumidity();
   float AverageStackTemp();
@@ -43,11 +43,13 @@ public:
   Hum sfm3003Loop();
 #endif // USE_SFM3003
 
-  /* int loopSFM3003();
-  uint8_t crc8(const uint8_t data, uint8_t crc); */
-
-  // Variables
 private:
+  // Variables
+  byte _status;
+  byte _loopCnt;
+  bool _enableHeater;
+  int _offset; // _Offset for the sensor
+  float _scale; // _Scale factor for Air and N2 is 140.0, O2 is 142.8
 };
 extern Humidity humidity;
 #endif

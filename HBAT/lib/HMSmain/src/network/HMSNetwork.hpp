@@ -2,13 +2,12 @@
  Network.h - HBAT library
  Copyright (c) 2021 ZanzyTHEbar
 */
-#pragma once
+
 #ifndef HMSNETWORK_hpp
 #define HMSNETWORK_hpp
 
 #include <defines.hpp>
-#include "SecureOTA.hpp"
-#include <ESPmDNS.h>
+//#include "SecureOTA.hpp"
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncTCP.h>
@@ -24,19 +23,30 @@ public:
     virtual ~HMSnetwork();
     // Functions
     bool SetupNetworkStack();
-    bool connectToApWithFailToStation();
+    // bool connectToApWithFailToStation();
+    
     void SetupWebServer();
     void SetupServer();
-    void CheckNetworkLoop();
+    bool CheckNetworkLoop();
     void CheckConnectionLoop_Active();
     void networkRoutes();
     bool LoopWifiScan();
 
+    friend void wifiClear();
+    friend void wifiConnect();
+    friend void wifiDisconnect();
+
     // variables
 private:
     int CheckWifiState();
-    int maxVoltage;
-    int maxTemp;
+    unsigned long _previousMillis;
+
+    const size_t _MAX_FILESIZE; // 2MB
+    const char *_HTTP_USERNAME;
+    const char *_HTTP_PASSWORD;
+
+    // Timer variables
+    const long _interval = 30000; // interval to wait for Wi-Fi connection (milliseconds)
 };
 
 extern HMSnetwork network;

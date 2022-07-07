@@ -3,9 +3,6 @@
 // Global Variables
 //  Setup an array of _relays to control peripherals. Numbers represent pin numbers.
 
-int status = 0;
-int loopCnt = 0;
-
 Adafruit_SHT31 sht31;
 Adafruit_SHT31 sht31_2;
 
@@ -13,18 +10,14 @@ Adafruit_SHT31 sht31_2;
 SensirionI2CSfmSf06 sfmSf06;
 #endif // USE_SFM3003
 
-bool enableHeater = false;
-
-int _offset = 32000; // _Offset for the sensor
-int HUMIDITY_SENSORS_ACTIVE = 0;
-
-float _scale = 140.0; // _Scale factor for Air and N2 is 140.0, O2 is 142.8
-
 Humidity::Hum result;
 
-Humidity::Humidity()
+Humidity::Humidity() : _status(0),
+                       _loopCnt(0),
+                       _enableHeater(false),
+                       _offset(32000),
+                       _scale(140.0) // _Scale factor for Air and N2 is 140.0, O2 is 142.8
 {
-  // Constructor
 }
 
 Humidity::~Humidity()
@@ -37,7 +30,7 @@ Humidity::~Humidity()
  * Parameters: None
  * Return: None
  ******************************************************************************/
-int Humidity::setupSensor()
+void Humidity::setupSensor()
 {
   log_i("SHT31 Sensors Setup Beginning....");
   // Set to 0x45 for alternate i2c address
@@ -45,49 +38,45 @@ int Humidity::setupSensor()
   {
     log_i("Couldn't find SHT31 sensors");
     log_i("SHT31 Sensors Setup did not complete successfully, check your wiring or the addresses and try again");
-    HUMIDITY_SENSORS_ACTIVE = 0;
-    return 0;
+    stateManager.setState(ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_NONE);
   }
   else if (!sht31.begin(0x44) && sht31_2.begin(0x45))
   {
     log_i("Couldn't find SHT31 sensor #1");
     log_i("SHT31 Sensors Setup did not complete successfully, check your wiring and try again");
-    HUMIDITY_SENSORS_ACTIVE = 1;
-    return 1;
+    stateManager.setState(ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_1);
   }
   else if (!sht31_2.begin(0x45) && sht31.begin(0x44))
   {
     log_i("Couldn't find SHT31 sensor #2");
     log_i("SHT31 Sensors Setup did not complete successfully, check your wiring and try again");
-    HUMIDITY_SENSORS_ACTIVE = 2;
-    return 2;
+    stateManager.setState(ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_2);
   }
   else
   {
     log_i("SHT31 Sensors Setup Complete");
-    HUMIDITY_SENSORS_ACTIVE = 3;
-    return 3;
+    stateManager.setState(ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_BOTH);
   }
   my_delay(2L); // delay in between reads for stability
 }
 
 bool Humidity::checkHeaterEnabled()
 {
-  switch (HUMIDITY_SENSORS_ACTIVE)
+  switch (stateManager.getCurrentSensorState())
   {
-  case 0:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_NONE:
     log_d("No humidity sensors active");
     return false;
     break;
-  case 1:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_1:
   {
     bool _sensor1 = sht31.isHeaterEnabled();
     bool heaterenabled = false;
-    if (loopCnt >= 30)
+    if (_loopCnt >= 30)
     {
-      enableHeater = !enableHeater;
-      sht31.heater(enableHeater);
-      log_i("Heater Enabled State: %s", enableHeater ? "ENABLED" : "DISABLED");
+      _enableHeater = !_enableHeater;
+      sht31.heater(_enableHeater);
+      log_i("Heater Enabled State: %s", _enableHeater ? "ENABLED" : "DISABLED");
       if (_sensor1)
       {
         log_i("Sensor 1 Heater Heater ENABLED");
@@ -98,21 +87,21 @@ bool Humidity::checkHeaterEnabled()
         log_i("Sensor 1 Heater Disabled");
         heaterenabled = false;
       }
-      loopCnt = 0;
+      _loopCnt = 0;
     }
-    loopCnt++;
+    _loopCnt++;
     return heaterenabled;
     break;
   }
-  case 2:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_2:
   {
     bool _sensor2 = sht31_2.isHeaterEnabled();
     bool heaterenabled = false;
-    if (loopCnt >= 30)
+    if (_loopCnt >= 30)
     {
-      enableHeater = !enableHeater;
-      sht31_2.heater(enableHeater);
-      log_i("Heater Enabled State: %s", enableHeater ? "ENABLED" : "DISABLED");
+      _enableHeater = !_enableHeater;
+      sht31_2.heater(_enableHeater);
+      log_i("Heater Enabled State: %s", _enableHeater ? "ENABLED" : "DISABLED");
       if (_sensor2)
       {
         log_i("Sensor 2 Heater ENABLED");
@@ -123,23 +112,23 @@ bool Humidity::checkHeaterEnabled()
         log_i("Sensor 2 Heater Disabled");
         heaterenabled = false;
       }
-      loopCnt = 0;
+      _loopCnt = 0;
     }
-    loopCnt++;
+    _loopCnt++;
     return heaterenabled;
     break;
   }
-  case 3:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_BOTH:
   {
     bool _sensor1 = sht31.isHeaterEnabled();
     bool _sensor2 = sht31_2.isHeaterEnabled();
     bool heaterenabled = false;
-    if (loopCnt >= 30)
+    if (_loopCnt >= 30)
     {
-      enableHeater = !enableHeater;
-      sht31.heater(enableHeater);
-      sht31_2.heater(enableHeater);
-      log_i("Heater Enabled State: %s\t\t", enableHeater ? "ENABLED" : "DISABLED");
+      _enableHeater = !_enableHeater;
+      sht31.heater(_enableHeater);
+      sht31_2.heater(_enableHeater);
+      log_i("Heater Enabled State: %s\t\t", _enableHeater ? "ENABLED" : "DISABLED");
       if (_sensor1 != _sensor2)
       {
         log_i("Sensors have Heater ENABLED");
@@ -150,9 +139,9 @@ bool Humidity::checkHeaterEnabled()
         log_i("Sensors have Heater Disabled");
         heaterenabled = false;
       }
-      loopCnt = 0;
+      _loopCnt = 0;
     }
-    loopCnt++;
+    _loopCnt++;
     return heaterenabled;
     break;
   }
@@ -171,34 +160,34 @@ bool Humidity::checkHeaterEnabled()
  ******************************************************************************/
 float Humidity::AverageStackTemp()
 {
-  switch (HUMIDITY_SENSORS_ACTIVE)
+  switch (stateManager.getCurrentSensorState())
   {
-  case 0:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_NONE:
   {
-    result = {0, 0, 0, 0};
-    float stack_humidity = 0;
+    result = {0.0, 0.0, 0.0, 0.0};
+    float stack_humidity = 0.0;
     return stack_humidity; // return 0 if no sensors are active
     break;
   }
 
-  case 1:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_1:
   {
     float stack_temp = result.temp;
     return stack_temp; // Only one sensor - return the value of that sensor
     break;
   }
 
-  case 2:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_2:
   {
     float stack_temp = result.temp_2;
     return stack_temp; // Only one sensor - return the value of that sensor
     break;
   }
 
-  case 3:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_BOTH:
   {
     float stack_temp = result.temp + result.temp_2;
-    return stack_temp / 2; // Read the _temperature from the sensor and average the two sensors.
+    return stack_temp / 2.0; // Read the _temperature from the sensor and average the two sensors.
     break;
   }
 
@@ -207,7 +196,7 @@ float Humidity::AverageStackTemp()
     break;
   }
   }
-  return 0;
+  return 0.0;
 }
 
 /******************************************************************************
@@ -219,34 +208,34 @@ float Humidity::AverageStackTemp()
  ******************************************************************************/
 float Humidity::StackHumidity()
 {
-  switch (HUMIDITY_SENSORS_ACTIVE)
+  switch (stateManager.getCurrentSensorState())
   {
-  case 0:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_NONE:
   {
-    result = {0, 0, 0, 0};
-    float stack_humidity = 0;
+    result = {0.0, 0.0, 0.0, 0.0};
+    float stack_humidity = 0.0;
     return stack_humidity; // return 0 if no sensors are active
     break;
   }
 
-  case 1:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_1:
   {
     float stack_humidity = result.humidity;
     return stack_humidity; // Only one sensor - return the value of that sensor
     break;
   }
 
-  case 2:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_2:
   {
     float stack_humidity = result.humidity_2;
     return stack_humidity; // Only one sensor - return the value of that sensor
     break;
   }
 
-  case 3:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_BOTH:
   {
     float stack_humidity = result.humidity + result.humidity_2;
-    return stack_humidity / 2; // Read the _humidity from the sensor and average the two sensors.
+    return stack_humidity / 2.0; // Read the _humidity from the sensor and average the two sensors.
     break;
   }
 
@@ -255,7 +244,7 @@ float Humidity::StackHumidity()
     break;
   }
   }
-  return 0;
+  return 0.0;
 }
 
 /******************************************************************************
@@ -266,16 +255,16 @@ float Humidity::StackHumidity()
  ******************************************************************************/
 Humidity::Hum Humidity::ReadSensor()
 {
-  switch (HUMIDITY_SENSORS_ACTIVE)
+  switch (stateManager.getCurrentSensorState())
   {
-  case 0:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_NONE:
   {
-    result = {0, 0, 0, 0};
+    result = {0.0, 0.0, 0.0, 0.0};
     log_d("No Humidity Sensors Active");
     return result;
     break;
   }
-  case 1:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_1:
   {
     float temp = sht31.readTemperature();
     float hum = sht31.readHumidity();
@@ -303,11 +292,11 @@ Humidity::Hum Humidity::ReadSensor()
     // An ~3.0 degC _temperature increase can be noted when heater is enabled
     // This is needed due to the high operating humidity of the system
     checkHeaterEnabled();
-    result = {temp, hum, 0, 0};
+    result = {temp, hum, 0.0, 0.0};
     return result;
     break;
   }
-  case 2:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_2:
   {
     float temp_2 = sht31_2.readTemperature();
     float hum_2 = sht31_2.readHumidity();
@@ -334,11 +323,11 @@ Humidity::Hum Humidity::ReadSensor()
     // An ~3.0 degC _temperature increase can be noted when heater is enabled
     // This is needed due to the high operating humidity of the system
     checkHeaterEnabled();
-    result = {0, 0, temp_2, hum_2};
+    result = {0.0, 0.0, temp_2, hum_2};
     return result;
     break;
   }
-  case 3:
+  case ProgramStates::EnabledHumiditySensors::EnabledSensors::HUM_SHT31_BOTH:
   {
     float temp_1 = sht31.readTemperature();
     float temp_2 = sht31_2.readTemperature();
@@ -386,7 +375,7 @@ Humidity::Hum Humidity::ReadSensor()
     break;
   }
   default: // Should never get here
-    result = {0, 0, 0, 0};
+    result = {0.0, 0.0, 0.0, 0.0};
     return result;
     break;
   }
@@ -447,10 +436,10 @@ Humidity::Hum Humidity::sfm3003Loop()
   char errorMessage[256];
   float flow = 0;
   float temperature = 0;
-  uint16_t status = 0;
+  uint16_t _status = 0;
 
   // Read Measurement
-  error = sfmSf06.readMeasurementData(flow, temperature, status);
+  error = sfmSf06.readMeasurementData(flow, temperature, _status);
   my_delay(1L);
 
   if (error)
@@ -477,165 +466,5 @@ Humidity::Hum Humidity::sfm3003Loop()
  ******************************************************************************/
 
 /* Put pressure sensor code here */
-
-/* uint8_t Humidity::crc8(const uint8_t result, uint8_t crc)
-{
-  crc ^= result;
-
-  for (uint8_t i = 8; i; --i)
-  {
-    crc = (crc & 0x80) ? (crc << 1) ^ 0x31 : (crc << 1);
-  }
-  return crc;
-}
-
-int Humidity::loopSFM3003()
-{
-  auto device = 0x28;
-  unsigned long timed_event = 500;
-  unsigned long current_time = millis(); // millis() function
-  unsigned long start_time = current_time;
-  // delay(500); // blocking delay, not needed
-  if (current_time - start_time >= timed_event)
-  {
-    Wire.beginTransmission(byte(device)); // transmit to device (0x28)
-    Wire.write(byte(0x10));               //
-    Wire.write(byte(0x00));               //
-    Wire.endTransmission();
-    Wire.requestFrom(device, 3); // read 3 bytes from device with address 0x28
-    while (Wire.available())
-    {                            // slave may send less than requested
-      uint16_t a = Wire.read();  // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
-      uint8_t b = Wire.read();   // second received byte stored here
-      uint8_t crc = Wire.read(); // crc value stored here
-      uint8_t mycrc = 0xFF;      // initialize crc variable
-      mycrc = crc8(a, mycrc);    // let first byte through CRC calculation
-      mycrc = crc8(b, mycrc);    // and the second byte too
-      if (mycrc != crc)
-      { // check if the calculated and the received CRC byte matches
-        log_i("Error: wrong CRC");
-      }
-      log_i("p %d %d %d h", a, b, crc);
-      a = (a << 8) | b; // combine the two received bytes to a 16bit integer value
-      // a >>= 2; // remove the two least significant bits
-      int Flow = (a - _offset) / _scale;
-      // log_i(a); // print the raw result from the sensor to the serial interface
-      log_i("%d", Flow); // print the calculated flow to the serial interface
-      start_time = current_time;
-      return Flow;
-    }
-  }
-  return 0;
-} */
-
-/* int Humidity::SetupSFM3003()
-{
-  const char *driver_version = sfm_common_get_driver_version();
-  if (driver_version)
-  {
-    printf("SFM driver version %s\n", driver_version);
-  }
-  else
-  {
-    printf("fatal: Getting driver version failed\n");
-    return -1;
-  }
-
-  sensirion_i2c_init();
-
-  int16_t error = sensirion_i2c_general_call_reset();
-  if (error)
-  {
-    printf("General call reset failed\n");
-  }
-
-  sensirion_sleep_usec(SFM3003_SOFT_RESET_TIME_US);
-
-  while (sfm3003_probe())
-  {
-    printf("SFM sensor probing failed\n");
-  }
-
-  uint32_t product_number = 0;
-  uint8_t serial_number[8] = {};
-  error = sfm_common_read_product_identifier(SFM3003_I2C_ADDRESS,
-                                             &product_number, &serial_number);
-  if (error)
-  {
-    printf("Failed to read product identifier\n");
-  }
-  else
-  {
-    printf("product: 0x%08x, serial: 0x", product_number);
-    for (size_t i = 0; i < 8; ++i)
-    {
-      printf("%x", serial_number[i]);
-    }
-    printf("\n");
-  }
-  return 0;
-}
-
-int Humidity::SFM3003()
-{
-  SfmConfig sfm3003 = sfm3003_create();
-  int16_t error = sensirion_i2c_general_call_reset();
-  error = sfm_common_start_continuous_measurement(
-      &sfm3003, SFM3003_CMD_START_CONTINUOUS_MEASUREMENT_AIR);
-  if (error)
-  {
-    printf("Failed to start measurement\n");
-  }
-
-  sensirion_sleep_usec(SFM3003_MEASUREMENT_INITIALIZATION_TIME_US);
-
-  for (;;)
-  {
-    int16_t _flow_raw;
-    int16_t _temperature_raw;
-    error = sfm_common_read_measurement_raw(&sfm3003, &_flow_raw,
-                                            &_temperature_raw, &status);
-    if (error)
-    {
-      printf("Error while reading measurement\n");
-    }
-    else
-    {
-      // Convert the raw values to physical values in Standard Liter/Minute
-      error = sfm_common_convert__flow_float(&sfm3003, _flow_raw, &_flow);
-      if (error)
-      {
-        printf("Error while converting _flow\n");
-      }
-      _temperature = sfm_common_convert__temperature_float(_temperature_raw);
-      printf(" _Flow: %.3f (%4i) _Temperature: %.2f (%4i) Status: %04x\n",
-             _flow, _flow_raw, _temperature, _temperature_raw, status);
-    }
-  }
-  sensirion_i2c_release();
-  return 0;
-} */
-
-/* void Humidity::setupSfm3003()
-{
-
-  int a = 0;
-  int b = 0;
-  int c = 0;
-
-  Wire.requestFrom(0x28, 3); //
-   a = Wire.read(); // first received byte stored here
-   b = Wire.read(); // second received byte stored here
-   c = Wire.read(); // third received byte stored here
-   Wire.endTransmission();
-   delay(5);
-
-   Wire.requestFrom(0x28, 3); //
-   a = Wire.read(); // first received byte stored here
-   b = Wire.read(); // second received byte stored here
-   c = Wire.read(); // third received byte stored here
-   Wire.endTransmission();
-   delay(5);
-} */
 
 Humidity humidity;

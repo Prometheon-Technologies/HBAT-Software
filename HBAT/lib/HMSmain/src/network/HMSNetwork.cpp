@@ -208,7 +208,7 @@ bool HMSnetwork::SetupNetworkStack()
             WiFi.persistent(false);
             WiFi.setAutoConnect(false);
             WiFi.setAutoReconnect(true);
-            WiFi.setTxPower(WIFI_POWER_2dBm);
+            //WiFi.setTxPower(WIFI_POWER_2dBm);
 
             unsigned long currentMillis = millis();
             _previousMillis = currentMillis;

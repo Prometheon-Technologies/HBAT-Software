@@ -201,14 +201,13 @@ bool HMSnetwork::SetupNetworkStack()
                     return false;
                 }
             }
-
             // WiFi.setHostname(cfg.config.hostname); // define hostname
             WiFi.setSleep(false);
             WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
             WiFi.persistent(false);
             WiFi.setAutoConnect(false);
             WiFi.setAutoReconnect(true);
-            WiFi.setTxPower(WIFI_POWER_2dBm);
+            //WiFi.setTxPower(WIFI_POWER_2dBm);
 
             unsigned long currentMillis = millis();
             _previousMillis = currentMillis;
@@ -262,7 +261,6 @@ void HMSnetwork::SetupWebServer()
 
         log_i("[INFO]: Configuring access point...\n");
         WiFi.mode(WIFI_AP);
-        WiFi.setTxPower(WIFI_POWER_11dBm);
 
         // You can remove the password parameter if you want the AP to be open.
         log_i("Wifi Connection Failed. \r\nStarting AP. \r\nAP IP address: ");
@@ -277,6 +275,7 @@ void HMSnetwork::SetupWebServer()
         {
             WiFi.softAP("HBAT_HMS", md5str, 10, 1, 2); // MAC address is used as password for the AP - Unique to each device - MD5 hash of MAC address
         }
+        WiFi.setTxPower(WIFI_POWER_11dBm);
 
         // Give the Memory back to the System
         free(md5str);

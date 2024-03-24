@@ -201,8 +201,7 @@ bool HMSnetwork::SetupNetworkStack()
                     return false;
                 }
             }
-
-            WiFi.setHostname(cfg.config.hostname); // define hostname
+            // WiFi.setHostname(cfg.config.hostname); // define hostname
             WiFi.setSleep(false);
             WiFi.begin(cfg.config.WIFISSID, cfg.config.WIFIPASS);
             WiFi.persistent(false);

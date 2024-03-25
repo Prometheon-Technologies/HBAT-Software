@@ -37,7 +37,8 @@
 
 # Rust
 
-/target/
+**/target/
+**/**/target/
 
 
 

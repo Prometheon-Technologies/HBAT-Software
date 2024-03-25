@@ -48,3 +48,8 @@ portable-atomic = { version = "1.6.0", features = [
 
 [profile.release]
 debug = 2
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

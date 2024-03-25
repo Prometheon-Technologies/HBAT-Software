@@ -35,3 +35,9 @@
 
 /.vscode
 
+# Rust
+
+/target/
+
+
+

@@ -17,9 +17,11 @@
         "editor.codeActionsOnSave": {
             "source.fixAll.eslint": "explicit"
         },
-        "rust-analyzer.checkOnSave.enable": true,
-        "rust-analyzer.checkOnSave.command": "clippy",
-        "rust-analyzer.checkOnSave.allTargets": true,
+        "rust-analyzer.check.allTargets": false,
+        "rust-analyzer.check.extraArgs": [
+            "--target",
+            "thumbv6m-none-eabi"
+        ],
         "rust-analyzer.files.excludeDirs": [
             "**/target",
             "**/node_modules",

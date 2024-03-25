@@ -1,9 +1,10 @@
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
-# replace STM32G0B1RETx with your chip as listed in `probe-rs chip list`
-runner = "probe-rs run --chip STM32G0B1RETx"
+# replace STM32G070CBT6 with your chip as listed in `probe-rs chip list`
+runner = "probe-rs run --chip STM32G070CBT6"
 
 [build]
 target = "thumbv6m-none-eabi"
+channel = "nightly"
 
 [env]
 DEFMT_LOG = "trace"

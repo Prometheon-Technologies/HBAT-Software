@@ -22,7 +22,7 @@ embassy-futures = "0.1.1"
 embassy-stm32 = { version = "0.1.0", features = [
     "defmt",
     "time-driver-any",
-    "stm32g0b1re",
+    "stm32g070cb",
     "memory-x",
     "unstable-pac",
     "exti",

@@ -1,0 +1,62 @@
+{
+    "folders": [
+        {
+            "name": "Source",
+            "path": "./firmware"
+        },
+        {
+            "name": "Repo Root",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "files.autoSave": "afterDelay",
+        "editor.quickSuggestions": {
+            "strings": true
+        },
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+        },
+        "rust-analyzer.checkOnSave.enable": true,
+        "rust-analyzer.checkOnSave.command": "clippy",
+        "rust-analyzer.checkOnSave.allTargets": true,
+        "rust-analyzer.files.excludeDirs": [
+            "**/target",
+            "**/node_modules",
+            "**/dist",
+            "**/build",
+            "**/public",
+            "**/assets",
+            "**/src-tauri/target",
+            "**/scripts",
+            "**/src/components",
+            "**/src/interfaces",
+            "**/src/pages",
+            "**/src/static",
+            "**/src/styles",
+            "**/src/utils",
+            "docs",
+            "**/docs",
+            "./docs",
+            "img",
+            "**/img",
+            "./img",
+        ],
+        "rust-analyzer.files.watcher": "client",
+        "[toml]": {
+            "editor.defaultFormatter": "tamasfe.even-better-toml"
+        },
+        "editor.formatOnSave": true,
+        "files.exclude": {
+            "**/.git": false
+        },
+        "cSpell.words": [],
+        "rust-analyzer.showUnlinkedFileNotification": false
+    },
+    "extensions": {
+        "recommendations": [
+            "rust-lang.rust-analyzer",
+            "tamasfe.even-better-toml"
+        ]
+    }
+}

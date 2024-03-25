@@ -1,8 +1,12 @@
 {
     "folders": [
         {
-            "name": "Source",
-            "path": "./firmware"
+            "name": "Cell Firmware",
+            "path": "./pcc-firmware"
+        },
+        {
+            "name": "Main Controller Firmware",
+            "path": "./mcb-firmware"
         },
         {
             "name": "Repo Root",
